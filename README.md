@@ -1,2 +1,5 @@
-# effects-1d
-Framework for creating and rendering 1D effects
+# 1D Effects Framework
+
+For Creating and rendering 1D effects.
+
+Meant for NeoPixel strips or POV displays.
