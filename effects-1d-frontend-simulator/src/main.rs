@@ -19,6 +19,7 @@ struct LedStripSim;
 
 fn main() {
     App::new()
+        .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
         .add_plugins(DefaultPlugins)
         .add_plugin(Material2dPlugin::<LaserSimMaterial>::default())
         .add_plugin(Material2dPlugin::<LedStripSimMaterial>::default())
