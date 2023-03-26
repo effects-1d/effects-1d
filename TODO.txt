@@ -1,0 +1,7 @@
+- transitions
+    - effects need to be able to tell the system how many beats are left
+        - something like a transitionhint that specifies remaining time or remaining measures?
+- measure based effects
+    - information required:
+        - current beat %
+        - number of beats per measure
