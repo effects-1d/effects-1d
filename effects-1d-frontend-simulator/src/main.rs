@@ -3,7 +3,6 @@
 #![deny(unsafe_code)]
 
 use bevy::{
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
     sprite::{Material2dPlugin, MaterialMesh2dBundle},
     window::{PresentMode, WindowResized},

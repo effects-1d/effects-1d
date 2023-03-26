@@ -4,4 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-thiserror = "1.0.40"
+snafu = { version = "0.7.4", default-features = false, features = [
+    "rust_1_46",
+] }
