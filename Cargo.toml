@@ -1,4 +1,6 @@
 [workspace]
+# Required for wgpu in the simulator
+resolver = "2"
 
 members = [
     "effects-1d",
@@ -6,3 +8,12 @@ members = [
     "effects-1d-frontend-simulator",
     "effects-1d-runtime",
 ]
+
+## Recommended by bevy:
+# Enable a small amount of optimization in debug mode
+[profile.dev]
+opt-level = 1
+
+# Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
