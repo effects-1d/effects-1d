@@ -3,41 +3,41 @@
 #![deny(unsafe_code)]
 
 use bevy::{
+    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
     sprite::{Material2dPlugin, MaterialMesh2dBundle},
-    window::WindowResized,
+    window::{PresentMode, WindowResized},
 };
 
-mod materials;
-use materials::{LaserSimMaterial, LedStripSimMaterial};
-
-#[derive(Component)]
-struct LaserSim;
-
-#[derive(Component)]
-struct LedStripSim;
+mod sims;
+use sims::{
+    laser_position, led_strip_position, LaserSim, LaserSimMaterial, LedStripSim,
+    LedStripSimMaterial,
+};
 
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "1D Effect Simulator".to_string(),
+                //resolution: (500., 300.).into(),
+                present_mode: PresentMode::AutoVsync,
+                // Tells wasm to resize the window according to the available canvas
+                fit_canvas_to_parent: true,
+                // Tells wasm not to override default event handling, like F5, Ctrl+R etc.
+                prevent_default_event_handling: false,
+                ..default()
+            }),
+            ..default()
+        }))
+        //.add_plugin(LogDiagnosticsPlugin::default())
+        //.add_plugin(FrameTimeDiagnosticsPlugin)
         .add_plugin(Material2dPlugin::<LaserSimMaterial>::default())
         .add_plugin(Material2dPlugin::<LedStripSimMaterial>::default())
         .add_systems(Startup, setup)
         .add_systems(Update, on_resize_system)
         .run();
-}
-
-fn led_strip_position(window_width: f32, window_height: f32) -> Transform {
-    Transform::default()
-        .with_scale(Vec3::new(window_width, window_height * 0.05, 0.))
-        .with_translation(Vec3::new(0., window_height * (0.5 - 0.05), 0.))
-}
-
-fn laser_position(window_width: f32, window_height: f32) -> Transform {
-    Transform::default()
-        .with_scale(Vec3::new(window_width, window_height * 0.9, 0.))
-        .with_translation(Vec3::new(0., -window_height * 0.05, 0.))
 }
 
 fn setup(
@@ -73,11 +73,11 @@ fn setup(
 
 fn on_resize_system(
     mut resize_reader: EventReader<WindowResized>,
-    mut ledstrip: Query<&mut Transform, (With<LedStripSim>, Without<LaserSim>)>,
-    mut laser: Query<&mut Transform, (With<LaserSim>, Without<LedStripSim>)>,
+    mut ledstrip_transform: Query<&mut Transform, (With<LedStripSim>, Without<LaserSim>)>,
+    mut laser_transform: Query<&mut Transform, (With<LaserSim>, Without<LedStripSim>)>,
 ) {
     for e in resize_reader.iter() {
-        *ledstrip.single_mut() = led_strip_position(e.width, e.height);
-        *laser.single_mut() = laser_position(e.width, e.height);
+        *ledstrip_transform.single_mut() = led_strip_position(e.width, e.height);
+        *laser_transform.single_mut() = laser_position(e.width, e.height);
     }
 }
