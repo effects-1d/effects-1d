@@ -4,10 +4,18 @@
 
 use bevy::{
     prelude::*,
-    reflect::TypeUuid,
-    render::render_resource::*,
-    sprite::{Material2d, Material2dPlugin, MaterialMesh2dBundle},
+    sprite::{Material2dPlugin, MaterialMesh2dBundle},
+    window::WindowResized,
 };
+
+mod materials;
+use materials::{LaserSimMaterial, LedStripSimMaterial};
+
+#[derive(Component)]
+struct LaserSim;
+
+#[derive(Component)]
+struct LedStripSim;
 
 fn main() {
     App::new()
@@ -15,7 +23,20 @@ fn main() {
         .add_plugin(Material2dPlugin::<LaserSimMaterial>::default())
         .add_plugin(Material2dPlugin::<LedStripSimMaterial>::default())
         .add_systems(Startup, setup)
+        .add_systems(Update, on_resize_system)
         .run();
+}
+
+fn led_strip_position(window_width: f32, window_height: f32) -> Transform {
+    Transform::default()
+        .with_scale(Vec3::new(window_width, window_height * 0.05, 0.))
+        .with_translation(Vec3::new(0., window_height * (0.5 - 0.05), 0.))
+}
+
+fn laser_position(window_width: f32, window_height: f32) -> Transform {
+    Transform::default()
+        .with_scale(Vec3::new(window_width, window_height * 0.9, 0.))
+        .with_translation(Vec3::new(0., -window_height * 0.05, 0.))
 }
 
 fn setup(
@@ -28,43 +49,34 @@ fn setup(
     // Assumes we only have one window
     let window = windows.single();
 
-    // TODO: change transform/scale when window size changes
-
     commands.spawn(Camera2dBundle::default());
-    commands.spawn(MaterialMesh2dBundle {
-        mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
-        transform: Transform::default()
-            .with_scale(Vec3::new(window.width() as f32, window.height() * 0.9, 0.))
-            .with_translation(Vec3::new(0., -window.height() * 0.05, 0.)),
-        material: laser_materials.add(LaserSimMaterial {}),
-        ..default()
-    });
-    commands.spawn(MaterialMesh2dBundle {
-        mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
-        transform: Transform::default()
-            .with_scale(Vec3::new(window.width() as f32, window.height() * 0.05, 0.))
-            .with_translation(Vec3::new(0., window.height() * (0.5 - 0.05), 0.)),
-        material: ledstrip_materials.add(LedStripSimMaterial {}),
-        ..default()
-    });
+    commands.spawn((
+        LaserSim,
+        MaterialMesh2dBundle {
+            mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
+            transform: laser_position(window.width(), window.height()),
+            material: laser_materials.add(LaserSimMaterial {}),
+            ..default()
+        },
+    ));
+    commands.spawn((
+        LedStripSim,
+        MaterialMesh2dBundle {
+            mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
+            transform: led_strip_position(window.width(), window.height()),
+            material: ledstrip_materials.add(LedStripSimMaterial {}),
+            ..default()
+        },
+    ));
 }
 
-#[derive(AsBindGroup, TypeUuid, Debug, Clone)]
-#[uuid = "a71be379-cac5-4204-8dbd-33982a9e1a60"]
-struct LaserSimMaterial {}
-
-impl Material2d for LaserSimMaterial {
-    fn fragment_shader() -> ShaderRef {
-        "shaders/laser.wgsl".into()
-    }
-}
-
-#[derive(AsBindGroup, TypeUuid, Debug, Clone)]
-#[uuid = "69fdd51f-11e6-4ffd-9ebf-2badfdd98f37"]
-struct LedStripSimMaterial {}
-
-impl Material2d for LedStripSimMaterial {
-    fn fragment_shader() -> ShaderRef {
-        "shaders/led_strip.wgsl".into()
+fn on_resize_system(
+    mut resize_reader: EventReader<WindowResized>,
+    mut ledstrip: Query<&mut Transform, (With<LedStripSim>, Without<LaserSim>)>,
+    mut laser: Query<&mut Transform, (With<LaserSim>, Without<LedStripSim>)>,
+) {
+    for e in resize_reader.iter() {
+        *ledstrip.single_mut() = led_strip_position(e.width, e.height);
+        *laser.single_mut() = laser_position(e.width, e.height);
     }
 }
