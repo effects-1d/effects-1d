@@ -14,6 +14,9 @@ use sim_shaders::{
     LedStripSimMaterial,
 };
 
+// TODO: Learn [here](https://github.com/mrk-its/bevy-atari-antic/blob/main/src/render/mod.rs) how to modify buffers at runtime.
+// Might need to make the sim renderers `RenderAssets`.
+
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
