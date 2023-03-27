@@ -18,7 +18,11 @@ impl Material2d for LaserSimMaterial {
 
 #[derive(AsBindGroup, TypeUuid, Debug, Clone)]
 #[uuid = "69fdd51f-11e6-4ffd-9ebf-2badfdd98f37"]
-pub struct LedStripSimMaterial {}
+pub struct LedStripSimMaterial {
+    #[texture(0)]
+    #[sampler(1)]
+    pub texture: Handle<Image>,
+}
 
 impl Material2d for LedStripSimMaterial {
     fn fragment_shader() -> ShaderRef {

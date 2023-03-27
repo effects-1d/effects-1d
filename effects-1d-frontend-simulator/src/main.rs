@@ -8,8 +8,8 @@ use bevy::{
     window::{PresentMode, WindowResized},
 };
 
-mod sims;
-use sims::{
+mod sim_shaders;
+use sim_shaders::{
     laser_position, led_strip_position, LaserSim, LaserSimMaterial, LedStripSim,
     LedStripSimMaterial,
 };
@@ -20,7 +20,6 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "1D Effects Simulator".to_string(),
-                //resolution: (500., 300.).into(),
                 present_mode: PresentMode::AutoVsync,
                 // Tells wasm to resize the window according to the available canvas
                 fit_canvas_to_parent: true,
@@ -41,6 +40,7 @@ fn main() {
 
 fn setup(
     windows: Query<&Window>,
+    asset_server: Res<AssetServer>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut laser_materials: ResMut<Assets<LaserSimMaterial>>,
@@ -64,7 +64,9 @@ fn setup(
         MaterialMesh2dBundle {
             mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
             transform: led_strip_position(window.width(), window.height()),
-            material: ledstrip_materials.add(LedStripSimMaterial {}),
+            material: ledstrip_materials.add(LedStripSimMaterial {
+                texture: asset_server.load("textures/generic-rpg-treasure-closed.png"),
+            }),
             ..default()
         },
     ));

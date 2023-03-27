@@ -2,6 +2,13 @@
 // The time since startup data is in the globals binding which is part of the mesh_view_bindings import
 #import bevy_sprite::mesh2d_view_bindings
 
+#import bevy_pbr::utils
+
+@group(1) @binding(0)
+var texture: texture_2d<f32>;
+@group(1) @binding(1)
+var texture_sampler: sampler;
+
 fn oklab_to_linear_srgb(c: vec3<f32>) -> vec3<f32> {
     let L = c.x;
     let a = c.y;
@@ -43,7 +50,7 @@ fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
     let white = vec3<f32>(1.0, 0.0, 0.0);
     let mixed = mix(mix(red, blue, t_1), mix(green, white, t_2), distance_to_center);
 
-    return vec4<f32>(oklab_to_linear_srgb(mixed), 1.0);
+    return textureSample(texture, texture_sampler, in.uv);
 }
 
 
