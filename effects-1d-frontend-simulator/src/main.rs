@@ -16,9 +16,6 @@ use visualizations::{
     LaserSimMaterial, LedStripSimMaterial, SimWidget, SimWidgetBundle, WidgetMaterial,
 };
 
-// TODO: Learn [here](https://github.com/mrk-its/bevy-atari-antic/blob/main/src/render/mod.rs) how to properly integrate this
-// using `RenderAssets`. There is a lot of code duplication and stuff currently.
-
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
