@@ -4,19 +4,16 @@
 
 use bevy::{
     prelude::*,
-    render::{
-        render_resource::{encase::StorageBuffer, BufferInitDescriptor, BufferUsages},
-        renderer::{RenderDevice, RenderQueue},
-    },
     sprite::{Material2dPlugin, MaterialMesh2dBundle},
     window::{PresentMode, WindowResized},
 };
 
 mod sim_shaders;
 use sim_shaders::{
-    laser_position, led_strip_position, LaserSim, LaserSimMaterial, LedStripSim,
+    compute_laser_position, compute_ledstrip_position, LaserSim, LaserSimMaterial, LedStripSim,
     LedStripSimMaterial,
 };
+mod effect_renderer;
 
 // TODO: Learn [here](https://github.com/mrk-its/bevy-atari-antic/blob/main/src/render/mod.rs) how to properly integrate this
 // using `RenderAssets`. Currently we modify the data buffer from within the update, which is not how it is intended.
@@ -36,8 +33,8 @@ fn main() {
             }),
             ..default()
         }))
-        // .add_plugin(LogDiagnosticsPlugin::default())
-        // .add_plugin(FrameTimeDiagnosticsPlugin)
+        .add_plugin(bevy::diagnostic::LogDiagnosticsPlugin::default())
+        .add_plugin(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugin(Material2dPlugin::<LaserSimMaterial>::default())
         .add_plugin(Material2dPlugin::<LedStripSimMaterial>::default())
         .add_systems(Startup, setup)
@@ -48,7 +45,6 @@ fn main() {
 
 fn setup(
     windows: Query<&Window>,
-    render_device: Res<RenderDevice>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut laser_materials: ResMut<Assets<LaserSimMaterial>>,
@@ -58,31 +54,25 @@ fn setup(
     let window = windows.single();
 
     commands.spawn(Camera2dBundle::default());
+
     commands.spawn((
         LaserSim,
         MaterialMesh2dBundle {
             mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
-            transform: laser_position(window.width(), window.height()),
+            transform: compute_laser_position(window.width(), window.height()),
             material: laser_materials.add(LaserSimMaterial {}),
             ..default()
         },
     ));
 
-    let mut buffer_data = StorageBuffer::new(Vec::new());
-    buffer_data.write(&128u32).unwrap();
-    let buffer = render_device.create_buffer_with_data(&BufferInitDescriptor {
-        label: Some("effect data buffer"),
-        usage: BufferUsages::COPY_DST | BufferUsages::STORAGE,
-        contents: buffer_data.as_ref(),
-    });
-
     commands.spawn((
         LedStripSim,
         MaterialMesh2dBundle {
             mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
-            transform: led_strip_position(window.width(), window.height()),
+            transform: compute_ledstrip_position(window.width(), window.height()),
             material: ledstrip_materials.add(LedStripSimMaterial {
-                effect_data: buffer,
+                effect_data: vec![128],
+                widget_resolution: Vec2::new(0., 0.),
             }),
             ..default()
         },
@@ -95,43 +85,21 @@ fn on_resize_system(
     mut laser_transform: Query<&mut Transform, (With<LaserSim>, Without<LedStripSim>)>,
 ) {
     for e in resize_reader.iter() {
-        *ledstrip_transform.single_mut() = led_strip_position(e.width, e.height);
-        *laser_transform.single_mut() = laser_position(e.width, e.height);
+        *ledstrip_transform.single_mut() = compute_ledstrip_position(e.width, e.height);
+        *laser_transform.single_mut() = compute_laser_position(e.width, e.height);
     }
 }
 
-fn render_effect_frame(
-    time: Res<Time>,
-    render_queue: Res<RenderQueue>,
-    render_device: Res<RenderDevice>,
-    mut led_strips: ResMut<Assets<LedStripSimMaterial>>,
-) {
-    let mut fb = vec![0u32; 3];
+fn render_effect_frame(time: Res<Time>, mut led_strips: ResMut<Assets<LedStripSimMaterial>>) {
+    let mut fb = vec![0u32; 32];
     let fb: &mut [u32] = fb.as_mut_slice();
 
     let val = time.elapsed().as_nanos().to_le_bytes()[3] as u32;
     fb[0] = val as u32;
 
-    println!("render: {:?}", fb);
-
-    let mut transfer_buffer = StorageBuffer::new(Vec::new());
-    transfer_buffer.write(&fb).unwrap();
-    println!("extract: {:?}", transfer_buffer.as_ref());
+    //println!("render: {:?}", fb);
 
     for (_, material) in led_strips.iter_mut() {
-        let transfer_buffer: &[u8] = transfer_buffer.as_ref();
-        if material.effect_data.size() != transfer_buffer.len() as u64 {
-            // re-allocate if size changed
-            println!("Recreate");
-            material.effect_data = render_device.create_buffer_with_data(&BufferInitDescriptor {
-                label: Some("effect data buffer"),
-                usage: BufferUsages::COPY_DST | BufferUsages::STORAGE,
-                contents: transfer_buffer.as_ref(),
-            });
-        } else {
-            // update if size is identical
-            println!("Update");
-            render_queue.write_buffer(&material.effect_data, 0, transfer_buffer.as_ref());
-        }
+        material.effect_data = fb.to_vec();
     }
 }

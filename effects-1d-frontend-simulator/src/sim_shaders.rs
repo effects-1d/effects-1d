@@ -19,8 +19,11 @@ impl Material2d for LaserSimMaterial {
 #[derive(AsBindGroup, TypeUuid, Debug, Clone)]
 #[uuid = "69fdd51f-11e6-4ffd-9ebf-2badfdd98f37"]
 pub struct LedStripSimMaterial {
-    #[storage(0, read_only, buffer)]
-    pub effect_data: Buffer,
+    #[storage(0, read_only)]
+    pub effect_data: Vec<u32>,
+
+    #[uniform(1)]
+    pub widget_resolution: Vec2,
 }
 
 impl Material2d for LedStripSimMaterial {
@@ -29,13 +32,13 @@ impl Material2d for LedStripSimMaterial {
     }
 }
 
-pub fn led_strip_position(window_width: f32, window_height: f32) -> Transform {
+pub fn compute_ledstrip_position(window_width: f32, window_height: f32) -> Transform {
     Transform::default()
         .with_scale(Vec3::new(window_width, window_height * 0.05, 0.))
         .with_translation(Vec3::new(0., window_height * (0.5 - 0.05), 0.))
 }
 
-pub fn laser_position(window_width: f32, window_height: f32) -> Transform {
+pub fn compute_laser_position(window_width: f32, window_height: f32) -> Transform {
     Transform::default()
         .with_scale(Vec3::new(window_width, window_height * 0.9, 0.))
         .with_translation(Vec3::new(0., -window_height * 0.05, 0.))
