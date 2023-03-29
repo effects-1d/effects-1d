@@ -68,7 +68,7 @@ fn setup(
             mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
             transform: led_strip_position(window.width(), window.height()),
             material: ledstrip_materials.add(LedStripSimMaterial {
-                texture: asset_server.load("textures/generic-rpg-treasure-closed.png"),
+                texture: vec![1, 255, 128, 0, 1],
             }),
             ..default()
         },

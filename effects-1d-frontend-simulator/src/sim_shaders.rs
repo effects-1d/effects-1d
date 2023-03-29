@@ -1,4 +1,15 @@
-use bevy::{prelude::*, reflect::TypeUuid, render::render_resource::*, sprite::Material2d};
+use bevy::{
+    ecs::system::{lifetimeless::SRes, SystemParamItem},
+    prelude::*,
+    reflect::TypeUuid,
+    render::{
+        render_asset::{PrepareAssetError, RenderAsset},
+        render_resource::*,
+        renderer::{RenderDevice, RenderQueue},
+        texture::{DefaultImageSampler, GpuImage, ImageSampler},
+    },
+    sprite::Material2d,
+};
 
 #[derive(Component)]
 pub struct LaserSim;
@@ -19,9 +30,8 @@ impl Material2d for LaserSimMaterial {
 #[derive(AsBindGroup, TypeUuid, Debug, Clone)]
 #[uuid = "69fdd51f-11e6-4ffd-9ebf-2badfdd98f37"]
 pub struct LedStripSimMaterial {
-    #[texture(0)]
-    #[sampler(1)]
-    pub texture: Handle<Image>,
+    #[storage(0, read_only)]
+    pub texture: Vec<u32>,
 }
 
 impl Material2d for LedStripSimMaterial {
