@@ -5,9 +5,7 @@
 use bevy::{
     prelude::*,
     render::{
-        render_resource::{
-            encase::StorageBuffer, Buffer, BufferDescriptor, BufferInitDescriptor, BufferUsages,
-        },
+        render_resource::{encase::StorageBuffer, BufferInitDescriptor, BufferUsages},
         renderer::{RenderDevice, RenderQueue},
     },
     sprite::{Material2dPlugin, MaterialMesh2dBundle},
@@ -38,8 +36,8 @@ fn main() {
             }),
             ..default()
         }))
-        //.add_plugin(LogDiagnosticsPlugin::default())
-        //.add_plugin(FrameTimeDiagnosticsPlugin)
+        // .add_plugin(LogDiagnosticsPlugin::default())
+        // .add_plugin(FrameTimeDiagnosticsPlugin)
         .add_plugin(Material2dPlugin::<LaserSimMaterial>::default())
         .add_plugin(Material2dPlugin::<LedStripSimMaterial>::default())
         .add_systems(Startup, setup)
@@ -71,9 +69,7 @@ fn setup(
     ));
 
     let mut buffer_data = StorageBuffer::new(Vec::new());
-    buffer_data
-        .write(&[1, 50, 255, 0, 18, 0, 0, 0, 0, 0, 0, 0])
-        .unwrap();
+    buffer_data.write(&0u32).unwrap();
     let buffer = render_device.create_buffer_with_data(&BufferInitDescriptor {
         label: Some("effect data buffer"),
         usage: BufferUsages::COPY_DST | BufferUsages::STORAGE,
@@ -109,15 +105,12 @@ fn update_effect(
     render_queue: Res<RenderQueue>,
     mut led_strips: ResMut<Assets<LedStripSimMaterial>>,
 ) {
-    let val = time.elapsed().as_nanos().to_le_bytes()[0] as u32;
-
-    println!("val: {:?}", val);
+    let val = time.elapsed().as_nanos().to_le_bytes()[3] as u32;
 
     // for led_strip in &mut led_strips {}
     let mut buffer_data = StorageBuffer::new(Vec::new());
     buffer_data.write(&val).unwrap();
     for (_, material) in led_strips.iter_mut() {
-        println!("Sending buffer data: {:?}", buffer_data.as_ref());
-        render_queue.write_buffer(&material.effect_data, 4, buffer_data.as_ref());
+        render_queue.write_buffer(&material.effect_data, 0, buffer_data.as_ref());
     }
 }
