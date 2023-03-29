@@ -1,4 +1,5 @@
 @group(1) @binding(0) var<storage> effect_data: array<u32>;
+@group(1) @binding(1) var<uniform> widget_size: vec2<f32>;
 
 struct FragmentInput {
     #import bevy_pbr::mesh_vertex_output

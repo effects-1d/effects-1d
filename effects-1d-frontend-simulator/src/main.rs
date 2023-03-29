@@ -96,14 +96,18 @@ fn on_resize_system(
 fn render_effect_frame(
     time: Res<Time>,
     mut effect_renderer: ResMut<EffectRenderer>,
-    mut led_strips: ResMut<Assets<LedStripSimMaterial>>,
+    mut ledstrip_sim_materials: ResMut<Assets<LedStripSimMaterial>>,
+    mut laser_sim_materials: ResMut<Assets<LaserSimMaterial>>,
 ) {
     let mut framebuffer = vec![0u32; 32];
     effect_renderer
         .as_mut()
         .render_next_frame(&mut framebuffer, time.as_ref());
 
-    for (_, material) in led_strips.iter_mut() {
-        material.effect_data = framebuffer.to_vec();
+    for (_, laser_sim_material) in laser_sim_materials.iter_mut() {
+        laser_sim_material.effect_data = framebuffer.to_vec();
+    }
+    for (_, ledstrip_sim_material) in ledstrip_sim_materials.iter_mut() {
+        ledstrip_sim_material.effect_data = framebuffer.to_vec();
     }
 }
