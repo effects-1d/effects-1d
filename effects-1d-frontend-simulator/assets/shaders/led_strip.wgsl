@@ -52,7 +52,12 @@ fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
     let white = vec3<f32>(1.0, 0.0, 0.0);
     let mixed = mix(mix(red, blue, t_1), mix(green, white, t_2), distance_to_center);
 
-    return vec4<f32>(f32(texture[0]) / 255.0, 0., 0., 1.);
+    let count = arrayLength(&texture);
+    let max_x = u32(i32(count) - 1);
+
+    let x = clamp(u32(in.uv.x * f32(count)), u32(0), max_x);
+
+    return vec4<f32>(f32(texture[x]) / 255.0, 0., 0., 1.);
 }
 
 
