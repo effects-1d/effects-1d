@@ -38,12 +38,12 @@ fn main() {
         .add_plugin(Material2dPlugin::<LedStripSimMaterial>::default())
         .add_systems(Startup, setup)
         .add_systems(Update, on_resize_system)
+        .add_systems(Update, update_effect)
         .run();
 }
 
 fn setup(
     windows: Query<&Window>,
-    asset_server: Res<AssetServer>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut laser_materials: ResMut<Assets<LaserSimMaterial>>,
@@ -84,4 +84,9 @@ fn on_resize_system(
         *ledstrip_transform.single_mut() = led_strip_position(e.width, e.height);
         *laser_transform.single_mut() = laser_position(e.width, e.height);
     }
+}
+
+fn update_effect(time: Res<Time>, mut led_strips: Query<&mut LedStripSim>) {
+    // println!("time: {:?}", time.delta());
+    // for led_strip in &mut led_strips {}
 }

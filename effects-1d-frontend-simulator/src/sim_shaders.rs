@@ -1,15 +1,4 @@
-use bevy::{
-    ecs::system::{lifetimeless::SRes, SystemParamItem},
-    prelude::*,
-    reflect::TypeUuid,
-    render::{
-        render_asset::{PrepareAssetError, RenderAsset},
-        render_resource::*,
-        renderer::{RenderDevice, RenderQueue},
-        texture::{DefaultImageSampler, GpuImage, ImageSampler},
-    },
-    sprite::Material2d,
-};
+use bevy::{prelude::*, reflect::TypeUuid, render::render_resource::*, sprite::Material2d};
 
 #[derive(Component)]
 pub struct LaserSim;
