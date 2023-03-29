@@ -4,17 +4,16 @@
 
 use bevy::{
     prelude::*,
-    sprite::{Material2dPlugin, MaterialMesh2dBundle},
+    sprite::Material2dPlugin,
     window::{PresentMode, WindowResized},
 };
 
 mod effect_renderer;
-mod sim_shaders;
+mod visualizations;
 
 use effect_renderer::EffectRenderer;
-use sim_shaders::{
-    compute_laser_position, compute_ledstrip_position, LaserSim, LaserSimMaterial, LedStripSim,
-    LedStripSimMaterial,
+use visualizations::{
+    LaserSimMaterial, LedStripSimMaterial, SimWidget, SimWidgetBundle, WidgetMaterial,
 };
 
 // TODO: Learn [here](https://github.com/mrk-its/bevy-atari-antic/blob/main/src/render/mod.rs) how to properly integrate this
@@ -58,38 +57,42 @@ fn setup(
 
     commands.spawn(Camera2dBundle::default());
 
-    commands.spawn((
-        LaserSim,
-        MaterialMesh2dBundle {
-            mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
-            transform: compute_laser_position(window.width(), window.height()),
-            material: laser_materials.add(LaserSimMaterial {}),
-            ..default()
-        },
+    commands.spawn(SimWidgetBundle::new(
+        &mut meshes,
+        &mut laser_materials,
+        window,
+        Vec2::new(0.0, 0.0),
+        Vec2::new(1.0, 0.9),
     ));
-
-    commands.spawn((
-        LedStripSim,
-        MaterialMesh2dBundle {
-            mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
-            transform: compute_ledstrip_position(window.width(), window.height()),
-            material: ledstrip_materials.add(LedStripSimMaterial {
-                effect_data: vec![128],
-                widget_resolution: Vec2::new(0., 0.),
-            }),
-            ..default()
-        },
+    commands.spawn(SimWidgetBundle::new(
+        &mut meshes,
+        &mut ledstrip_materials,
+        window,
+        Vec2::new(0.0, 0.925),
+        Vec2::new(1.0, 0.05),
     ));
 }
 
 fn on_resize_system(
     mut resize_reader: EventReader<WindowResized>,
-    mut ledstrip_transform: Query<&mut Transform, (With<LedStripSim>, Without<LaserSim>)>,
-    mut laser_transform: Query<&mut Transform, (With<LaserSim>, Without<LedStripSim>)>,
+    mut simwidgets: Query<(&mut Transform, &SimWidget)>,
+    mut ledstrip_sim_materials: ResMut<Assets<LedStripSimMaterial>>,
+    mut laser_sim_materials: ResMut<Assets<LaserSimMaterial>>,
 ) {
     for e in resize_reader.iter() {
-        *ledstrip_transform.single_mut() = compute_ledstrip_position(e.width, e.height);
-        *laser_transform.single_mut() = compute_laser_position(e.width, e.height);
+        let window_size = Vec2::new(e.width, e.height);
+
+        for (mut transform, simwidget) in simwidgets.iter_mut() {
+            (*transform) = simwidget.compute_transform(window_size);
+        }
+
+        for (_, ledstrip_sim_material) in ledstrip_sim_materials.iter_mut() {
+            ledstrip_sim_material.update_window_size(window_size);
+        }
+
+        for (_, laser_sim_material) in laser_sim_materials.iter_mut() {
+            laser_sim_material.update_window_size(window_size);
+        }
     }
 }
 
