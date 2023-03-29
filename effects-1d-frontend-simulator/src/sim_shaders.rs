@@ -19,13 +19,22 @@ impl Material2d for LaserSimMaterial {
 #[derive(AsBindGroup, TypeUuid, Debug, Clone)]
 #[uuid = "69fdd51f-11e6-4ffd-9ebf-2badfdd98f37"]
 pub struct LedStripSimMaterial {
-    #[storage(0, read_only)]
-    pub texture: Vec<u32>,
+    #[storage(0, read_only, buffer)]
+    pub effect_data: Buffer,
 }
 
 impl Material2d for LedStripSimMaterial {
     fn fragment_shader() -> ShaderRef {
         "shaders/led_strip.wgsl".into()
+    }
+
+    fn specialize(
+        descriptor: &mut RenderPipelineDescriptor,
+        layout: &bevy::render::mesh::MeshVertexBufferLayout,
+        key: bevy::sprite::Material2dKey<Self>,
+    ) -> Result<(), SpecializedMeshPipelineError> {
+        println!("AAAA");
+        Ok(())
     }
 }
 

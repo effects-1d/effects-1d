@@ -4,6 +4,12 @@
 
 use bevy::{
     prelude::*,
+    render::{
+        render_resource::{
+            encase::StorageBuffer, Buffer, BufferDescriptor, BufferInitDescriptor, BufferUsages,
+        },
+        renderer::{RenderDevice, RenderQueue},
+    },
     sprite::{Material2dPlugin, MaterialMesh2dBundle},
     window::{PresentMode, WindowResized},
 };
@@ -44,6 +50,7 @@ fn main() {
 
 fn setup(
     windows: Query<&Window>,
+    render_device: Res<RenderDevice>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut laser_materials: ResMut<Assets<LaserSimMaterial>>,
@@ -62,13 +69,24 @@ fn setup(
             ..default()
         },
     ));
+
+    let mut buffer_data = StorageBuffer::new(Vec::new());
+    buffer_data
+        .write(&[1, 50, 255, 0, 18, 0, 0, 0, 0, 0, 0, 0])
+        .unwrap();
+    let buffer = render_device.create_buffer_with_data(&BufferInitDescriptor {
+        label: Some("effect data buffer"),
+        usage: BufferUsages::COPY_DST | BufferUsages::STORAGE,
+        contents: buffer_data.as_ref(),
+    });
+
     commands.spawn((
         LedStripSim,
         MaterialMesh2dBundle {
             mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
             transform: led_strip_position(window.width(), window.height()),
             material: ledstrip_materials.add(LedStripSimMaterial {
-                texture: vec![1, 255, 128, 0, 1],
+                effect_data: buffer,
             }),
             ..default()
         },
@@ -86,7 +104,20 @@ fn on_resize_system(
     }
 }
 
-fn update_effect(time: Res<Time>, mut led_strips: Query<&mut LedStripSim>) {
-    // println!("time: {:?}", time.delta());
+fn update_effect(
+    time: Res<Time>,
+    render_queue: Res<RenderQueue>,
+    mut led_strips: ResMut<Assets<LedStripSimMaterial>>,
+) {
+    let val = time.elapsed().as_nanos().to_le_bytes()[0] as u32;
+
+    println!("val: {:?}", val);
+
     // for led_strip in &mut led_strips {}
+    let mut buffer_data = StorageBuffer::new(Vec::new());
+    buffer_data.write(&val).unwrap();
+    for (_, material) in led_strips.iter_mut() {
+        println!("Sending buffer data: {:?}", buffer_data.as_ref());
+        render_queue.write_buffer(&material.effect_data, 4, buffer_data.as_ref());
+    }
 }
