@@ -27,15 +27,6 @@ impl Material2d for LedStripSimMaterial {
     fn fragment_shader() -> ShaderRef {
         "shaders/led_strip.wgsl".into()
     }
-
-    fn specialize(
-        descriptor: &mut RenderPipelineDescriptor,
-        layout: &bevy::render::mesh::MeshVertexBufferLayout,
-        key: bevy::sprite::Material2dKey<Self>,
-    ) -> Result<(), SpecializedMeshPipelineError> {
-        println!("AAAA");
-        Ok(())
-    }
 }
 
 pub fn led_strip_position(window_width: f32, window_height: f32) -> Transform {

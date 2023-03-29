@@ -18,8 +18,8 @@ use sim_shaders::{
     LedStripSimMaterial,
 };
 
-// TODO: Learn [here](https://github.com/mrk-its/bevy-atari-antic/blob/main/src/render/mod.rs) how to modify buffers at runtime.
-// Might need to make the sim renderers `RenderAssets`.
+// TODO: Learn [here](https://github.com/mrk-its/bevy-atari-antic/blob/main/src/render/mod.rs) how to properly integrate this
+// using `RenderAssets`. Currently we modify the data buffer from within the update, which is not how it is intended.
 
 fn main() {
     App::new()
@@ -42,7 +42,7 @@ fn main() {
         .add_plugin(Material2dPlugin::<LedStripSimMaterial>::default())
         .add_systems(Startup, setup)
         .add_systems(Update, on_resize_system)
-        .add_systems(Update, update_effect)
+        .add_systems(Update, render_effect_frame)
         .run();
 }
 
@@ -69,7 +69,7 @@ fn setup(
     ));
 
     let mut buffer_data = StorageBuffer::new(Vec::new());
-    buffer_data.write(&0u32).unwrap();
+    buffer_data.write(&128u32).unwrap();
     let buffer = render_device.create_buffer_with_data(&BufferInitDescriptor {
         label: Some("effect data buffer"),
         usage: BufferUsages::COPY_DST | BufferUsages::STORAGE,
@@ -100,17 +100,38 @@ fn on_resize_system(
     }
 }
 
-fn update_effect(
+fn render_effect_frame(
     time: Res<Time>,
     render_queue: Res<RenderQueue>,
+    render_device: Res<RenderDevice>,
     mut led_strips: ResMut<Assets<LedStripSimMaterial>>,
 ) {
-    let val = time.elapsed().as_nanos().to_le_bytes()[3] as u32;
+    let mut fb = vec![0u32; 3];
+    let fb: &mut [u32] = fb.as_mut_slice();
 
-    // for led_strip in &mut led_strips {}
-    let mut buffer_data = StorageBuffer::new(Vec::new());
-    buffer_data.write(&val).unwrap();
+    let val = time.elapsed().as_nanos().to_le_bytes()[3] as u32;
+    fb[0] = val as u32;
+
+    println!("render: {:?}", fb);
+
+    let mut transfer_buffer = StorageBuffer::new(Vec::new());
+    transfer_buffer.write(&fb).unwrap();
+    println!("extract: {:?}", transfer_buffer.as_ref());
+
     for (_, material) in led_strips.iter_mut() {
-        render_queue.write_buffer(&material.effect_data, 0, buffer_data.as_ref());
+        let transfer_buffer: &[u8] = transfer_buffer.as_ref();
+        if material.effect_data.size() != transfer_buffer.len() as u64 {
+            // re-allocate if size changed
+            println!("Recreate");
+            material.effect_data = render_device.create_buffer_with_data(&BufferInitDescriptor {
+                label: Some("effect data buffer"),
+                usage: BufferUsages::COPY_DST | BufferUsages::STORAGE,
+                contents: transfer_buffer.as_ref(),
+            });
+        } else {
+            // update if size is identical
+            println!("Update");
+            render_queue.write_buffer(&material.effect_data, 0, transfer_buffer.as_ref());
+        }
     }
 }
