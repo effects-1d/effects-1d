@@ -8,19 +8,22 @@ use bevy::{
     window::{PresentMode, WindowResized},
 };
 
+mod effect_renderer;
 mod sim_shaders;
+
+use effect_renderer::EffectRenderer;
 use sim_shaders::{
     compute_laser_position, compute_ledstrip_position, LaserSim, LaserSimMaterial, LedStripSim,
     LedStripSimMaterial,
 };
-mod effect_renderer;
 
 // TODO: Learn [here](https://github.com/mrk-its/bevy-atari-antic/blob/main/src/render/mod.rs) how to properly integrate this
-// using `RenderAssets`. Currently we modify the data buffer from within the update, which is not how it is intended.
+// using `RenderAssets`. There is a lot of code duplication and stuff currently.
 
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
+        .insert_resource(EffectRenderer::new())
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "1D Effects Simulator".to_string(),
@@ -90,16 +93,17 @@ fn on_resize_system(
     }
 }
 
-fn render_effect_frame(time: Res<Time>, mut led_strips: ResMut<Assets<LedStripSimMaterial>>) {
-    let mut fb = vec![0u32; 32];
-    let fb: &mut [u32] = fb.as_mut_slice();
-
-    let val = time.elapsed().as_nanos().to_le_bytes()[3] as u32;
-    fb[0] = val as u32;
-
-    //println!("render: {:?}", fb);
+fn render_effect_frame(
+    time: Res<Time>,
+    mut effect_renderer: ResMut<EffectRenderer>,
+    mut led_strips: ResMut<Assets<LedStripSimMaterial>>,
+) {
+    let mut framebuffer = vec![0u32; 32];
+    effect_renderer
+        .as_mut()
+        .render_next_frame(&mut framebuffer, time.as_ref());
 
     for (_, material) in led_strips.iter_mut() {
-        material.effect_data = fb.to_vec();
+        material.effect_data = framebuffer.to_vec();
     }
 }
