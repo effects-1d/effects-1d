@@ -7,6 +7,10 @@ struct FragmentInput {
 
 @fragment
 fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
+    let pixel_size = 1.0 / widget_size.x;
+
+    // TODO iterate over multiple pixels to catch all
+
     let count = arrayLength(&effect_data);
     let max_x = u32(i32(count) - 1);
 
