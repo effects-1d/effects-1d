@@ -45,7 +45,7 @@ struct FragmentInput{
     #import bevy_pbr::mesh_vertex_output
 }
 
-const BRIGHTNESS: f32 = 0.05;
+const BRIGHTNESS: f32 = 0.1;
 const NUM_SAMPLES: u32 = 64u;
 
 fn get_laser_color(uv: vec2<f32>) -> vec3<f32> {
