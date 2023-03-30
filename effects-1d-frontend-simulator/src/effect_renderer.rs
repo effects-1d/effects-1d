@@ -12,6 +12,7 @@ pub struct EffectRenderer {
 
 fn random_color() -> Vec3 {
     let mut rng = rand::thread_rng();
+    println!("{}", rng.gen::<u64>());
     Vec3::new(
         rng.gen_range(0.0..=1.0),
         rng.gen_range(0.0..=1.0),

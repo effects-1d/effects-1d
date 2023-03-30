@@ -13,8 +13,12 @@ mod visualizations;
 
 use effect_renderer::EffectRenderer;
 use visualizations::{
-    LaserSimMaterial, LedStripSimMaterial, SimWidget, SimWidgetBundle, WidgetMaterial,
+    laser_sim::{LaserSimMaterial, LaserSimPlugin},
+    ledstrip_sim::LedStripSimMaterial,
+    SimWidget, SimWidgetBundle, WidgetMaterial,
 };
+
+// TODO: make shader resources static. Might require lower level custom stuff.
 
 fn main() {
     App::new()
@@ -34,7 +38,7 @@ fn main() {
         }))
         .add_plugin(bevy::diagnostic::LogDiagnosticsPlugin::default())
         .add_plugin(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
-        .add_plugin(Material2dPlugin::<LaserSimMaterial>::default())
+        .add_plugin(LaserSimPlugin)
         .add_plugin(Material2dPlugin::<LedStripSimMaterial>::default())
         .add_systems(Startup, setup)
         .add_systems(Update, on_resize_system)

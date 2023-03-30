@@ -1,4 +1,10 @@
-use bevy::{prelude::*, reflect::TypeUuid, render::render_resource::*, sprite::Material2d};
+use bevy::{
+    asset::load_internal_asset,
+    prelude::*,
+    reflect::TypeUuid,
+    render::render_resource::*,
+    sprite::{Material2d, Material2dPlugin},
+};
 
 use super::WidgetMaterial;
 
@@ -16,7 +22,7 @@ pub struct LaserSimMaterial {
 
 impl Material2d for LaserSimMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/laser.wgsl".into()
+        LASERSIM_SHADER_HANDLE.typed().into()
     }
 }
 
@@ -33,5 +39,22 @@ impl WidgetMaterial for LaserSimMaterial {
 
     fn update_window_size(&mut self, window_size: Vec2) {
         self.widget_size = self.rel_size * window_size;
+    }
+}
+
+pub const LASERSIM_SHADER_HANDLE: HandleUntyped =
+    HandleUntyped::weak_from_u64(Shader::TYPE_UUID, 2240791260128260106);
+
+pub struct LaserSimPlugin;
+impl Plugin for LaserSimPlugin {
+    fn build(&self, app: &mut App) {
+        load_internal_asset!(
+            app,
+            LASERSIM_SHADER_HANDLE,
+            "laser_sim.wgsl",
+            Shader::from_wgsl
+        );
+
+        app.add_plugin(Material2dPlugin::<LaserSimMaterial>::default());
     }
 }

@@ -3,10 +3,8 @@ use bevy::{
     sprite::{Material2d, MaterialMesh2dBundle},
 };
 
-mod laser_sim;
-mod ledstrip_sim;
-pub use laser_sim::LaserSimMaterial;
-pub use ledstrip_sim::LedStripSimMaterial;
+pub mod laser_sim;
+pub mod ledstrip_sim;
 
 #[derive(Component)]
 pub struct SimWidget {
