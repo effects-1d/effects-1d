@@ -57,5 +57,9 @@ impl EffectRenderer {
 
             *val = color_to_u32(color);
         }
+
+        if let Some(el) = framebuffer.get_mut(framebuffer.len() / 2) {
+            *el = 255;
+        }
     }
 }

@@ -46,7 +46,7 @@ struct FragmentInput{
 }
 
 const BRIGHTNESS: f32 = 0.1;
-const NUM_SAMPLES: u32 = 64u;
+const MSAA_SAMPLES: u32 = 8u;
 
 fn get_laser_color(uv: vec2<f32>) -> vec3<f32> {
     let effect_data_len = arrayLength(&effect_data);
@@ -96,7 +96,7 @@ fn fragment(
     let pixel_size = 1.0 / widget_size;
 
     var color_sum = vec3(0., 0., 0.);
-    for(var i = 0u; i < NUM_SAMPLES; i++){
+    for(var i = 0u; i < MSAA_SAMPLES; i++){
         let offset = vec2(
             rand(&rng_state) - 0.5,
             rand(&rng_state) - 0.5
@@ -104,7 +104,7 @@ fn fragment(
 
         color_sum += get_laser_color(in.uv + offset);
     };
-    let color = color_sum / f32(NUM_SAMPLES);
+    let color = color_sum / f32(MSAA_SAMPLES);
 
     // Tone mapping
     let total_overshoot =

@@ -99,7 +99,7 @@ fn render_effect_frame(
     mut ledstrip_sim_materials: ResMut<Assets<LedStripSimMaterial>>,
     mut laser_sim_materials: ResMut<Assets<LaserSimMaterial>>,
 ) {
-    let mut framebuffer = vec![0u32; 400];
+    let mut framebuffer = vec![0u32; 256];
     effect_renderer
         .as_mut()
         .render_next_frame(&mut framebuffer, time.as_ref());
