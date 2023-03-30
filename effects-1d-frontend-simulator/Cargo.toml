@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.11.0-dev", git = "https://github.com/bevyengine/bevy.git", rev = "e71078af4919346b1dd3b0b66eeb8b1c18fb6a7e" }
+rand = "0.8.5"

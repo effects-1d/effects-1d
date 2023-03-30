@@ -45,7 +45,7 @@ struct FragmentInput{
     #import bevy_pbr::mesh_vertex_output
 }
 
-const BRIGHTNESS: f32 = 0.2;
+const BRIGHTNESS: f32 = 0.05;
 const NUM_SAMPLES: u32 = 64u;
 
 fn get_laser_color(uv: vec2<f32>) -> vec3<f32> {
@@ -108,9 +108,10 @@ fn fragment(
 
     // Tone mapping
     let total_overshoot =
-        max(color.r - 1., 0.) +
-        max(color.g - 1., 0.) +
-        max(color.b - 1., 0.);
+        max(
+            max(color.r - 1., 0.),
+            max(color.g - 1., color.b - 1.)
+        );
 
     let tonemapped_color = color + total_overshoot * 0.1;
 
