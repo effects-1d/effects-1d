@@ -4,7 +4,6 @@
 
 use bevy::{
     prelude::*,
-    sprite::Material2dPlugin,
     window::{PresentMode, WindowResized},
 };
 
@@ -14,7 +13,7 @@ mod visualizations;
 use effect_renderer::EffectRenderer;
 use visualizations::{
     laser_sim::{LaserSimMaterial, LaserSimPlugin},
-    ledstrip_sim::LedStripSimMaterial,
+    ledstrip_sim::{LedStripSimMaterial, LedStripSimPlugin},
     SimWidget, SimWidgetBundle, WidgetMaterial,
 };
 
@@ -36,10 +35,10 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugin(bevy::diagnostic::LogDiagnosticsPlugin::default())
-        .add_plugin(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
+        // .add_plugin(bevy::diagnostic::LogDiagnosticsPlugin::default())
+        // .add_plugin(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugin(LaserSimPlugin)
-        .add_plugin(Material2dPlugin::<LedStripSimMaterial>::default())
+        .add_plugin(LedStripSimPlugin)
         .add_systems(Startup, setup)
         .add_systems(Update, on_resize_system)
         .add_systems(Update, render_effect_frame)

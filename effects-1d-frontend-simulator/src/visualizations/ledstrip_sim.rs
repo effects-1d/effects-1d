@@ -1,4 +1,10 @@
-use bevy::{prelude::*, reflect::TypeUuid, render::render_resource::*, sprite::Material2d};
+use bevy::{
+    asset::load_internal_asset,
+    prelude::*,
+    reflect::TypeUuid,
+    render::render_resource::*,
+    sprite::{Material2d, Material2dPlugin},
+};
 
 use super::WidgetMaterial;
 
@@ -16,7 +22,7 @@ pub struct LedStripSimMaterial {
 
 impl Material2d for LedStripSimMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/led_strip.wgsl".into()
+        LEDSTRIPSIM_SHADER_HANDLE.typed().into()
     }
 }
 
@@ -33,5 +39,22 @@ impl WidgetMaterial for LedStripSimMaterial {
 
     fn update_window_size(&mut self, window_size: Vec2) {
         self.widget_size = self.rel_size * window_size;
+    }
+}
+
+pub const LEDSTRIPSIM_SHADER_HANDLE: HandleUntyped =
+    HandleUntyped::weak_from_u64(Shader::TYPE_UUID, 13317158258890179713);
+
+pub struct LedStripSimPlugin;
+impl Plugin for LedStripSimPlugin {
+    fn build(&self, app: &mut App) {
+        load_internal_asset!(
+            app,
+            LEDSTRIPSIM_SHADER_HANDLE,
+            "ledstrip_sim.wgsl",
+            Shader::from_wgsl
+        );
+
+        app.add_plugin(Material2dPlugin::<LedStripSimMaterial>::default());
     }
 }
