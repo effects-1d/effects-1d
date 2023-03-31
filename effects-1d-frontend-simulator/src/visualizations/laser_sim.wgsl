@@ -40,6 +40,18 @@ fn init_rand_state(uv: vec2<f32>) -> u32 {
 @group(1) @binding(0) var<storage> effect_data: array<u32>;
 @group(1) @binding(1) var<uniform> widget_size: vec2<f32>;
 
+fn get_color(index: u32) -> vec3<f32>{
+    let color = effect_data[index];
+    let color_r = (color >> 0u) & 0xffu;
+    let color_g = (color >> 8u) & 0xffu;
+    let color_b = (color >> 16u) & 0xffu;
+    return vec3<f32>(
+        f32(color_r) / 255.0,
+        f32(color_g) / 255.0,
+        f32(color_b) / 255.0,
+    );
+}
+
 struct FragmentInput{
     @builtin(position) position: vec4<f32>,
     #import bevy_pbr::mesh_vertex_output
@@ -67,16 +79,7 @@ fn get_laser_color(uv: vec2<f32>) -> vec3<f32> {
 
     let array_pos = clamp(u32((rel_angle / acos(-1.)) * f32(effect_data_len)), u32(0), effect_data_max_index);
 
-    let color = effect_data[array_pos];
-    let color_r = (color >> 0u) & 0xffu;
-    let color_g = (color >> 8u) & 0xffu;
-    let color_b = (color >> 16u) & 0xffu;
-
-    let laser_color = vec3(
-        f32(color_r)/255.0,
-        f32(color_g)/255.0,
-        f32(color_b)/255.0,
-    );
+    let laser_color = get_color(array_pos);
 
     var brightness_multiplier = 10000000.0;
     if rel_dist > 0. {

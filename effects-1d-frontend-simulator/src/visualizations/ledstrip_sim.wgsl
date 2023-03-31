@@ -5,26 +5,54 @@ struct FragmentInput {
     #import bevy_pbr::mesh_vertex_output
 }
 
+fn get_color(index: u32) -> vec3<f32>{
+    let color = effect_data[index];
+    let color_r = (color >> 0u) & 0xffu;
+    let color_g = (color >> 8u) & 0xffu;
+    let color_b = (color >> 16u) & 0xffu;
+    return vec3<f32>(
+        f32(color_r) / 255.0,
+        f32(color_g) / 255.0,
+        f32(color_b) / 255.0,
+    );
+}
+
 @fragment
 fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
     let pixel_size = 1.0 / widget_size.x;
 
-    // TODO iterate over all data points within the range of the current pixel, to avoid aliasing
+    let effect_data_len = arrayLength(&effect_data);
+    let effect_data_max_index = effect_data_len - 1u;
 
-    let count = arrayLength(&effect_data);
-    let max_x = u32(i32(count) - 1);
+    let pos_start = (in.uv.x - 0.5*pixel_size) * f32(effect_data_len);
+    let pos_end = (in.uv.x + 0.5*pixel_size) * f32(effect_data_len);
 
-    let x = clamp(u32(in.uv.x * f32(count)), u32(0), max_x);
+    let pos_start_floor = floor(pos_start);
+    let pos_end_floor = floor(pos_end);
 
-    let color = effect_data[x];
-    let color_r = (color >> 0u) & 0xffu;
-    let color_g = (color >> 8u) & 0xffu;
-    let color_b = (color >> 16u) & 0xffu;
+    let index_start = clamp(u32(pos_start_floor), 0u, effect_data_max_index);
+    let index_end = clamp(u32(pos_end_floor), 0u, effect_data_max_index);
 
-    return vec4<f32>(
-        f32(color_r) / 255.0,
-        f32(color_g) / 255.0,
-        f32(color_b) / 255.0,
-        1.
-    );
+    var output_color = vec3<f32>(0., 0., 0.);
+    if(index_end <= index_start) {
+        // If we start and end in the same cell, the average is equal to the cell value
+        output_color = get_color(index_start);
+    } else {
+        for(var i = index_start; i <= index_end; i += 1u){
+            if i == index_start {
+                // First cell, only take the starting part
+                output_color += (1. - (pos_start - pos_start_floor)) * get_color(i);
+            } else if i == index_end {
+                // Last cell, only take the ending part
+                output_color += (pos_end - pos_end_floor) * get_color(i);
+            } else {
+                // One of the middle cells, take full value of the cell
+                output_color += get_color(i);
+            }
+        }
+        // Divide to create the average of all cells
+        output_color /= (pos_end - pos_start);
+    }
+
+    return vec4(output_color, 1.);
 }
