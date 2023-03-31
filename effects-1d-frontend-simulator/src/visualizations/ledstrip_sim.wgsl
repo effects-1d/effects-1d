@@ -60,7 +60,7 @@ fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
 
     // Draw grid lines if resolution is low enough
     let cell_size_pixels = widget_size.x / f32(effect_data_len);
-    if cell_size_pixels > 6.0 {
+    if cell_size_pixels > 1.0 / GRIDLINE_SIZE {
 
         let distance_to_gridline_start = abs(pos_start - round(pos_start));
         let distance_to_gridline_end = abs(pos_end - round(pos_end));
