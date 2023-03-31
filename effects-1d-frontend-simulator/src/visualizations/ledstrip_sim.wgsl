@@ -17,6 +17,8 @@ fn get_color(index: u32) -> vec3<f32>{
     );
 }
 
+const GRIDLINE_SIZE: f32 = 0.15;
+
 @fragment
 fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
     let pixel_size = 1.0 / widget_size.x;
@@ -54,5 +56,29 @@ fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
         output_color /= (pos_end - pos_start);
     }
 
-    return vec4(output_color, 1.);
+    var alpha = 1.;
+
+    // Draw grid lines if resolution is low enough
+    let cell_size_pixels = widget_size.x / f32(effect_data_len);
+    if cell_size_pixels > 6.0 {
+
+        let distance_to_gridline_start = abs(pos_start - round(pos_start));
+        let distance_to_gridline_end = abs(pos_end - round(pos_end));
+
+        let distance_to_gridline_min = min(
+            distance_to_gridline_start,
+            distance_to_gridline_end
+        );
+        let distance_to_gridline_max = max(
+            distance_to_gridline_start,
+            distance_to_gridline_end
+        );
+
+        alpha = clamp(
+            1. - (GRIDLINE_SIZE - distance_to_gridline_min) / (distance_to_gridline_max - distance_to_gridline_min),
+            0., 1.
+        );
+    }
+
+    return vec4(output_color, alpha);
 }

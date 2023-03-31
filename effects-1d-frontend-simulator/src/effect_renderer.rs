@@ -19,7 +19,7 @@ fn random_color() -> Vec3 {
     )
 }
 
-const SPEED: f32 = 0.5;
+const SPEED: f32 = 0.05;
 
 fn color_to_u32(color: Vec3) -> u32 {
     let r = (color.x * 256.0).clamp(0., 255.) as u32;
@@ -32,7 +32,7 @@ fn color_to_u32(color: Vec3) -> u32 {
 impl EffectRenderer {
     pub fn new() -> Self {
         Self {
-            old_color: Vec3::new(0., 0., 0.),
+            old_color: Vec3::splat(0.),
             new_color: random_color(),
             percent: 0.,
         }
@@ -43,7 +43,11 @@ impl EffectRenderer {
         if self.percent > 1. {
             self.percent -= 1.;
             self.old_color = self.new_color;
-            self.new_color = random_color();
+            if self.old_color == Vec3::splat(0.) {
+                self.new_color = random_color();
+            } else {
+                self.new_color = Vec3::splat(0.);
+            }
         }
 
         let pos_max = (framebuffer.len() - 1) as f32;
