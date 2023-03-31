@@ -17,8 +17,6 @@ use visualizations::{
     SimWidget, SimWidgetBundle, WidgetMaterial,
 };
 
-// TODO: make shader resources static. Might require lower level custom stuff.
-
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))

@@ -58,7 +58,9 @@ impl EffectRenderer {
             *val = color_to_u32(color);
         }
 
-        if let Some(el) = framebuffer.get_mut(framebuffer.len() / 2) {
+        if let Some(el) =
+            framebuffer.get_mut(framebuffer.len() / 2 + (time.elapsed().as_secs() % 10) as usize)
+        {
             *el = 255;
         }
     }
