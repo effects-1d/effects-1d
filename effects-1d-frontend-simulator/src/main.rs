@@ -33,8 +33,8 @@ fn main() {
             }),
             ..default()
         }))
-        // .add_plugin(bevy::diagnostic::LogDiagnosticsPlugin::default())
-        // .add_plugin(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
+        .add_plugin(bevy::diagnostic::LogDiagnosticsPlugin::default())
+        .add_plugin(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugin(LaserSimPlugin)
         .add_plugin(LedStripSimPlugin)
         .add_systems(Startup, setup)
