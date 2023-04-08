@@ -1,28 +1,29 @@
 use crate::errors::RenderError;
 
-use super::{BeatBasedEffect, BeatInfo, EffectState};
+use super::{BeatInfo, EffectState, MeasureBasedEffect, MeasureInfo};
 
-/// An effect whos animation is purely time-based.
-pub trait TimeBasedEffect {
+/// An effect who's animation is purely time-based.
+pub trait BeatBasedEffect {
     /// Renders the current frame.
     /// TODO: document args
     fn render_frame(
         &mut self,
         framebuffer: &mut [u8],
         d_t: f32,
+        beat: BeatInfo,
     ) -> Result<EffectState, RenderError>;
 }
 
-impl<T> BeatBasedEffect for T
+impl<T> MeasureBasedEffect for T
 where
-    T: TimeBasedEffect,
+    T: BeatBasedEffect,
 {
     fn render_frame(
         &mut self,
         framebuffer: &mut [u8],
         d_t: f32,
-        _beat: BeatInfo,
+        measure: MeasureInfo,
     ) -> Result<EffectState, RenderError> {
-        TimeBasedEffect::render_frame(self, framebuffer, d_t)
+        BeatBasedEffect::render_frame(self, framebuffer, d_t, measure.beat)
     }
 }
