@@ -3,6 +3,8 @@
 #![deny(unsafe_code)]
 #![no_std]
 
+/// Pixel colors
+pub mod color;
 /// Effect-releated traits and structs
 pub mod effects;
 /// Common error types

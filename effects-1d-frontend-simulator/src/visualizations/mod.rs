@@ -9,8 +9,8 @@ pub mod ledstrip_sim;
 #[derive(Component)]
 pub struct SimWidget {
     /// Position of the widget's top left point
-    ///  - [0,0] would be the in the top left corner
-    ///  - [0.5,0.5] would mean the top left corner of the widget is in the center of the screen
+    ///  - (0,0) would be the in the top left corner
+    ///  - (0.5,0.5) would mean the top left corner of the widget is in the center of the screen
     pub rel_position: Vec2,
     /// Size of the widget
     pub rel_size: Vec2,
