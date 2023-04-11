@@ -27,7 +27,7 @@ pub struct EffectState {
 ///
 /// Note that this is not coupled to the current time in any way.
 /// The beat tempo could slow down or speed up spontaneously.
-#[derive(Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct BeatInfo {
     /// The number of the current beat.
     pub current: i32,
@@ -41,8 +41,21 @@ pub struct BeatInfo {
 }
 
 impl BeatInfo {
+    /// Creates a new BeatInfo object.
+    ///
+    /// # Arguments
+    ///
+    /// * `current` - The integer part of the current beat.
+    /// * `fractional` - The fractional part of the current beat.
+    pub const fn new(current: i32, fractional: f32) -> Self {
+        Self {
+            current,
+            fractional,
+        }
+    }
+
     /// Creates a beat info whose current beat is at 0.0
-    pub fn zero() -> Self {
+    pub const fn zero() -> Self {
         Self {
             current: 0,
             fractional: 0.0,
@@ -57,6 +70,37 @@ impl BeatInfo {
         self.fractional -= passed_full_beats as f32;
         self.current += passed_full_beats;
     }
+
+    /// Returns the next full beat relative to this one.
+    pub fn next_full_beat(&self) -> Self {
+        if self.fractional > 0.0 {
+            BeatInfo {
+                current: self.current + 1,
+                fractional: 0.0,
+            }
+        } else {
+            self.clone()
+        }
+    }
+}
+
+impl PartialOrd for BeatInfo {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        match self.current.partial_cmp(&other.current) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        self.fractional.partial_cmp(&other.fractional)
+    }
+}
+
+impl core::ops::Sub<BeatInfo> for BeatInfo {
+    type Output = f32;
+
+    fn sub(self, rhs: BeatInfo) -> Self::Output {
+        let diff_current = self.current - rhs.current;
+        diff_current as f32 + self.fractional - rhs.fractional
+    }
 }
 
 /// The progress of the current measure.
@@ -70,4 +114,18 @@ pub struct MeasureInfo {
     pub current_measure_start: i32,
     /// The beat where the next measure will start.
     pub next_measure_start: i32,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    extern crate std;
+
+    #[test]
+    fn beatinfo_sub() {
+        let diff = BeatInfo::new(5, 0.3) - BeatInfo::new(3, 0.9);
+        assert!((diff - 1.4).abs() < 10.0 * f32::EPSILON);
+        let diff = BeatInfo::new(3, 0.9) - BeatInfo::new(5, 0.3);
+        assert!((diff + 1.4).abs() < 10.0 * f32::EPSILON);
+    }
 }

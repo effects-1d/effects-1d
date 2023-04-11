@@ -23,6 +23,13 @@ pub struct Monochrome {
     pub v: u8,
 }
 
+impl Monochrome {
+    /// Creates a new monochrome color value.
+    pub const fn new(v: u8) -> Self {
+        Self { v }
+    }
+}
+
 /// 3-bit RGB Color
 ///
 /// One bit each for R, G and B.

@@ -10,8 +10,13 @@ macro_rules! export_effects {
                 mod [<$name:snake>];
                 pub use [<$name:snake>]::$name;
             }
-        ),*
+        )*
     }
 }
 
-export_effects!(BlinkingStripes);
+pub mod binary {
+    export_effects! {
+        BlinkingStripes,
+        SplittingLine
+    }
+}
