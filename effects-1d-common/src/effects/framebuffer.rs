@@ -1,7 +1,7 @@
 use crate::color::Color;
 
 /// A reference to a framebuffer an effect can render into.
-pub trait FrameBufferRef<'a, C: Color> {
+pub trait FrameBufferRef<C: Color> {
     /// Returns the resolution of the framebuffer
     fn len(&self) -> u32;
     /// Sets a specific pixel in the framebuffer
@@ -49,7 +49,7 @@ pub struct FrameBuffer<'a, C> {
     data: &'a mut [C],
 }
 
-impl<'a, C: Color> FrameBufferRef<'a, C> for FrameBuffer<'_, C> {
+impl<'a, C: Color> FrameBufferRef<C> for FrameBuffer<'_, C> {
     fn len(&self) -> u32 {
         self.data.len() as u32
     }

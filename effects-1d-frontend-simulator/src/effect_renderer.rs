@@ -1,71 +1,49 @@
 use bevy::prelude::*;
+use effects_1d_common::{color, effects::FrameBufferRef};
 
-use rand::Rng;
+pub struct SimulationFramebuffer<'a> {
+    data: &'a mut [u32],
+}
 
-// TODO move rendering in separate struct so it can keep its state
+impl<'a> SimulationFramebuffer<'a> {
+    pub fn new(data: &'a mut [u32]) -> Self {
+        Self { data }
+    }
+}
+
+impl FrameBufferRef<color::RGB> for SimulationFramebuffer<'_> {
+    fn len(&self) -> u32 {
+        self.data.len() as u32
+    }
+
+    fn set_pixel(&mut self, pos: u32, color: color::RGB) {
+        if let Some(data) = self.data.get_mut(pos as usize) {
+            *data = color_to_u32(color)
+        }
+    }
+}
+
+/// An object that can render an effect to a simulation framebuffer
 #[derive(Resource)]
 pub struct EffectRenderer {
-    old_color: Vec3,
-    new_color: Vec3,
-    percent: f32,
+    render_callback: Box<dyn FnMut(&mut [u32], &Time) + Send + Sync>,
 }
 
-fn random_color() -> Vec3 {
-    let mut rng = rand::thread_rng();
-    Vec3::new(
-        rng.gen_range(0.0..=1.0),
-        rng.gen_range(0.0..=1.0),
-        rng.gen_range(0.0..=1.0),
-    )
-}
-
-const SPEED: f32 = 0.05;
-
-fn color_to_u32(color: Vec3) -> u32 {
-    let r = (color.x * 256.0).clamp(0., 255.) as u32;
-    let g = (color.y * 256.0).clamp(0., 255.) as u32;
-    let b = (color.z * 256.0).clamp(0., 255.) as u32;
+fn color_to_u32(color: color::RGB) -> u32 {
+    let r = u32::from(color.r);
+    let g = u32::from(color.g);
+    let b = u32::from(color.b);
 
     (r << 0) | (g << 8) | (b << 16)
 }
 
 impl EffectRenderer {
-    pub fn new() -> Self {
-        Self {
-            old_color: Vec3::splat(0.),
-            new_color: random_color(),
-            percent: 0.,
-        }
+    /// Create a new effect renderer
+    pub fn new(render_callback: Box<dyn FnMut(&mut [u32], &Time) + Send + Sync>) -> Self {
+        Self { render_callback }
     }
 
-    pub fn render_next_frame(&mut self, framebuffer: &mut [u32], time: &Time) {
-        self.percent += time.delta_seconds() * SPEED;
-        if self.percent > 1. {
-            self.percent -= 1.;
-            self.old_color = self.new_color;
-            if self.old_color == Vec3::splat(0.) {
-                self.new_color = random_color();
-            } else {
-                self.new_color = Vec3::splat(0.);
-            }
-        }
-
-        let pos_max = (framebuffer.len() - 1) as f32;
-        for (pos, val) in framebuffer.iter_mut().enumerate() {
-            let pos = pos as f32 / pos_max;
-            let color = if pos <= self.percent {
-                self.new_color
-            } else {
-                self.old_color
-            };
-
-            *val = color_to_u32(color);
-        }
-
-        if let Some(el) =
-            framebuffer.get_mut(framebuffer.len() / 2 + (time.elapsed().as_secs() % 10) as usize)
-        {
-            *el = 255;
-        }
+    pub(crate) fn render_next_frame(&mut self, framebuffer: &mut [u32], time: &Time) {
+        (self.render_callback)(framebuffer, time)
     }
 }

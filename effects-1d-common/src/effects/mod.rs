@@ -27,6 +27,7 @@ pub struct EffectState {
 ///
 /// Note that this is not coupled to the current time in any way.
 /// The beat tempo could slow down or speed up spontaneously.
+#[derive(Clone)]
 pub struct BeatInfo {
     /// The number of the current beat.
     pub current: i32,
@@ -37,6 +38,25 @@ pub struct BeatInfo {
     /// Whenever it crosses 1.0, it will restart at 0.0
     /// and the `current` variable gets increased by one.
     pub fractional: f32,
+}
+
+impl BeatInfo {
+    /// Creates a beat info whose current beat is at 0.0
+    pub fn zero() -> Self {
+        Self {
+            current: 0,
+            fractional: 0.0,
+        }
+    }
+
+    /// Progresses the beat by a specific amount.
+    pub fn progress(&mut self, delta: f32) {
+        assert!(delta >= 0.0);
+        self.fractional += delta;
+        let passed_full_beats = self.fractional as i32;
+        self.fractional -= passed_full_beats as f32;
+        self.current += passed_full_beats;
+    }
 }
 
 /// The progress of the current measure.

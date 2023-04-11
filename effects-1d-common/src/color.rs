@@ -9,6 +9,13 @@ pub struct RGB {
     pub b: u8,
 }
 
+impl RGB {
+    /// A color with all values set to zero
+    pub const fn black() -> Self {
+        Self { r: 0, g: 0, b: 0 }
+    }
+}
+
 /// 8-bit Monochrome Color
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Monochrome {

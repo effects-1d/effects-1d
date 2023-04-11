@@ -1318,6 +1318,7 @@ name = "effects-1d-frontend-simulator"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "effects-1d-common",
  "rand",
 ]
 

@@ -8,19 +8,23 @@ use bevy::{
 };
 
 mod effect_renderer;
+mod single_effect_simulator;
 mod visualizations;
 
-use effect_renderer::EffectRenderer;
+pub use effect_renderer::EffectRenderer;
+pub use single_effect_simulator::SimulatableEffect;
+
 use visualizations::{
     laser_sim::{LaserSimMaterial, LaserSimPlugin},
     ledstrip_sim::{LedStripSimMaterial, LedStripSimPlugin},
     SimWidget, SimWidgetBundle, WidgetMaterial,
 };
 
-fn main() {
+/// Runs a simulation for the given effect/engine
+pub fn run_simulation(effect_renderer: EffectRenderer) {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
-        .insert_resource(EffectRenderer::new())
+        .insert_resource(effect_renderer)
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "1D Effects Simulator".to_string(),
