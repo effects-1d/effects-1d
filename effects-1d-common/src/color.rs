@@ -41,11 +41,11 @@ pub struct Binary {
 
 impl Binary {
     /// Creates an 'on' value.
-    pub fn on() -> Self {
+    pub const fn on() -> Self {
         Self { v: true }
     }
     /// Creates an 'off' value.
-    pub fn off() -> Self {
+    pub const fn off() -> Self {
         Self { v: false }
     }
 }
