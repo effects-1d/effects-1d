@@ -57,3 +57,41 @@ impl Color for RGB {}
 impl Color for Monochrome {}
 impl Color for BinaryRGB {}
 impl Color for Binary {}
+
+/// Common functionality for interpolatable colors
+pub trait InterpolatableColor: Color {
+    /// Interpolates between the current color and another color.
+    ///
+    /// # Arguments
+    ///
+    /// * `other` - The other color to interpolate to.
+    /// * `percent` - How dominant the other color should be, from 0.0 to 1.0.
+    fn interpolate(&self, other: &Self, percent: f32) -> Self;
+}
+
+fn lerp8(value_a: u8, value_b: u8, percent: f32) -> u8 {
+    let percent = percent.clamp(0.0, 1.0);
+
+    let a: f32 = value_a.into();
+    let b: f32 = value_b.into();
+
+    // the + 0.5 is for proper rounding; float->int conversion is always a floor() operation
+    (a * (1.0 - percent) + b * percent + 0.5).clamp(0.0, 255.0) as u8
+}
+
+impl InterpolatableColor for RGB {
+    fn interpolate(&self, other: &Self, percent: f32) -> Self {
+        Self {
+            r: lerp8(self.r, other.r, percent),
+            g: lerp8(self.g, other.g, percent),
+            b: lerp8(self.b, other.b, percent),
+        }
+    }
+}
+impl InterpolatableColor for Monochrome {
+    fn interpolate(&self, other: &Self, percent: f32) -> Self {
+        Self {
+            v: lerp8(self.v, other.v, percent),
+        }
+    }
+}

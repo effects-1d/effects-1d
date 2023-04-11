@@ -17,7 +17,7 @@ impl BeatBasedEffect for BlinkingStripes {
 
     fn render_frame(
         &mut self,
-        framebuffer: &mut dyn FrameBufferRef<Self::Color>,
+        framebuffer: &mut dyn FrameBufferRef<color::Binary>,
         _d_t: f32,
         beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {
