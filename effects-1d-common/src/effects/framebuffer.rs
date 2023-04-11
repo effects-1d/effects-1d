@@ -2,11 +2,32 @@ use crate::color::Color;
 
 /// A reference to a framebuffer an effect can render into.
 pub trait FrameBufferRef<C: Color> {
-    /// Returns the resolution of the framebuffer
+    /// Get the resolution of the framebuffer.
     fn len(&self) -> u32;
-    /// Sets a specific pixel in the framebuffer
+
+    /// Set a specific pixel in the framebuffer.
+    ///
+    /// # Arguments
+    ///
+    /// * `pos` - The position of the pixel that should get modified.
+    ///           Should be in the range of `0` to `len() - 1`.
+    ///           Can be outside of this range, but then nothing will happen.
+    /// * `color` - The color the pixel shall be set to.
     fn set_pixel(&mut self, pos: u32, color: C);
-    /// Draws a segment with sharp edges
+
+    /// Draw a segment with sharp edges.
+    ///
+    /// This function performs no anti-aliasing, so all the pixels that
+    /// get modified are exactly the given color.
+    ///
+    /// Rendering multiple sections that touch each other will not cause any
+    /// seams in between.
+    ///
+    /// # Arguments
+    ///
+    /// * `start`, `end` - The range that should be filled.
+    ///                    The left end of the framebuffer is `0.0`, the right end is `1.0`.
+    /// * `color` - The color the range shall be set to.
     fn draw_sharp(&mut self, start: f32, end: f32, color: C) {
         let len = self.len() as f32;
         let start = len * start;
