@@ -9,11 +9,37 @@ pub trait FrameBufferRef<'a, C: Color> {
     /// Draws a segment with sharp edges
     fn draw_sharp(&mut self, start: f32, end: f32, color: C) {
         let len = self.len() as f32;
-        let start = (len * start + 0.5) as i32;
-        let end = (len * end - 0.5) as i32;
+        let start = len * start;
+        let end = len * end;
 
-        for pos in start..end {
-            self.set_pixel(pos as u32, color);
+        // Don't draw negative ranges
+        if end < start {
+            return;
+        }
+
+        // Don't draw ranges that are fully out of bounds
+        if end < 0.0 || start > len {
+            return;
+        }
+
+        // Clamp to valid range
+        let start = start.clamp(0.0, len);
+        let end = end.clamp(0.0, len);
+
+        // If range is very short, draw exactly one pixel, even if we technically
+        // didn't hit any pixel centers.
+        if end - start <= 1.0 {
+            let mean = (end + start) / 2.0;
+            let pos = (mean as u32).clamp(0, self.len() - 1);
+            self.set_pixel(pos, color);
+            return;
+        }
+
+        // Else, draw range as normal
+        let start = (start + 0.5) as u32;
+        let end = (end - 0.5).max(0.0) as u32;
+        for pos in start..=end {
+            self.set_pixel(pos, color);
         }
     }
 }
