@@ -3,14 +3,14 @@ use effects_1d_common::effects::{BeatBasedEffect, BeatInfo, FrameBufferRef};
 use crate::{effect_renderer::SimulationFramebuffer, run_simulation, EffectRenderer};
 
 /// Adds a simulator to the effect types
-pub trait SimulatableEffect {
+pub trait SimulateEffect {
     /// Runs a simulator that shows the given effect
     fn simulate();
 }
 
 const BPM: f32 = 109.0;
 
-impl<T> SimulatableEffect for T
+impl<T> SimulateEffect for T
 where
     T: BeatBasedEffect,
     for<'a> SimulationFramebuffer<'a>: FrameBufferRef<<T as BeatBasedEffect>::Color>,

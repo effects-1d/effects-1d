@@ -5,3 +5,5 @@
     - information required:
         - current beat %
         - number of beats per measure
+
+- size hint at initialization, to give effects the chance to optimize themselves for LED strips

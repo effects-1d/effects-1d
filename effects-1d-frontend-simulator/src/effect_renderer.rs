@@ -23,6 +23,55 @@ impl FrameBufferRef<color::RGB> for SimulationFramebuffer<'_> {
     }
 }
 
+impl FrameBufferRef<color::BinaryRGB> for SimulationFramebuffer<'_> {
+    fn len(&self) -> u32 {
+        self.data.len() as u32
+    }
+
+    fn set_pixel(&mut self, pos: u32, color: color::BinaryRGB) {
+        if let Some(data) = self.data.get_mut(pos as usize) {
+            *data = color_to_u32(color::RGB {
+                r: if color.r { 255 } else { 0 },
+                g: if color.g { 255 } else { 0 },
+                b: if color.b { 255 } else { 0 },
+            });
+        }
+    }
+}
+
+impl FrameBufferRef<color::Monochrome> for SimulationFramebuffer<'_> {
+    fn len(&self) -> u32 {
+        self.data.len() as u32
+    }
+
+    fn set_pixel(&mut self, pos: u32, color: color::Monochrome) {
+        if let Some(data) = self.data.get_mut(pos as usize) {
+            *data = color_to_u32(color::RGB {
+                r: color.v,
+                g: color.v,
+                b: color.v,
+            });
+        }
+    }
+}
+
+impl FrameBufferRef<color::Binary> for SimulationFramebuffer<'_> {
+    fn len(&self) -> u32 {
+        self.data.len() as u32
+    }
+
+    fn set_pixel(&mut self, pos: u32, color: color::Binary) {
+        if let Some(data) = self.data.get_mut(pos as usize) {
+            let value = if color.v { 255 } else { 0 };
+            *data = color_to_u32(color::RGB {
+                r: value,
+                g: value,
+                b: value,
+            });
+        }
+    }
+}
+
 /// An object that can render an effect to a simulation framebuffer
 #[derive(Resource)]
 pub struct EffectRenderer {

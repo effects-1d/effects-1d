@@ -12,7 +12,7 @@ mod single_effect_simulator;
 mod visualizations;
 
 pub use effect_renderer::EffectRenderer;
-pub use single_effect_simulator::SimulatableEffect;
+pub use single_effect_simulator::SimulateEffect;
 
 use visualizations::{
     laser_sim::{LaserSimMaterial, LaserSimPlugin},

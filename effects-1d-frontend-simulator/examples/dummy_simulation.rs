@@ -3,7 +3,7 @@ use effects_1d_common::{
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
-use effects_1d_frontend_simulator::SimulatableEffect;
+use effects_1d_frontend_simulator::SimulateEffect;
 
 use rand::Rng;
 

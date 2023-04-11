@@ -12,7 +12,7 @@ impl BeatBasedEffect for BlinkingStripes {
     type Color = color::Binary;
 
     fn init() -> Self {
-        todo!()
+        Self { num_stripes: 35 }
     }
 
     fn render_frame(
@@ -21,11 +21,10 @@ impl BeatBasedEffect for BlinkingStripes {
         _d_t: f32,
         beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {
-        let len = framebuffer.len() as f32;
-
+        let len = self.num_stripes as f32;
         for i in 0..self.num_stripes {
             let i: i32 = i.into();
-            if (i + beat.current) % 2 == 0 {
+            if (i + beat.current / 2) % 2 == 0 {
                 let i = i as f32;
                 let start = i / len;
                 let end = (i + 1.0) / len;
