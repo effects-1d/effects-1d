@@ -17,7 +17,7 @@ impl BeatBasedEffect for SplittingLine {
     fn init() -> Self {
         Self {
             line_width_half: 0.0015,
-            line_speed: 0.02,
+            line_speed: 0.01,
             split_distance: 2,
             start_beat: None,
         }
@@ -33,6 +33,9 @@ impl BeatBasedEffect for SplittingLine {
             .start_beat
             .get_or_insert_with(|| beat.next_full_beat().current);
 
+        let split_distance = self.split_distance;
+        let split_distance_f = self.split_distance as f32;
+
         beat.current -= start_beat;
         // Display nothing until the start of the next beat
         if beat.current < 0 {
@@ -42,24 +45,24 @@ impl BeatBasedEffect for SplittingLine {
             });
         }
 
-        let num_splits = beat.current / self.split_distance;
-        let cycle_position = (beat.fractional + (beat.current % (self.split_distance * 2)) as f32)
-            / self.split_distance as f32;
+        let num_splits = beat.current / split_distance;
+        let cycle_position =
+            (beat.fractional + (beat.current % (split_distance * 2)) as f32) / split_distance_f;
 
         let mut draw_line = |offset: f32| {
             framebuffer.draw_sharp(
-                0.5 + offset * self.line_speed - self.line_width_half,
-                0.5 + offset * self.line_speed + self.line_width_half,
+                0.5 + offset * self.line_speed * split_distance_f - self.line_width_half,
+                0.5 + offset * self.line_speed * split_distance_f + self.line_width_half,
                 color::Monochrome::new(255),
             );
             framebuffer.draw_sharp(
-                0.5 - offset * self.line_speed - self.line_width_half,
-                0.5 - offset * self.line_speed + self.line_width_half,
+                0.5 - offset * self.line_speed * split_distance_f - self.line_width_half,
+                0.5 - offset * self.line_speed * split_distance_f + self.line_width_half,
                 color::Monochrome::new(255),
             );
         };
 
-        let num_segments = (0.5 / self.line_speed) as i32 + 2; // +2 to make sure no jumping happens at the corners
+        let num_segments = (0.5 / (self.line_speed * split_distance_f)) as i32 + 2; // +2 to make sure no jumping happens at the corners
         for seg_id in 0..num_segments {
             if seg_id > num_splits {
                 break;
@@ -76,7 +79,7 @@ impl BeatBasedEffect for SplittingLine {
 
         Ok(EffectState {
             over: false,
-            idle: true,
+            idle: num_splits > num_segments,
         })
     }
 }
