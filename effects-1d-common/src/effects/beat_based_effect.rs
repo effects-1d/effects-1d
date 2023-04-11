@@ -1,11 +1,11 @@
-use crate::errors::RenderError;
+use crate::{color::Color, errors::RenderError};
 
-use super::{BeatInfo, EffectState, MeasureBasedEffect, MeasureInfo};
+use super::{framebuffer::FrameBufferRef, BeatInfo, EffectState, MeasureBasedEffect, MeasureInfo};
 
 /// An effect who's animation is purely time-based.
 pub trait BeatBasedEffect {
     /// The color space the effect will render to
-    type PixelType;
+    type Color: Color;
 
     /// Creates a new instance of the effect
     fn init() -> Self;
@@ -22,7 +22,7 @@ pub trait BeatBasedEffect {
     /// * `beat` - Information about the position in the current beat.
     fn render_frame(
         &mut self,
-        framebuffer: &mut [Self::PixelType],
+        framebuffer: &mut dyn FrameBufferRef<Self::Color>,
         d_t: f32,
         beat: BeatInfo,
     ) -> Result<EffectState, RenderError>;
@@ -32,7 +32,7 @@ impl<T> MeasureBasedEffect for T
 where
     T: BeatBasedEffect,
 {
-    type PixelType = <Self as BeatBasedEffect>::PixelType;
+    type Color = <Self as BeatBasedEffect>::Color;
 
     fn init() -> Self {
         BeatBasedEffect::init()
@@ -40,7 +40,7 @@ where
 
     fn render_frame(
         &mut self,
-        framebuffer: &mut [Self::PixelType],
+        framebuffer: &mut dyn FrameBufferRef<Self::Color>,
         d_t: f32,
         measure: MeasureInfo,
     ) -> Result<EffectState, RenderError> {

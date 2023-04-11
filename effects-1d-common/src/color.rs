@@ -1,4 +1,5 @@
 /// 24-bit RGB Color
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RGB {
     /// Red
     pub r: u8,
@@ -9,6 +10,7 @@ pub struct RGB {
 }
 
 /// 8-bit Monochrome Color
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Monochrome {
     /// Brightness value
     pub v: u8,
@@ -18,6 +20,7 @@ pub struct Monochrome {
 ///
 /// One bit each for R, G and B.
 /// Can represent 8 different colors (including black and white).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct BinaryRGB {
     /// Red
     pub r: bool,
@@ -30,13 +33,25 @@ pub struct BinaryRGB {
 /// 1-bit Color
 ///
 /// Can only represent on (true) and off (false).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Binary {
     /// On or Off
     pub v: bool,
 }
 
+impl Binary {
+    /// Creates an 'on' value.
+    pub fn on() -> Self {
+        Self { v: true }
+    }
+    /// Creates an 'off' value.
+    pub fn off() -> Self {
+        Self { v: false }
+    }
+}
+
 /// Common functionality of all colors
-pub trait Color {}
+pub trait Color: Copy + core::fmt::Debug + Eq + PartialEq {}
 
 impl Color for RGB {}
 impl Color for Monochrome {}

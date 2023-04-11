@@ -1,11 +1,11 @@
-use crate::errors::RenderError;
+use crate::{color::Color, errors::RenderError};
 
-use super::{BeatBasedEffect, BeatInfo, EffectState};
+use super::{framebuffer::FrameBufferRef, BeatBasedEffect, BeatInfo, EffectState};
 
 /// An effect whos animation is purely time-based.
 pub trait TimeBasedEffect {
     /// The color space the effect will render to
-    type PixelType;
+    type Color: Color;
 
     /// Creates a new instance of the effect
     fn init() -> Self;
@@ -21,7 +21,7 @@ pub trait TimeBasedEffect {
     /// * `d_t` - The time difference to the previous frame, in seconds.
     fn render_frame(
         &mut self,
-        framebuffer: &mut [Self::PixelType],
+        framebuffer: &mut dyn FrameBufferRef<Self::Color>,
         d_t: f32,
     ) -> Result<EffectState, RenderError>;
 }
@@ -30,7 +30,7 @@ impl<T> BeatBasedEffect for T
 where
     T: TimeBasedEffect,
 {
-    type PixelType = <Self as TimeBasedEffect>::PixelType;
+    type Color = <Self as TimeBasedEffect>::Color;
 
     fn init() -> Self {
         TimeBasedEffect::init()
@@ -38,7 +38,7 @@ where
 
     fn render_frame(
         &mut self,
-        framebuffer: &mut [Self::PixelType],
+        framebuffer: &mut dyn FrameBufferRef<Self::Color>,
         d_t: f32,
         _beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {

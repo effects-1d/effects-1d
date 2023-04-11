@@ -5,6 +5,9 @@ pub use beat_based_effect::BeatBasedEffect;
 mod measure_based_effect;
 pub use measure_based_effect::MeasureBasedEffect;
 
+mod framebuffer;
+pub use framebuffer::{FrameBuffer, FrameBufferRef};
+
 /// The current state of an effect.
 pub struct EffectState {
     /// The effect is finished and a new effect
