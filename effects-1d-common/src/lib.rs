@@ -9,3 +9,5 @@ pub mod color;
 pub mod effects;
 /// Common error types
 pub mod errors;
+/// Randomness
+pub mod random;

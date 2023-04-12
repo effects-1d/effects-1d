@@ -89,7 +89,7 @@ fn setup(
             "",
             TextStyle {
                 font: fonts::roboto(),
-                font_size: 20.0,
+                font_size: 15.0,
                 color: Color::WHITE,
             },
         ) // Set the alignment of the Text

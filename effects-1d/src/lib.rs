@@ -19,6 +19,13 @@ pub mod binary {
         BlinkingStripes,
     }
 }
+
+pub mod binary_rgb {
+    export_effects! {
+        JumpingStripes,
+    }
+}
+
 pub mod monochrome {
     export_effects! {
         SplittingLine,

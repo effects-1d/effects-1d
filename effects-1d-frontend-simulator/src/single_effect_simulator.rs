@@ -15,7 +15,7 @@ pub trait SimulateEffect {
     fn simulate();
 }
 
-const BPM: f32 = 122.0;
+const BPM: f32 = 120.0;
 
 impl<T> SimulateEffect for T
 where
@@ -58,7 +58,6 @@ where
 
             if effect_state.idle && beat.is_new_beat {
                 let rng: f32 = rand::random();
-                info!("Rng: {}", rng);
                 if rng < 0.1 {
                     running_effect = None;
                 }

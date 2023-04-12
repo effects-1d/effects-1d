@@ -1,5 +1,5 @@
 /// 24-bit RGB Color
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub struct RGB {
     /// Red
     pub r: u8,
@@ -25,7 +25,7 @@ impl core::ops::AddAssign for RGB {
 }
 
 /// 8-bit Monochrome Color
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub struct Monochrome {
     /// Brightness value
     pub v: u8,
@@ -54,7 +54,7 @@ impl core::ops::AddAssign for Monochrome {
 ///
 /// One bit each for R, G and B.
 /// Can represent 8 different colors (including black and white).
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub struct BinaryRGB {
     /// Red
     pub r: bool,
@@ -129,12 +129,25 @@ impl BinaryRGB {
             b: true,
         }
     }
+
+    /// A list of all possible colors (excluding black and white)
+    pub const fn all_possible_colors() -> &'static [BinaryRGB; 6] {
+        const ALL_COLORS: [BinaryRGB; 6] = [
+            BinaryRGB::red(),
+            BinaryRGB::yellow(),
+            BinaryRGB::green(),
+            BinaryRGB::cyan(),
+            BinaryRGB::blue(),
+            BinaryRGB::magenta(),
+        ];
+        &ALL_COLORS
+    }
 }
 
 /// 1-bit Color
 ///
 /// Can only represent on (true) and off (false).
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub struct Binary {
     /// On or Off
     pub v: bool,
