@@ -11,10 +11,6 @@ pub use framebuffer::FrameBufferRef;
 /// The current state of an effect.
 #[derive(Debug)]
 pub struct EffectState {
-    /// The effect is finished and a new effect
-    /// needs to be played immediately
-    pub over: bool,
-
     /// The effect can be scheduled out if desired.
     ///
     /// Meant for effects that don't have a fix end;
@@ -39,6 +35,9 @@ pub struct BeatInfo {
     /// Whenever it crosses 1.0, it will restart at 0.0
     /// and the `current` variable gets increased by one.
     pub fractional: f32,
+
+    /// Indicates that the `current` beat just changed.
+    pub is_new_beat: bool,
 }
 
 impl BeatInfo {
@@ -52,6 +51,7 @@ impl BeatInfo {
         Self {
             current,
             fractional,
+            is_new_beat: false,
         }
     }
 
@@ -60,6 +60,7 @@ impl BeatInfo {
         Self {
             current: 0,
             fractional: 0.0,
+            is_new_beat: true,
         }
     }
 
@@ -70,17 +71,19 @@ impl BeatInfo {
         let passed_full_beats = self.fractional as i32;
         self.fractional -= passed_full_beats as f32;
         self.current += passed_full_beats;
+        self.is_new_beat = passed_full_beats != 0;
     }
 
     /// Returns the next full beat relative to this one.
-    pub fn next_full_beat(&self) -> Self {
-        if self.fractional > 0.0 {
-            BeatInfo {
-                current: self.current + 1,
-                fractional: 0.0,
-            }
-        } else {
-            self.clone()
+    pub fn next_full_beat(&self) -> BeatInfo {
+        BeatInfo {
+            current: if self.is_new_beat {
+                self.current
+            } else {
+                self.current + 1
+            },
+            fractional: 0.0,
+            is_new_beat: true,
         }
     }
 }

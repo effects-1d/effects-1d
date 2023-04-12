@@ -1,6 +1,11 @@
+use bevy::prelude::*;
+
 use std::time::Instant;
 
-use effects_1d_common::effects::{BeatBasedEffect, BeatInfo, FrameBufferRef};
+use effects_1d_common::{
+    effects::{BeatBasedEffect, BeatInfo, FrameBufferRef},
+    errors::RenderError,
+};
 
 use crate::{effect_renderer::SimulationFramebuffer, run_simulation, EffectRenderer};
 
@@ -10,7 +15,7 @@ pub trait SimulateEffect {
     fn simulate();
 }
 
-const BPM: f32 = 109.0;
+const BPM: f32 = 122.0;
 
 impl<T> SimulateEffect for T
 where
@@ -22,24 +27,41 @@ where
         let mut beat: BeatInfo = BeatInfo::zero();
 
         let effect_renderer = EffectRenderer::new(Box::new(move |data, time| {
-            beat.progress(BPM * time.delta_seconds() / 60.0);
-
             let data_len = data.len();
             let t0 = Instant::now();
-            let mut framebuffer = SimulationFramebuffer::new(data);
-            let effect = running_effect.get_or_insert_with(|| Self::init(Some(data_len as u32)));
-            let effect_state = effect
-                .render_frame(&mut framebuffer, time.delta_seconds(), beat.clone())
-                .unwrap();
+            let effect_state = loop {
+                data.fill(0);
+                let mut framebuffer = SimulationFramebuffer::new(data);
+                let effect =
+                    running_effect.get_or_insert_with(|| Self::init(Some(data_len as u32)));
+
+                match effect.render_frame(&mut framebuffer, time.delta_seconds(), beat.clone()) {
+                    Ok(effect_state) => break effect_state,
+                    Err(RenderError::EffectOver) => {
+                        running_effect = None;
+                        continue;
+                    }
+                    Err(e) => error!("Effect failed: {:?}", e),
+                };
+            };
             let render_duration = t0.elapsed();
 
             let result = format!(
                 "{:#?}\nCompute Time: {:.01?}\n{:#.01?}\n{:#?}",
-                effect, render_duration, beat, effect_state
+                running_effect.as_mut().unwrap(),
+                render_duration,
+                beat,
+                effect_state
             );
 
-            if effect_state.over {
-                running_effect = None;
+            beat.progress(BPM * time.delta_seconds() / 60.0);
+
+            if effect_state.idle && beat.is_new_beat {
+                let rng: f32 = rand::random();
+                info!("Rng: {}", rng);
+                if rng < 0.1 {
+                    running_effect = None;
+                }
             }
 
             result

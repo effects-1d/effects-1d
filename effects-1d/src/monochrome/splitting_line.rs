@@ -48,9 +48,9 @@ impl BeatBasedEffect for SplittingLine {
         _d_t: f32,
         mut beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {
-        let start_beat = *self
-            .start_beat
-            .get_or_insert_with(|| beat.next_full_beat().current);
+        let start_beat = *self.start_beat.get_or_insert_with(
+            || beat.next_full_beat().current + 1, /* Small pause, for dramatic effect */
+        );
 
         let split_distance = self.split_distance;
         let split_distance_f = self.split_distance as f32;
@@ -58,10 +58,7 @@ impl BeatBasedEffect for SplittingLine {
         beat.current -= start_beat;
         // Display nothing until the start of the next beat
         if beat.current < 0 {
-            return Ok(EffectState {
-                over: false,
-                idle: false,
-            });
+            return Ok(EffectState { idle: false });
         }
 
         let num_splits = beat.current / split_distance;
@@ -99,7 +96,6 @@ impl BeatBasedEffect for SplittingLine {
         }
 
         Ok(EffectState {
-            over: false,
             idle: num_splits > num_segments,
         })
     }

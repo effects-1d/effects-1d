@@ -64,10 +64,7 @@ impl TimeBasedEffect for DebugEffect {
             color::RGB { r: 255, g: 0, b: 0 },
         );
 
-        Ok(EffectState {
-            over: false,
-            idle: false,
-        })
+        Ok(EffectState { idle: false })
     }
 }
 
