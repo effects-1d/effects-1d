@@ -7,6 +7,7 @@ use effects_1d_frontend_simulator::SimulateEffect;
 
 use rand::Rng;
 
+#[derive(Debug)]
 struct DebugEffect {
     old_color: color::RGB,
     new_color: color::RGB,

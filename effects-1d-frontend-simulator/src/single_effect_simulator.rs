@@ -27,19 +27,22 @@ where
             let data_len = data.len();
             let t0 = Instant::now();
             let mut framebuffer = SimulationFramebuffer::new(data);
-            let effect_state = running_effect
-                .get_or_insert_with(|| Self::init(Some(data_len as u32)))
+            let effect = running_effect.get_or_insert_with(|| Self::init(Some(data_len as u32)));
+            let effect_state = effect
                 .render_frame(&mut framebuffer, time.delta_seconds(), beat.clone())
                 .unwrap();
             let render_duration = t0.elapsed();
+
+            let result = format!(
+                "{:#?}\nCompute Time: {:.01?}\n{:#.01?}\n{:#?}",
+                effect, render_duration, beat, effect_state
+            );
+
             if effect_state.over {
                 running_effect = None;
             }
 
-            format!(
-                "Compute Time: {:.01?}\n{:#.01?}\n{:#?}",
-                render_duration, beat, effect_state
-            )
+            result
         }));
         run_simulation(effect_renderer)
     }

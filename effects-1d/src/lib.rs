@@ -4,7 +4,7 @@
 
 // Adds effect submodules and exports the effect types
 macro_rules! export_effects {
-    ($($name: ident),*) => {
+    ($($name: ident),* $(,)?) => {
         $(
             ::paste::paste!{
                 mod [<$name:snake>];
@@ -17,6 +17,10 @@ macro_rules! export_effects {
 pub mod binary {
     export_effects! {
         BlinkingStripes,
-        SplittingLine
+    }
+}
+pub mod monochrome {
+    export_effects! {
+        SplittingLine,
     }
 }

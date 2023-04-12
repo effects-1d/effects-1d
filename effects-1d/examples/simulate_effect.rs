@@ -4,5 +4,5 @@ use effects_1d::*;
 use effects_1d_frontend_simulator::SimulateEffect;
 
 fn main() {
-    binary::SplittingLine::simulate();
+    monochrome::SplittingLine::simulate();
 }

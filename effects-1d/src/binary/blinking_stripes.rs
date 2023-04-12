@@ -4,6 +4,7 @@ use effects_1d_common::{
     errors::RenderError,
 };
 
+#[derive(Debug)]
 pub struct BlinkingStripes {
     num_stripes: u16,
     fix_stripe_size: Option<u32>,

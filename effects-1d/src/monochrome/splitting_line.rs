@@ -4,6 +4,7 @@ use effects_1d_common::{
     errors::RenderError,
 };
 
+#[derive(Debug)]
 pub struct SplittingLine {
     line_width_half: f32,
     line_speed: f32,

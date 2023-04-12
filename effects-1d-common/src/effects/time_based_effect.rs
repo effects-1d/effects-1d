@@ -1,9 +1,11 @@
+use core::fmt::Debug;
+
 use crate::{color::Color, errors::RenderError};
 
 use super::{framebuffer::FrameBufferRef, BeatBasedEffect, BeatInfo, EffectState};
 
 /// An effect whos animation is purely time-based.
-pub trait TimeBasedEffect: Send + Sync + 'static {
+pub trait TimeBasedEffect: Send + Sync + 'static + Debug {
     /// The color space the effect will render to
     type Color: Color;
 

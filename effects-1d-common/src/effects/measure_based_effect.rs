@@ -1,9 +1,11 @@
+use core::fmt::Debug;
+
 use crate::{color::Color, errors::RenderError};
 
 use super::{framebuffer::FrameBufferRef, EffectState, MeasureInfo};
 
 /// An effect whos animation is purely time-based.
-pub trait MeasureBasedEffect: Send + Sync + 'static {
+pub trait MeasureBasedEffect: Send + Sync + 'static + Debug {
     /// The color space the effect will render to.
     type Color: Color;
 
@@ -18,7 +20,7 @@ pub trait MeasureBasedEffect: Send + Sync + 'static {
     /// It is **not** meant to be used in anything that requires a precise value, like array initializations.
     /// The actual resolution later might change at any point, although it can be assumed that it will lie
     /// in the general area of the hint. The resolution might even change in every frame, for example
-    /// at POV displays (where the frame size might depend on the varying rotation speed)
+    /// at POV displays (where the frame size might depend on the varying rotation speed).
     fn init(resolution_hint: Option<u32>) -> Self;
 
     /// Renders the current frame.
