@@ -6,7 +6,7 @@ mod measure_based_effect;
 pub use measure_based_effect::MeasureBasedEffect;
 
 mod framebuffer;
-pub use framebuffer::{FrameBuffer, FrameBufferRef};
+pub use framebuffer::FrameBufferRef;
 
 /// The current state of an effect.
 pub struct EffectState {
@@ -27,7 +27,7 @@ pub struct EffectState {
 ///
 /// Note that this is not coupled to the current time in any way.
 /// The beat tempo could slow down or speed up spontaneously.
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct BeatInfo {
     /// The number of the current beat.
     pub current: i32,
@@ -107,6 +107,7 @@ impl core::ops::Sub<BeatInfo> for BeatInfo {
 ///
 /// Note that this is not coupled to the current time in any way.
 /// The beat tempo could slow down or speed up spontaneously.
+#[derive(Clone, Debug)]
 pub struct MeasureInfo {
     /// Information about the current beat.
     pub beat: BeatInfo,
@@ -128,4 +129,18 @@ mod tests {
         let diff = BeatInfo::new(3, 0.9) - BeatInfo::new(5, 0.3);
         assert!((diff + 1.4).abs() < 10.0 * f32::EPSILON);
     }
+}
+
+/// Different blend modes used for smooth rendering
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub enum BlendMode {
+    /// Additive blend mode
+    ///
+    /// New color gets added to the existing pixel color.
+    Add,
+
+    /// Maximum blend mode
+    ///
+    /// The pixel becomes the maximum of its existing color and the new color.
+    Max,
 }

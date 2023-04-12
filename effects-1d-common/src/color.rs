@@ -16,6 +16,14 @@ impl RGB {
     }
 }
 
+impl core::ops::AddAssign for RGB {
+    fn add_assign(&mut self, rhs: Self) {
+        self.r = self.r.saturating_add(rhs.r);
+        self.g = self.g.saturating_add(rhs.g);
+        self.b = self.b.saturating_add(rhs.b);
+    }
+}
+
 /// 8-bit Monochrome Color
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Monochrome {
@@ -27,6 +35,18 @@ impl Monochrome {
     /// Creates a new monochrome color value.
     pub const fn new(v: u8) -> Self {
         Self { v }
+    }
+}
+
+impl PartialEq<u8> for Monochrome {
+    fn eq(&self, other: &u8) -> bool {
+        self.v.eq(other)
+    }
+}
+
+impl core::ops::AddAssign for Monochrome {
+    fn add_assign(&mut self, rhs: Self) {
+        self.v = self.v.saturating_add(rhs.v)
     }
 }
 
@@ -42,6 +62,73 @@ pub struct BinaryRGB {
     pub g: bool,
     /// Blue
     pub b: bool,
+}
+
+impl BinaryRGB {
+    /// Creates the color 'black'
+    pub const fn black() -> Self {
+        Self {
+            r: false,
+            g: false,
+            b: false,
+        }
+    }
+    /// Creates the color 'white'
+    pub const fn white() -> Self {
+        Self {
+            r: true,
+            g: true,
+            b: true,
+        }
+    }
+    /// Creates the color 'red'
+    pub const fn red() -> Self {
+        Self {
+            r: true,
+            g: false,
+            b: false,
+        }
+    }
+    /// Creates the color 'green'
+    pub const fn green() -> Self {
+        Self {
+            r: false,
+            g: true,
+            b: false,
+        }
+    }
+    /// Creates the color 'blue'
+    pub const fn blue() -> Self {
+        Self {
+            r: false,
+            g: false,
+            b: true,
+        }
+    }
+    /// Creates the color 'yellow'
+    pub const fn yellow() -> Self {
+        Self {
+            r: true,
+            g: true,
+            b: false,
+        }
+    }
+    /// Creates the color 'magenta'
+    pub const fn magenta() -> Self {
+        Self {
+            r: true,
+            g: false,
+            b: true,
+        }
+    }
+    /// Creates the color 'cyan'
+    pub const fn cyan() -> Self {
+        Self {
+            r: false,
+            g: true,
+            b: true,
+        }
+    }
 }
 
 /// 1-bit Color
@@ -65,22 +152,46 @@ impl Binary {
 }
 
 /// Common functionality of all colors
-pub trait Color: Copy + core::fmt::Debug + Eq + PartialEq {}
+pub trait Color: Copy + core::fmt::Debug + Eq + PartialEq {
+    /// Returns the zero value of the given color type.
+    ///
+    /// This is the value that can be added to any color without changing it.
+    fn zero() -> Self;
+}
 
-impl Color for RGB {}
-impl Color for Monochrome {}
-impl Color for BinaryRGB {}
-impl Color for Binary {}
+impl Color for RGB {
+    fn zero() -> Self {
+        Self::black()
+    }
+}
+impl Color for Monochrome {
+    fn zero() -> Self {
+        Self::new(0)
+    }
+}
+impl Color for BinaryRGB {
+    fn zero() -> Self {
+        Self::black()
+    }
+}
+impl Color for Binary {
+    fn zero() -> Self {
+        Self::off()
+    }
+}
 
 /// Common functionality for interpolatable colors
-pub trait InterpolatableColor: Color {
+pub trait InterpolatableColor: Color + core::ops::AddAssign {
     /// Interpolates between the current color and another color.
     ///
     /// # Arguments
     ///
     /// * `other` - The other color to interpolate to.
     /// * `percent` - How dominant the other color should be, from 0.0 to 1.0.
-    fn interpolate(&self, other: &Self, percent: f32) -> Self;
+    fn interpolate(self, other: Self, percent: f32) -> Self;
+
+    /// Creates the maximum between two colors
+    fn assign_elementwise_max(&mut self, other: Self);
 }
 
 fn lerp8(value_a: u8, value_b: u8, percent: f32) -> u8 {
@@ -94,18 +205,28 @@ fn lerp8(value_a: u8, value_b: u8, percent: f32) -> u8 {
 }
 
 impl InterpolatableColor for RGB {
-    fn interpolate(&self, other: &Self, percent: f32) -> Self {
+    fn interpolate(self, other: Self, percent: f32) -> Self {
         Self {
             r: lerp8(self.r, other.r, percent),
             g: lerp8(self.g, other.g, percent),
             b: lerp8(self.b, other.b, percent),
         }
     }
+
+    fn assign_elementwise_max(&mut self, other: Self) {
+        self.r = self.r.max(other.r);
+        self.g = self.g.max(other.g);
+        self.b = self.b.max(other.b);
+    }
 }
 impl InterpolatableColor for Monochrome {
-    fn interpolate(&self, other: &Self, percent: f32) -> Self {
+    fn interpolate(self, other: Self, percent: f32) -> Self {
         Self {
             v: lerp8(self.v, other.v, percent),
         }
+    }
+
+    fn assign_elementwise_max(&mut self, other: Self) {
+        self.v = self.v.max(other.v);
     }
 }

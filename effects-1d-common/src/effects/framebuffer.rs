@@ -1,4 +1,6 @@
-use crate::color::Color;
+use crate::color::{Color, InterpolatableColor};
+
+use super::BlendMode;
 
 /// A reference to a framebuffer an effect can render into.
 pub trait FrameBufferRef<C: Color> {
@@ -6,6 +8,8 @@ pub trait FrameBufferRef<C: Color> {
     fn len(&self) -> u32;
 
     /// Set a specific pixel in the framebuffer.
+    ///
+    /// Replaces the previous color of the pixel.
     ///
     /// # Arguments
     ///
@@ -15,13 +19,28 @@ pub trait FrameBufferRef<C: Color> {
     /// * `color` - The color the pixel shall be set to.
     fn set_pixel(&mut self, pos: u32, color: C);
 
-    /// Draw a segment with sharp edges.
+    /// Updates a specific pixel in the framebuffer.
+    ///
+    /// Update the existing color of the pixel based on the given blend mode.
+    ///
+    /// # Arguments
+    ///
+    /// * `pos` - The position of the pixel that should get modified.
+    ///           Should be in the range of `0` to `len() - 1`.
+    ///           Can be outside of this range, but then nothing will happen.
+    /// * `color` - The color the pixel shall be updated with.
+    /// * `blend_mode` - The mechanism that should be used to combine the existing
+    ///                  and the new pixel color
+    fn update_pixel(&mut self, pos: u32, color: C, blend_mode: BlendMode)
+    where
+        C: InterpolatableColor;
+
+    /// Draw a segment with sharp edges, replacing the existing color within the segment.
     ///
     /// This function performs no anti-aliasing, so all the pixels that
     /// get modified are exactly the given color.
     ///
-    /// Rendering multiple sections that touch each other will not cause any
-    /// seams in between.
+    /// Multiple sections that touch each other will be rendered seamless.
     ///
     /// # Arguments
     ///
@@ -63,21 +82,69 @@ pub trait FrameBufferRef<C: Color> {
             self.set_pixel(pos, color);
         }
     }
-}
 
-/// A framebuffer an effect can render into.
-pub struct FrameBuffer<'a, C> {
-    data: &'a mut [C],
-}
+    /// Draw a segment with sharp edges, replacing the existing color within the segment.
+    ///
+    /// This function performs no anti-aliasing, so all the pixels that
+    /// get modified are exactly the given color.
+    ///
+    /// Multiple sections that touch each other will be rendered seamless.
+    ///
+    /// # Arguments
+    ///
+    /// * `start`, `end` - The range that should be filled.
+    ///                    The left end of the framebuffer is `0.0`, the right end is `1.0`.
+    /// * `color` - The color the range shall be set to.
+    fn draw_smooth(&mut self, start: f32, end: f32, color: C, blend_mode: BlendMode)
+    where
+        C: InterpolatableColor,
+    {
+        let len = self.len();
+        let len_f = len as f32;
+        let start = len_f * start;
+        let end = len_f * end;
 
-impl<'a, C: Color> FrameBufferRef<C> for FrameBuffer<'_, C> {
-    fn len(&self) -> u32 {
-        self.data.len() as u32
-    }
+        // Don't draw negative ranges
+        if end < start {
+            return;
+        }
 
-    fn set_pixel(&mut self, pos: u32, color: C) {
-        if let Some(v) = self.data.get_mut(pos as usize) {
-            *v = color;
+        // Don't draw ranges that are fully out of bounds
+        if end < 0.0 || start > len_f {
+            return;
+        }
+
+        // Clamp to valid range
+        let start = start.clamp(0.0, len_f);
+        let end = end.clamp(0.0, len_f);
+
+        let start_pixel = (start as u32).clamp(0, len - 1);
+        let end_pixel = (end as u32).clamp(0, len - 1);
+
+        // If we hit only one pixel, draw that one pixel
+        if start_pixel == end_pixel {
+            let color = C::zero().interpolate(color, end - start);
+            self.update_pixel(start_pixel, color, blend_mode);
+            return;
+        }
+
+        // Else, draw range as normal.
+        // Start with the first/last pixel, as those are special cases
+        {
+            // How much the area reaches into the first pixel
+            let amount = (start_pixel + 1) as f32 - start;
+            let color = C::zero().interpolate(color, amount);
+            self.update_pixel(start_pixel, color, blend_mode);
+        }
+        {
+            // How much the area reaches into the last pixel
+            let amount = end - end_pixel as f32;
+            let color = C::zero().interpolate(color, amount);
+            self.update_pixel(end_pixel, color, blend_mode);
+        }
+
+        for pos in (start_pixel + 1)..end_pixel {
+            self.update_pixel(pos, color, blend_mode);
         }
     }
 }
@@ -86,14 +153,44 @@ impl<'a, C: Color> FrameBufferRef<C> for FrameBuffer<'_, C> {
 mod tests {
     use super::*;
     use crate::color;
+    use crate::color::Monochrome;
 
     const ON: color::Binary = color::Binary::on();
     const OFF: color::Binary = color::Binary::off();
 
+    /// A framebuffer an effect can render into.
+    pub struct TestFrameBuffer<'a, C> {
+        data: &'a mut [C],
+    }
+
+    impl<'a, C: Color> FrameBufferRef<C> for TestFrameBuffer<'_, C> {
+        fn len(&self) -> u32 {
+            self.data.len() as u32
+        }
+
+        fn set_pixel(&mut self, pos: u32, color: C) {
+            if let Some(v) = self.data.get_mut(pos as usize) {
+                *v = color;
+            }
+        }
+
+        fn update_pixel(&mut self, pos: u32, color: C, blend_mode: BlendMode)
+        where
+            C: InterpolatableColor,
+        {
+            if let Some(v) = self.data.get_mut(pos as usize) {
+                match blend_mode {
+                    BlendMode::Add => *v += color,
+                    BlendMode::Max => v.assign_elementwise_max(color),
+                };
+            }
+        }
+    }
+
     #[test]
     fn draw_sharp_singlepixel_round_down() {
         let mut data = [OFF; 5];
-        let mut framebuffer = FrameBuffer { data: &mut data };
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
 
         framebuffer.draw_sharp(0.38, 0.41, ON);
 
@@ -103,7 +200,7 @@ mod tests {
     #[test]
     fn draw_sharp_singlepixel_round_up() {
         let mut data = [OFF; 5];
-        let mut framebuffer = FrameBuffer { data: &mut data };
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
 
         framebuffer.draw_sharp(0.39, 0.42, ON);
 
@@ -113,7 +210,7 @@ mod tests {
     #[test]
     fn draw_sharp_multipixel_exclusive() {
         let mut data = [OFF; 5];
-        let mut framebuffer = FrameBuffer { data: &mut data };
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
 
         framebuffer.draw_sharp(0.31, 0.69, ON);
 
@@ -123,7 +220,7 @@ mod tests {
     #[test]
     fn draw_sharp_multipixel_inclusive() {
         let mut data = [OFF; 5];
-        let mut framebuffer = FrameBuffer { data: &mut data };
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
 
         framebuffer.draw_sharp(0.29, 0.71, ON);
 
@@ -133,7 +230,7 @@ mod tests {
     #[test]
     fn draw_sharp_out_of_bounds_low() {
         let mut data = [OFF; 5];
-        let mut framebuffer = FrameBuffer { data: &mut data };
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
 
         framebuffer.draw_sharp(-10.0, 0.01, ON);
 
@@ -143,7 +240,7 @@ mod tests {
     #[test]
     fn draw_sharp_out_of_bounds_high() {
         let mut data = [OFF; 5];
-        let mut framebuffer = FrameBuffer { data: &mut data };
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
 
         framebuffer.draw_sharp(0.99, 10.0, ON);
 
@@ -153,7 +250,7 @@ mod tests {
     #[test]
     fn draw_sharp_out_of_bounds_full() {
         let mut data = [OFF; 5];
-        let mut framebuffer = FrameBuffer { data: &mut data };
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
 
         framebuffer.draw_sharp(-10.0, -9.8, ON);
         framebuffer.draw_sharp(-10.0, -5.0, ON);
@@ -166,7 +263,7 @@ mod tests {
     #[test]
     fn draw_sharp_out_of_bounds_both_sides() {
         let mut data = [OFF; 5];
-        let mut framebuffer = FrameBuffer { data: &mut data };
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
 
         framebuffer.draw_sharp(-10.0, 10.0, ON);
 
@@ -176,10 +273,97 @@ mod tests {
     #[test]
     fn draw_sharp_negative_range() {
         let mut data = [OFF; 5];
-        let mut framebuffer = FrameBuffer { data: &mut data };
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
 
         framebuffer.draw_sharp(0.9, 0.1, ON);
 
         assert_eq!(data, [OFF, OFF, OFF, OFF, OFF]);
+    }
+
+    #[test]
+    fn draw_smooth_normal_range() {
+        let mut data = [Monochrome::zero(); 10];
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
+
+        framebuffer.draw_smooth(0.13, 0.58, Monochrome::new(100), BlendMode::Add);
+
+        assert_eq!(data, [0, 70, 100, 100, 100, 80, 0, 0, 0, 0]);
+    }
+
+    #[test]
+    fn draw_smooth_single_pixel() {
+        let mut data = [Monochrome::zero(); 10];
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
+
+        framebuffer.draw_smooth(0.13, 0.175, Monochrome::new(100), BlendMode::Add);
+
+        assert_eq!(data, [0, 45, 0, 0, 0, 0, 0, 0, 0, 0]);
+    }
+
+    #[test]
+    fn draw_smooth_out_of_bounds_full() {
+        let mut data = [Monochrome::zero(); 10];
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
+
+        framebuffer.draw_smooth(-10.0, -9.8, Monochrome::new(100), BlendMode::Add);
+        framebuffer.draw_smooth(-10.0, -5.0, Monochrome::new(100), BlendMode::Add);
+        framebuffer.draw_smooth(5.0, 10.0, Monochrome::new(100), BlendMode::Add);
+        framebuffer.draw_smooth(9.8, 10.0, Monochrome::new(100), BlendMode::Add);
+
+        assert_eq!(data, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    }
+
+    #[test]
+    fn draw_smooth_out_of_bounds_both_sides() {
+        let mut data = [Monochrome::zero(); 10];
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
+
+        framebuffer.draw_smooth(-10.0, 10.0, Monochrome::new(100), BlendMode::Add);
+
+        assert_eq!(data, [100, 100, 100, 100, 100, 100, 100, 100, 100, 100]);
+    }
+
+    #[test]
+    fn draw_smooth_overlap_add() {
+        let mut data = [Monochrome::zero(); 10];
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
+
+        framebuffer.draw_smooth(0.11, 0.65, Monochrome::new(100), BlendMode::Add);
+        framebuffer.draw_smooth(0.45, 0.85, Monochrome::new(50), BlendMode::Add);
+
+        assert_eq!(data, [0, 90, 100, 100, 125, 150, 100, 50, 25, 0]);
+    }
+
+    #[test]
+    fn draw_smooth_overlap_max() {
+        let mut data = [Monochrome::zero(); 10];
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
+
+        framebuffer.draw_smooth(0.11, 0.65, Monochrome::new(100), BlendMode::Max);
+        framebuffer.draw_smooth(0.45, 0.85, Monochrome::new(50), BlendMode::Max);
+
+        assert_eq!(data, [0, 90, 100, 100, 100, 100, 50, 50, 25, 0]);
+    }
+
+    #[test]
+    fn draw_smooth_touch_add() {
+        let mut data = [Monochrome::zero(); 10];
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
+
+        framebuffer.draw_smooth(0.1, 0.52, Monochrome::new(100), BlendMode::Add);
+        framebuffer.draw_smooth(0.52, 0.9, Monochrome::new(100), BlendMode::Add);
+
+        assert_eq!(data, [0, 100, 100, 100, 100, 100, 100, 100, 100, 0]);
+    }
+
+    #[test]
+    fn draw_smooth_touch_max() {
+        let mut data = [Monochrome::zero(); 10];
+        let mut framebuffer = TestFrameBuffer { data: &mut data };
+
+        framebuffer.draw_smooth(0.1, 0.52, Monochrome::new(100), BlendMode::Max);
+        framebuffer.draw_smooth(0.52, 0.9, Monochrome::new(100), BlendMode::Max);
+
+        assert_eq!(data, [0, 100, 100, 100, 100, 80, 100, 100, 100, 0]);
     }
 }
