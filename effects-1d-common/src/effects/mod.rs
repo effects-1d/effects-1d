@@ -9,6 +9,7 @@ mod framebuffer;
 pub use framebuffer::FrameBufferRef;
 
 /// The current state of an effect.
+#[derive(Debug)]
 pub struct EffectState {
     /// The effect is finished and a new effect
     /// needs to be played immediately

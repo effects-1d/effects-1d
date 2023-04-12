@@ -113,7 +113,7 @@ impl FrameBufferRef<color::Binary> for SimulationFramebuffer<'_> {
 /// An object that can render an effect to a simulation framebuffer
 #[derive(Resource)]
 pub struct EffectRenderer {
-    render_callback: Box<dyn FnMut(&mut [u32], &Time) + Send + Sync>,
+    render_callback: Box<dyn FnMut(&mut [u32], &Time) -> String + Send + Sync>,
 }
 
 fn color_to_u32(color: color::RGB) -> u32 {
@@ -134,11 +134,11 @@ fn u32_to_color(value: u32) -> color::RGB {
 
 impl EffectRenderer {
     /// Create a new effect renderer
-    pub fn new(render_callback: Box<dyn FnMut(&mut [u32], &Time) + Send + Sync>) -> Self {
+    pub fn new(render_callback: Box<dyn FnMut(&mut [u32], &Time) -> String + Send + Sync>) -> Self {
         Self { render_callback }
     }
 
-    pub(crate) fn render_next_frame(&mut self, framebuffer: &mut [u32], time: &Time) {
+    pub(crate) fn render_next_frame(&mut self, framebuffer: &mut [u32], time: &Time) -> String {
         (self.render_callback)(framebuffer, time)
     }
 }

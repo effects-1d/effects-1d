@@ -8,17 +8,25 @@ use bevy::{
 };
 
 mod effect_renderer;
+mod fonts;
 mod single_effect_simulator;
 mod visualizations;
 
 pub use effect_renderer::EffectRenderer;
 pub use single_effect_simulator::SimulateEffect;
 
+use fonts::RobotoFontPlugin;
 use visualizations::{
     laser_sim::{LaserSimMaterial, LaserSimPlugin},
     ledstrip_sim::{LedStripSimMaterial, LedStripSimPlugin},
     SimWidget, SimWidgetBundle, WidgetMaterial,
 };
+
+#[derive(Component)]
+struct SimulationStateText;
+
+#[derive(Component)]
+struct EngineStateText;
 
 /// Runs a simulation for the given effect/engine
 pub fn run_simulation(effect_renderer: EffectRenderer) {
@@ -41,6 +49,7 @@ pub fn run_simulation(effect_renderer: EffectRenderer) {
         .add_plugin(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugin(LaserSimPlugin)
         .add_plugin(LedStripSimPlugin)
+        .add_plugin(RobotoFontPlugin)
         .add_systems(Startup, setup)
         .add_systems(Update, on_resize_system)
         .add_systems(Update, render_effect_frame)
@@ -73,6 +82,27 @@ fn setup(
         Vec2::new(0.0, 0.925),
         Vec2::new(1.0, 0.05),
     ));
+    commands.spawn((
+        // Create a TextBundle that has a Text with a single section.
+        TextBundle::from_section(
+            // Accepts a `String` or any type that converts into a `String`, such as `&str`
+            "",
+            TextStyle {
+                font: fonts::roboto(),
+                font_size: 20.0,
+                color: Color::WHITE,
+            },
+        ) // Set the alignment of the Text
+        .with_text_alignment(TextAlignment::Left)
+        // Set the style of the TextBundle itself.
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            bottom: Val::Px(5.0),
+            left: Val::Px(15.0),
+            ..default()
+        }),
+        SimulationStateText,
+    ));
 }
 
 fn on_resize_system(
@@ -103,11 +133,16 @@ fn render_effect_frame(
     mut effect_renderer: ResMut<EffectRenderer>,
     mut ledstrip_sim_materials: ResMut<Assets<LedStripSimMaterial>>,
     mut laser_sim_materials: ResMut<Assets<LaserSimMaterial>>,
+    mut simulation_state_texts: Query<&mut Text, With<SimulationStateText>>,
 ) {
-    let mut framebuffer = vec![0u32; 128];
-    effect_renderer
+    let mut framebuffer = vec![0u32; 1024];
+    let effect_state = effect_renderer
         .as_mut()
         .render_next_frame(&mut framebuffer, time.as_ref());
+
+    for mut simulation_state_text in simulation_state_texts.iter_mut() {
+        simulation_state_text.sections[0].value = effect_state.clone();
+    }
 
     for (_, laser_sim_material) in laser_sim_materials.iter_mut() {
         laser_sim_material.effect_data = framebuffer.to_vec();

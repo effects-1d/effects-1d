@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use effects_1d_common::effects::{BeatBasedEffect, BeatInfo, FrameBufferRef};
 
 use crate::{effect_renderer::SimulationFramebuffer, run_simulation, EffectRenderer};
@@ -23,15 +25,21 @@ where
             beat.progress(BPM * time.delta_seconds() / 60.0);
 
             let data_len = data.len();
-
+            let t0 = Instant::now();
             let mut framebuffer = SimulationFramebuffer::new(data);
             let effect_state = running_effect
                 .get_or_insert_with(|| Self::init(Some(data_len as u32)))
                 .render_frame(&mut framebuffer, time.delta_seconds(), beat.clone())
                 .unwrap();
+            let render_duration = t0.elapsed();
             if effect_state.over {
                 running_effect = None;
             }
+
+            format!(
+                "Compute Time: {:.01?}\n{:#.01?}\n{:#?}",
+                render_duration, beat, effect_state
+            )
         }));
         run_simulation(effect_renderer)
     }
