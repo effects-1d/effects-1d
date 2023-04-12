@@ -1,6 +1,6 @@
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
     errors::RenderError,
 };
 
@@ -50,15 +50,17 @@ impl BeatBasedEffect for SplittingLine {
             (beat.fractional + (beat.current % (split_distance * 2)) as f32) / split_distance_f;
 
         let mut draw_line = |offset: f32| {
-            framebuffer.draw_sharp(
+            framebuffer.draw_smooth(
                 0.5 + offset * self.line_speed * split_distance_f - self.line_width_half,
                 0.5 + offset * self.line_speed * split_distance_f + self.line_width_half,
                 color::Monochrome::new(255),
+                BlendMode::Max,
             );
-            framebuffer.draw_sharp(
+            framebuffer.draw_smooth(
                 0.5 - offset * self.line_speed * split_distance_f - self.line_width_half,
                 0.5 - offset * self.line_speed * split_distance_f + self.line_width_half,
                 color::Monochrome::new(255),
+                BlendMode::Max,
             );
         };
 
