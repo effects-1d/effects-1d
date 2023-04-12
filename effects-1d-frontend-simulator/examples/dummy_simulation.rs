@@ -28,7 +28,7 @@ const SPEED: f32 = 0.05;
 impl TimeBasedEffect for DebugEffect {
     type Color = color::RGB;
 
-    fn init() -> Self {
+    fn init(_resolution_hint: Option<u32>) -> Self {
         Self {
             old_color: color::RGB::black(),
             new_color: random_color(),

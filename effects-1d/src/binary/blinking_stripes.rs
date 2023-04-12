@@ -11,7 +11,7 @@ pub struct BlinkingStripes {
 impl BeatBasedEffect for BlinkingStripes {
     type Color = color::Binary;
 
-    fn init() -> Self {
+    fn init(_resolution_hint: Option<u32>) -> Self {
         Self { num_stripes: 35 }
     }
 

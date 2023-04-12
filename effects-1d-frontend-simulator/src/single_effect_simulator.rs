@@ -16,18 +16,21 @@ where
     for<'a> SimulationFramebuffer<'a>: FrameBufferRef<<T as BeatBasedEffect>::Color>,
 {
     fn simulate() {
-        let mut running_effect = Self::init();
+        let mut running_effect = None;
         let mut beat: BeatInfo = BeatInfo::zero();
 
         let effect_renderer = EffectRenderer::new(Box::new(move |data, time| {
             beat.progress(BPM * time.delta_seconds() / 60.0);
 
+            let data_len = data.len();
+
             let mut framebuffer = SimulationFramebuffer::new(data);
             let effect_state = running_effect
+                .get_or_insert_with(|| Self::init(Some(data_len as u32)))
                 .render_frame(&mut framebuffer, time.delta_seconds(), beat.clone())
                 .unwrap();
             if effect_state.over {
-                running_effect = Self::init();
+                running_effect = None;
             }
         }));
         run_simulation(effect_renderer)

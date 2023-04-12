@@ -14,11 +14,31 @@ pub struct SplittingLine {
 impl BeatBasedEffect for SplittingLine {
     type Color = color::Monochrome;
 
-    fn init() -> Self {
+    fn init(resolution_hint: Option<u32>) -> Self {
+        let mut line_width = 0.003;
+        let mut line_speed = 0.01;
+        let split_distance = 2;
+
+        if let Some(resolution_hint) = resolution_hint {
+            let pixel_size = 1.0 / resolution_hint as f32;
+            if pixel_size > line_width {
+                line_width = pixel_size;
+            }
+
+            // let distance_between_lines = 2.0 * split_distance as f32 * line_speed;
+            // Distance should be at least 5 * the line width
+            let desired_min_distance_between_lines = 15.0 * line_width;
+            let desired_min_line_speed =
+                desired_min_distance_between_lines / (2.0 * split_distance as f32);
+            if line_speed < desired_min_line_speed {
+                line_speed = desired_min_line_speed;
+            }
+        }
+
         Self {
-            line_width_half: 0.0015,
-            line_speed: 0.01,
-            split_distance: 2,
+            line_width_half: line_width / 2.0,
+            line_speed,
+            split_distance,
             start_beat: None,
         }
     }

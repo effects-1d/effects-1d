@@ -8,7 +8,18 @@ pub trait MeasureBasedEffect: Send + Sync + 'static {
     type Color: Color;
 
     /// Creates a new instance of the effect.
-    fn init() -> Self;
+    ///
+    /// # Arguments
+    ///
+    /// * `resolution_hint` - A hint about what the resolution later might be.
+    ///
+    /// **IMPORTANT**: The `resolution_hint` is an approximate value and is intended to configure
+    /// the effect parameters so that it looks good at the given resolution.
+    /// It is **not** meant to be used in anything that requires a precise value, like array initializations.
+    /// The actual resolution later might change at any point, although it can be assumed that it will lie
+    /// in the general area of the hint. The resolution might even change in every frame, for example
+    /// at POV displays (where the frame size might depend on the varying rotation speed)
+    fn init(resolution_hint: Option<u32>) -> Self;
 
     /// Renders the current frame.
     ///
