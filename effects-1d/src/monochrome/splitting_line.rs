@@ -65,13 +65,13 @@ impl BeatBasedEffect for SplittingLine {
             framebuffer.draw_smooth(
                 0.5 + offset * self.line_speed * split_distance_f - self.line_width_half,
                 0.5 + offset * self.line_speed * split_distance_f + self.line_width_half,
-                color::Monochrome::new(255),
+                color::Monochrome::full(),
                 BlendMode::Max,
             );
             framebuffer.draw_smooth(
                 0.5 - offset * self.line_speed * split_distance_f - self.line_width_half,
                 0.5 - offset * self.line_speed * split_distance_f + self.line_width_half,
-                color::Monochrome::new(255),
+                color::Monochrome::full(),
                 BlendMode::Max,
             );
         };

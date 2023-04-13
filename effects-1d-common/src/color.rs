@@ -1,45 +1,31 @@
-/// 24-bit RGB Color
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
-pub struct RGB {
-    /// Red
-    pub r: u8,
-    /// Green
-    pub g: u8,
-    /// Blue
-    pub b: u8,
-}
+/// 96-bit Okhsv Color.
+///
+/// Okhsv was chosen over RGB for better color blending.
+pub type Okhsv = palette::Okhsv<f32>;
+pub use palette;
+use palette::MixAssign;
 
-impl RGB {
-    /// A color with all values set to zero
-    pub const fn black() -> Self {
-        Self { r: 0, g: 0, b: 0 }
-    }
-}
-
-impl core::ops::AddAssign for RGB {
-    fn add_assign(&mut self, rhs: Self) {
-        self.r = self.r.saturating_add(rhs.r);
-        self.g = self.g.saturating_add(rhs.g);
-        self.b = self.b.saturating_add(rhs.b);
-    }
-}
-
-/// 8-bit Monochrome Color
+/// 16-bit Monochrome Color
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub struct Monochrome {
     /// Brightness value
-    pub v: u8,
+    pub v: u16,
 }
 
 impl Monochrome {
     /// Creates a new monochrome color value.
-    pub const fn new(v: u8) -> Self {
+    pub const fn new(v: u16) -> Self {
         Self { v }
+    }
+
+    /// Creates a monochrome color with maximum brightness.
+    pub const fn full() -> Self {
+        Self { v: u16::MAX }
     }
 }
 
-impl PartialEq<u8> for Monochrome {
-    fn eq(&self, other: &u8) -> bool {
+impl PartialEq<u16> for Monochrome {
+    fn eq(&self, other: &u16) -> bool {
         self.v.eq(other)
     }
 }
@@ -165,16 +151,16 @@ impl Binary {
 }
 
 /// Common functionality of all colors
-pub trait Color: Copy + core::fmt::Debug + Eq + PartialEq {
+pub trait Color: Copy + core::fmt::Debug {
     /// Returns the zero value of the given color type.
     ///
     /// This is the value that can be added to any color without changing it.
     fn zero() -> Self;
 }
 
-impl Color for RGB {
+impl Color for Okhsv {
     fn zero() -> Self {
-        Self::black()
+        Self::new(0., 0., 0.)
     }
 }
 impl Color for Monochrome {
@@ -207,35 +193,39 @@ pub trait InterpolatableColor: Color + core::ops::AddAssign {
     fn assign_elementwise_max(&mut self, other: Self);
 }
 
-fn lerp8(value_a: u8, value_b: u8, percent: f32) -> u8 {
+fn lerp16(value_a: u16, value_b: u16, percent: f32) -> u16 {
     let percent = percent.clamp(0.0, 1.0);
 
     let a: f32 = value_a.into();
     let b: f32 = value_b.into();
 
     // the + 0.5 is for proper rounding; float->int conversion is always a floor() operation
-    (a * (1.0 - percent) + b * percent + 0.5).clamp(0.0, 255.0) as u8
+    (a * (1.0 - percent) + b * percent + 0.5).clamp(0.0, 65535.0) as u16
 }
 
-impl InterpolatableColor for RGB {
+impl InterpolatableColor for Okhsv {
     fn interpolate(self, other: Self, percent: f32) -> Self {
-        Self {
-            r: lerp8(self.r, other.r, percent),
-            g: lerp8(self.g, other.g, percent),
-            b: lerp8(self.b, other.b, percent),
-        }
+        use palette::Mix;
+        self.mix(other, percent)
     }
 
     fn assign_elementwise_max(&mut self, other: Self) {
-        self.r = self.r.max(other.r);
-        self.g = self.g.max(other.g);
-        self.b = self.b.max(other.b);
+        let max_value = self.value.max(other.value);
+        let total_value = self.value + other.value;
+        if total_value == 0.0 {
+            return;
+        }
+        let mix_factor = other.value / total_value;
+
+        self.mix_assign(other, mix_factor);
+        self.value = max_value;
     }
 }
+
 impl InterpolatableColor for Monochrome {
     fn interpolate(self, other: Self, percent: f32) -> Self {
         Self {
-            v: lerp8(self.v, other.v, percent),
+            v: lerp16(self.v, other.v, percent),
         }
     }
 

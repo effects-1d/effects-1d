@@ -13,6 +13,7 @@ mod single_effect_simulator;
 mod visualizations;
 
 pub use effect_renderer::EffectRenderer;
+use effects_1d_common::color::{self, palette::FromColor};
 pub use single_effect_simulator::SimulateEffect;
 
 use fonts::RobotoFontPlugin;
@@ -135,7 +136,8 @@ fn render_effect_frame(
     mut laser_sim_materials: ResMut<Assets<LaserSimMaterial>>,
     mut simulation_state_texts: Query<&mut Text, With<SimulationStateText>>,
 ) {
-    let mut framebuffer = vec![0u32; 1024];
+    use color::Color;
+    let mut framebuffer = vec![color::Okhsv::zero(); 1024];
     let effect_state = effect_renderer
         .as_mut()
         .render_next_frame(&mut framebuffer, time.as_ref());
@@ -144,10 +146,18 @@ fn render_effect_frame(
         simulation_state_text.sections[0].value = effect_state.clone();
     }
 
+    let rgb_colors: Vec<Vec4> = framebuffer
+        .into_iter()
+        .map(|okhsv_col| {
+            let linrgb_col = color::palette::LinSrgb::from_color(okhsv_col);
+            Vec4::new(linrgb_col.red, linrgb_col.green, linrgb_col.blue, 0.)
+        })
+        .collect();
+
     for (_, laser_sim_material) in laser_sim_materials.iter_mut() {
-        laser_sim_material.effect_data = framebuffer.to_vec();
+        laser_sim_material.effect_data = rgb_colors.clone();
     }
     for (_, ledstrip_sim_material) in ledstrip_sim_materials.iter_mut() {
-        ledstrip_sim_material.effect_data = framebuffer.to_vec();
+        ledstrip_sim_material.effect_data = rgb_colors.clone();
     }
 }

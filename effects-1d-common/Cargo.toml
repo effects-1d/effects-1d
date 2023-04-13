@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+palette = { version = "0.7.0", default-features = false, features = ["libm"] }
 rand = { version = "0.8.5", default-features = false, features = ["small_rng"] }
 snafu = { version = "0.7.4", default-features = false, features = [
     "rust_1_46",
