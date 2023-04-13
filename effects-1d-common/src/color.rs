@@ -1,9 +1,14 @@
-/// 96-bit Okhsv Color.
+/// 96-bit Oklab Color.
 ///
-/// Okhsv was chosen over RGB for better color blending.
-pub type Okhsv = palette::Okhsv<f32>;
+/// Oklab was chosen over RGB for better color blending.
+pub type Oklab = palette::Oklab<f32>;
 pub use palette;
-use palette::MixAssign;
+
+/// Creates an Oklab color from RGB.
+pub fn rgb(r: f32, g: f32, b: f32) -> Oklab {
+    use palette::FromColor;
+    Oklab::from_color(palette::Srgb::new(r, g, b))
+}
 
 /// 16-bit Monochrome Color
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
@@ -158,7 +163,7 @@ pub trait Color: Copy + core::fmt::Debug {
     fn zero() -> Self;
 }
 
-impl Color for Okhsv {
+impl Color for Oklab {
     fn zero() -> Self {
         Self::new(0., 0., 0.)
     }
@@ -203,22 +208,23 @@ fn lerp16(value_a: u16, value_b: u16, percent: f32) -> u16 {
     (a * (1.0 - percent) + b * percent + 0.5).clamp(0.0, 65535.0) as u16
 }
 
-impl InterpolatableColor for Okhsv {
+impl InterpolatableColor for Oklab {
     fn interpolate(self, other: Self, percent: f32) -> Self {
         use palette::Mix;
         self.mix(other, percent)
     }
 
     fn assign_elementwise_max(&mut self, other: Self) {
-        let max_value = self.value.max(other.value);
-        let total_value = self.value + other.value;
-        if total_value == 0.0 {
+        let max_l = self.l.max(other.l);
+        let total_l = self.l + other.l;
+        if total_l == 0.0 {
             return;
         }
-        let mix_factor = other.value / total_value;
+        let mix_factor = other.l / total_l;
 
-        self.mix_assign(other, mix_factor);
-        self.value = max_value;
+        self.a = self.a * (1.0 - mix_factor) + other.a * mix_factor;
+        self.b = self.b * (1.0 - mix_factor) + other.b * mix_factor;
+        self.l = max_l;
     }
 }
 

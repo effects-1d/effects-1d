@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use std::time::Instant;
 
 use effects_1d_common::{
-    color::{Color, Okhsv},
+    color::{self, Color},
     effects::{BeatBasedEffect, BeatInfo, FrameBufferRef},
     errors::RenderError,
 };
@@ -31,7 +31,7 @@ where
             let data_len = data.len();
             let t0 = Instant::now();
             let effect_state = loop {
-                data.fill(Okhsv::zero());
+                data.fill(color::Oklab::zero());
                 let mut framebuffer = SimulationFramebuffer::new(data);
                 let effect = running_effect.get_or_insert_with(|| {
                     Self::init(Some(data_len as u32), beat.next_full_beat().current)

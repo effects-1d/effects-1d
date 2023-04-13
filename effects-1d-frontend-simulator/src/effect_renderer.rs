@@ -1,31 +1,35 @@
 use bevy::prelude::*;
 use effects_1d_common::{
-    color::{self, InterpolatableColor, Okhsv},
+    color::{
+        self,
+        palette::{self, FromColor},
+        InterpolatableColor,
+    },
     effects::{BlendMode, FrameBufferRef},
 };
 
 pub struct SimulationFramebuffer<'a> {
-    data: &'a mut [color::Okhsv],
+    data: &'a mut [color::Oklab],
 }
 
 impl<'a> SimulationFramebuffer<'a> {
-    pub fn new(data: &'a mut [color::Okhsv]) -> Self {
+    pub fn new(data: &'a mut [color::Oklab]) -> Self {
         Self { data }
     }
 }
 
-impl FrameBufferRef<color::Okhsv> for SimulationFramebuffer<'_> {
+impl FrameBufferRef<color::Oklab> for SimulationFramebuffer<'_> {
     fn len(&self) -> u32 {
         self.data.len() as u32
     }
 
-    fn set_pixel(&mut self, pos: u32, color: color::Okhsv) {
+    fn set_pixel(&mut self, pos: u32, color: color::Oklab) {
         if let Some(data) = self.data.get_mut(pos as usize) {
             *data = color
         }
     }
 
-    fn update_pixel(&mut self, pos: u32, color: color::Okhsv, blend_mode: BlendMode) {
+    fn update_pixel(&mut self, pos: u32, color: color::Oklab, blend_mode: BlendMode) {
         if let Some(data) = self.data.get_mut(pos as usize) {
             let mut existing_color = *data;
             match blend_mode {
@@ -44,16 +48,11 @@ impl FrameBufferRef<color::BinaryRGB> for SimulationFramebuffer<'_> {
 
     fn set_pixel(&mut self, pos: u32, color: color::BinaryRGB) {
         if let Some(data) = self.data.get_mut(pos as usize) {
-            *data = match (color.r, color.g, color.b) {
-                (true, true, true) => Okhsv::new(0., 0., 1.),
-                (true, false, false) => Okhsv::new(29., 1., 1.),
-                (true, true, false) => Okhsv::new(110., 1., 1.),
-                (false, true, false) => Okhsv::new(142., 1., 1.),
-                (false, true, true) => Okhsv::new(195., 1., 1.),
-                (false, false, true) => Okhsv::new(264., 1., 1.),
-                (true, false, true) => Okhsv::new(328., 1., 1.),
-                (false, false, false) => Okhsv::new(0., 0., 0.),
-            };
+            let r = if color.r { 1.0 } else { 0.0 };
+            let g = if color.g { 1.0 } else { 0.0 };
+            let b = if color.b { 1.0 } else { 0.0 };
+
+            *data = color::Oklab::from_color(palette::Srgb::new(r, g, b));
         }
     }
 
@@ -62,8 +61,9 @@ impl FrameBufferRef<color::BinaryRGB> for SimulationFramebuffer<'_> {
     }
 }
 
-fn mono_to_okhsv(color: color::Monochrome) -> color::Okhsv {
-    Okhsv::new(0., 0., f32::from(color.v) / 65535.0)
+fn mono_to_oklab(color: color::Monochrome) -> color::Oklab {
+    let value = f32::from(color.v) / f32::from(u16::MAX);
+    color::Oklab::from_color(palette::Srgb::new(value, value, value))
 }
 
 impl FrameBufferRef<color::Monochrome> for SimulationFramebuffer<'_> {
@@ -73,13 +73,13 @@ impl FrameBufferRef<color::Monochrome> for SimulationFramebuffer<'_> {
 
     fn set_pixel(&mut self, pos: u32, color: color::Monochrome) {
         if let Some(data) = self.data.get_mut(pos as usize) {
-            *data = mono_to_okhsv(color);
+            *data = mono_to_oklab(color);
         }
     }
 
     fn update_pixel(&mut self, pos: u32, color: color::Monochrome, blend_mode: BlendMode) {
         if let Some(data) = self.data.get_mut(pos as usize) {
-            let color = mono_to_okhsv(color);
+            let color = mono_to_oklab(color);
             match blend_mode {
                 BlendMode::Add => *data += color,
                 BlendMode::Max => data.assign_elementwise_max(color),
@@ -96,9 +96,9 @@ impl FrameBufferRef<color::Binary> for SimulationFramebuffer<'_> {
     fn set_pixel(&mut self, pos: u32, color: color::Binary) {
         if let Some(data) = self.data.get_mut(pos as usize) {
             *data = if color.v {
-                Okhsv::new(0., 0., 1.)
+                mono_to_oklab(color::Monochrome::new(u16::MAX))
             } else {
-                Okhsv::new(0., 0., 0.)
+                mono_to_oklab(color::Monochrome::new(0))
             };
         }
     }
@@ -111,20 +111,20 @@ impl FrameBufferRef<color::Binary> for SimulationFramebuffer<'_> {
 /// An object that can render an effect to a simulation framebuffer
 #[derive(Resource)]
 pub struct EffectRenderer {
-    render_callback: Box<dyn FnMut(&mut [color::Okhsv], &Time) -> String + Send + Sync>,
+    render_callback: Box<dyn FnMut(&mut [color::Oklab], &Time) -> String + Send + Sync>,
 }
 
 impl EffectRenderer {
     /// Create a new effect renderer
     pub fn new(
-        render_callback: Box<dyn FnMut(&mut [color::Okhsv], &Time) -> String + Send + Sync>,
+        render_callback: Box<dyn FnMut(&mut [color::Oklab], &Time) -> String + Send + Sync>,
     ) -> Self {
         Self { render_callback }
     }
 
     pub(crate) fn render_next_frame(
         &mut self,
-        framebuffer: &mut [color::Okhsv],
+        framebuffer: &mut [color::Oklab],
         time: &Time,
     ) -> String {
         (self.render_callback)(framebuffer, time)

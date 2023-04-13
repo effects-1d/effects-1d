@@ -137,7 +137,7 @@ fn render_effect_frame(
     mut simulation_state_texts: Query<&mut Text, With<SimulationStateText>>,
 ) {
     use color::Color;
-    let mut framebuffer = vec![color::Okhsv::zero(); 1024];
+    let mut framebuffer = vec![color::Oklab::zero(); 1024];
     let effect_state = effect_renderer
         .as_mut()
         .render_next_frame(&mut framebuffer, time.as_ref());
@@ -148,8 +148,8 @@ fn render_effect_frame(
 
     let rgb_colors: Vec<Vec4> = framebuffer
         .into_iter()
-        .map(|okhsv_col| {
-            let linrgb_col = color::palette::LinSrgb::from_color(okhsv_col);
+        .map(|oklab_col| {
+            let linrgb_col = color::palette::LinSrgb::from_color(oklab_col);
             Vec4::new(linrgb_col.red, linrgb_col.green, linrgb_col.blue, 0.)
         })
         .collect();
