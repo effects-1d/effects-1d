@@ -32,8 +32,9 @@ where
             let effect_state = loop {
                 data.fill(0);
                 let mut framebuffer = SimulationFramebuffer::new(data);
-                let effect =
-                    running_effect.get_or_insert_with(|| Self::init(Some(data_len as u32)));
+                let effect = running_effect.get_or_insert_with(|| {
+                    Self::init(Some(data_len as u32), beat.next_full_beat().current)
+                });
 
                 match effect.render_frame(&mut framebuffer, time.delta_seconds(), beat.clone()) {
                     Ok(effect_state) => break effect_state,

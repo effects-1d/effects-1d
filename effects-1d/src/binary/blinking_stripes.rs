@@ -13,7 +13,7 @@ pub struct BlinkingStripes {
 impl BeatBasedEffect for BlinkingStripes {
     type Color = color::Binary;
 
-    fn init(resolution_hint: Option<u32>) -> Self {
+    fn init(resolution_hint: Option<u32>, _start_beat: i32) -> Self {
         let num_stripes = 35;
         let fix_stripe_size = resolution_hint.and_then(|resolution| {
             if resolution < 150 {

@@ -45,7 +45,7 @@ where
 {
     type Color = <Self as TimeBasedEffect>::Color;
 
-    fn init(resolution_hint: Option<u32>) -> Self {
+    fn init(resolution_hint: Option<u32>, _start_beat: i32) -> Self {
         TimeBasedEffect::init(resolution_hint)
     }
 
