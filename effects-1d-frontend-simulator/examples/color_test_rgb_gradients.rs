@@ -1,5 +1,5 @@
 use effects_1d_common::{
-    color::{self, ColorGradient, HslGradient, RGB},
+    color::{self, HslGradient, RGB},
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
@@ -22,23 +22,14 @@ impl TimeBasedEffect for ColorTest {
         framebuffer: &mut dyn FrameBufferRef<color::RGB>,
         _d_t: f32,
     ) -> Result<EffectState, RenderError> {
-        let len = framebuffer.len() as f32;
-
         let gradient0 = Gradient::new(RGB::new(u16::MAX, 0, 0), RGB::new(0, 0, u16::MAX));
         let gradient1 = Gradient::new(RGB::new(u16::MAX, 0, 0), RGB::new(0, u16::MAX, 0));
         let gradient2 = Gradient::new(RGB::new(0, 0, 0), RGB::new(u16::MAX, u16::MAX, u16::MAX));
 
-        for pos in 0..framebuffer.len() {
-            let pos_f = pos as f32;
-            let percent = 3. * pos_f / len;
-            if percent < 1. {
-                framebuffer.set_pixel(pos, gradient0.interpolate(percent))
-            } else if percent < 2. {
-                framebuffer.set_pixel(pos, gradient1.interpolate(percent - 1.))
-            } else {
-                framebuffer.set_pixel(pos, gradient2.interpolate(percent - 2.))
-            }
-        }
+        framebuffer.draw_gradient(0. / 3., 1. / 3., &gradient0);
+        framebuffer.draw_gradient(1. / 3., 2. / 3., &gradient1);
+        framebuffer.draw_gradient(2. / 3., 3. / 3., &gradient2);
+
         Ok(EffectState { idle: false })
     }
 }

@@ -5,5 +5,9 @@
     - information required:
         - current beat %
         - number of beats per measure
+- alpha blending
+    Blending currently only supports MAX and ADD, an alpha option would be helpful in certain cenarios.
+    Maybe by using an RGBA value somehow?
 
-- size hint at initialization, to give effects the chance to optimize themselves for LED strips
+Done:
++ size hint at initialization, to give effects the chance to optimize themselves for LED strips

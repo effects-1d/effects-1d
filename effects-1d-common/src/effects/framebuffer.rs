@@ -1,4 +1,4 @@
-use crate::color::{BlendableColor, Color};
+use crate::color::{BlendableColor, Color, ColorGradient};
 
 use super::BlendMode;
 
@@ -145,6 +145,66 @@ pub trait FrameBufferRef<C: Color> {
 
         for pos in (start_pixel + 1)..end_pixel {
             self.update_pixel(pos, color, blend_mode);
+        }
+    }
+
+    /// Draw a gradient
+    fn draw_gradient(&mut self, start: f32, end: f32, gradient: &dyn ColorGradient<C = C>) {
+        let len = self.len();
+        let len_f = len as f32;
+        let start = len_f * start;
+        let end = len_f * end;
+
+        // Don't draw negative ranges
+        if end < start {
+            return;
+        }
+
+        // Don't draw ranges that are fully out of bounds
+        if end < 0.5 || start > (len_f - 0.5) {
+            return;
+        }
+
+        // Draw range
+        let start_pixel = (start + 0.5) as u32;
+        let end_pixel = (end - 0.5).max(0.0) as u32;
+        for pos in start_pixel..=end_pixel {
+            let posf = ((pos as f32 + 0.5) - start) / (end - start);
+            self.set_pixel(pos, gradient.interpolate(posf));
+        }
+    }
+
+    /// Draw a gradient
+    fn draw_gradient_with_blend(
+        &mut self,
+        start: f32,
+        end: f32,
+        gradient: &dyn ColorGradient<C = C>,
+        blend_mode: BlendMode,
+    ) where
+        C: BlendableColor,
+    {
+        let len = self.len();
+        let len_f = len as f32;
+        let start = len_f * start;
+        let end = len_f * end;
+
+        // Don't draw negative ranges
+        if end < start {
+            return;
+        }
+
+        // Don't draw ranges that are fully out of bounds
+        if end < 0.5 || start > (len_f - 0.5) {
+            return;
+        }
+
+        // Draw range
+        let start_pixel = (start + 0.5) as u32;
+        let end_pixel = (end - 0.5).max(0.0) as u32;
+        for pos in start_pixel..=end_pixel {
+            let posf = ((pos as f32 + 0.5) - start) / (end - start);
+            self.update_pixel(pos, gradient.interpolate(posf), blend_mode);
         }
     }
 }

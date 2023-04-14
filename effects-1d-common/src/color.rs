@@ -182,9 +182,6 @@ pub trait ColorGradient {
     /// The color type of the gradient
     type C;
 
-    /// Creates a new gradient
-    fn new(start: Self::C, end: Self::C) -> Self;
-
     /// Produce the color at the given position
     ///
     /// # Arguments
@@ -222,16 +219,17 @@ pub struct OklabGradient {
     start: palette::Oklab,
     end: palette::Oklab,
 }
-
-impl ColorGradient for OklabGradient {
-    type C = RGB;
-
-    fn new(start: Self::C, end: Self::C) -> Self {
+impl OklabGradient {
+    /// Creates a new gradient
+    pub fn new(start: RGB, end: RGB) -> Self {
         Self {
             start: start.into_format().into_color(),
             end: end.into_format().into_color(),
         }
     }
+}
+impl ColorGradient for OklabGradient {
+    type C = RGB;
 
     fn interpolate(&self, position: f32) -> Self::C {
         palette::Srgb::from_color(self.start.mix(self.end, position.clamp(0.0, 1.0))).into_format()
@@ -243,16 +241,17 @@ pub struct LinearRGBGradient {
     start: palette::LinSrgb,
     end: palette::LinSrgb,
 }
-
-impl ColorGradient for LinearRGBGradient {
-    type C = RGB;
-
-    fn new(start: Self::C, end: Self::C) -> Self {
+impl LinearRGBGradient {
+    /// Creates a new gradient
+    pub fn new(start: RGB, end: RGB) -> Self {
         Self {
             start: start.into_format().into_color(),
             end: end.into_format().into_color(),
         }
     }
+}
+impl ColorGradient for LinearRGBGradient {
+    type C = RGB;
 
     fn interpolate(&self, position: f32) -> Self::C {
         palette::Srgb::from_color(self.start.mix(self.end, position.clamp(0.0, 1.0))).into_format()
@@ -265,15 +264,17 @@ pub struct SRGBGradient {
     end: palette::Srgb,
 }
 
-impl ColorGradient for SRGBGradient {
-    type C = RGB;
-
-    fn new(start: Self::C, end: Self::C) -> Self {
+impl SRGBGradient {
+    /// Creates a new gradient
+    pub fn new(start: RGB, end: RGB) -> Self {
         Self {
             start: start.into_format(),
             end: end.into_format(),
         }
     }
+}
+impl ColorGradient for SRGBGradient {
+    type C = RGB;
 
     fn interpolate(&self, position: f32) -> Self::C {
         self.start
@@ -288,18 +289,57 @@ pub struct HslGradient {
     end: palette::Hsl,
 }
 
-impl ColorGradient for HslGradient {
-    type C = RGB;
-
-    fn new(start: Self::C, end: Self::C) -> Self {
+impl HslGradient {
+    /// Creates a new gradient
+    pub fn new(start: RGB, end: RGB) -> Self {
         Self {
             start: start.into_format().into_color(),
             end: end.into_format().into_color(),
         }
     }
+}
+
+impl ColorGradient for HslGradient {
+    type C = RGB;
 
     fn interpolate(&self, position: f32) -> Self::C {
         palette::Srgb::from_color(self.start.mix(self.end, position.clamp(0.0, 1.0))).into_format()
+    }
+}
+
+/// A rainbow gradient.
+pub struct HsvRainbowGradient {
+    /// Saturation; the 's' component of the Hsv colors.
+    ///
+    /// Must be between 0.0 and 1.0.
+    pub saturation: f32,
+
+    /// Brightness; the 'v' component of the Hsv colors.
+    ///
+    /// Must be between 0.0 and 1.0.
+    pub brightness: f32,
+
+    /// Offset. An offset of '360.0' produces the same color as an offset of '0'.
+    pub offset: f32,
+
+    /// Scale factor. A factor of `2.0` means that the colors are twice as close together.
+    pub scale: f32,
+
+    /// Reverses the color order
+    pub reversed: bool,
+}
+
+impl ColorGradient for HsvRainbowGradient {
+    type C = RGB;
+
+    fn interpolate(&self, position: f32) -> RGB {
+        let value: palette::Srgb = palette::Hsv::new(
+            360.0 * self.scale * (if self.reversed { -position } else { position }) + self.offset,
+            self.saturation,
+            self.brightness,
+        )
+        .into_color();
+        value.into_format()
     }
 }
 
@@ -324,16 +364,18 @@ pub struct MonochromeGradient {
     start: f32,
     end: f32,
 }
-
-impl ColorGradient for MonochromeGradient {
-    type C = Monochrome;
-
-    fn new(start: Self::C, end: Self::C) -> Self {
+impl MonochromeGradient {
+    /// Creates a new gradient
+    pub fn new(start: Monochrome, end: Monochrome) -> Self {
         Self {
             start: start.v.into(),
             end: end.v.into(),
         }
     }
+}
+
+impl ColorGradient for MonochromeGradient {
+    type C = Monochrome;
 
     fn interpolate(&self, position: f32) -> Self::C {
         Monochrome {

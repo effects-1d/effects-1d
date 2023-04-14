@@ -35,5 +35,6 @@ pub mod monochrome {
 pub mod rgb {
     export_effects! {
         AppearingRainbowStripes,
+        RotatingRainbow,
     }
 }

@@ -1,47 +1,55 @@
 use effects_1d_common::{
-    color::{
-        self,
-        palette::{self, FromColor},
-    },
+    color::{self, HsvRainbowGradient},
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
 use effects_1d_frontend_simulator::SimulateEffect;
 
 #[derive(Debug)]
-struct ColorTest;
+struct ColorTest {
+    time: f32,
+}
 
 impl TimeBasedEffect for ColorTest {
     type Color = color::RGB;
 
     fn init(_resolution_hint: Option<u32>) -> Self {
-        Self
+        Self { time: 0.0 }
     }
 
     fn render_frame(
         &mut self,
         framebuffer: &mut dyn FrameBufferRef<color::RGB>,
-        _d_t: f32,
+        d_t: f32,
     ) -> Result<EffectState, RenderError> {
-        let len = framebuffer.len() as f32;
-        for pos in 0..framebuffer.len() {
-            let pos_f = pos as f32;
-            let percent = 2. * pos_f / len;
-            if percent < 1. {
-                framebuffer.set_pixel(
-                    pos,
-                    palette::Srgb::from_color(palette::Hsv::new(percent * 360., 1.0, 1.0))
-                        .into_format(),
-                );
-            } else {
-                let percent = percent - 1.0;
-                framebuffer.set_pixel(
-                    pos,
-                    palette::Srgb::from_color(palette::Hsv::new(percent * 360., 0.5, 1.0))
-                        .into_format(),
-                );
-            }
+        self.time += d_t;
+        if self.time > 2.0 {
+            self.time -= 2.0;
         }
+
+        framebuffer.draw_gradient(
+            0.0,
+            0.5,
+            &HsvRainbowGradient {
+                saturation: 1.0,
+                brightness: 1.0,
+                offset: self.time * 180.0,
+                scale: 1.0,
+                reversed: false,
+            },
+        );
+        framebuffer.draw_gradient(
+            0.5,
+            1.0,
+            &HsvRainbowGradient {
+                saturation: 1.0,
+                brightness: 1.0,
+                offset: self.time * 180.0,
+                scale: 2.0,
+                reversed: false,
+            },
+        );
+
         Ok(EffectState { idle: false })
     }
 }
