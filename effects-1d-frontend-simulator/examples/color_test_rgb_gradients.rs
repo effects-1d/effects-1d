@@ -1,5 +1,5 @@
 use effects_1d_common::{
-    color::{self, ColorGradient, OklabGradient, RGB},
+    color::{self, ColorGradient, HslGradient, RGB},
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
@@ -8,7 +8,7 @@ use effects_1d_frontend_simulator::SimulateEffect;
 #[derive(Debug)]
 struct ColorTest;
 
-type Gradient = OklabGradient;
+type Gradient = HslGradient;
 
 impl TimeBasedEffect for ColorTest {
     type Color = color::RGB;
