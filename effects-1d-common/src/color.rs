@@ -1,6 +1,7 @@
 /// 48-bit sRGB Color.
 pub type RGB = palette::Srgb<u16>;
 pub use palette;
+use palette::{FromColor, IntoColor, Mix};
 
 /// 16-bit Monochrome Color
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
@@ -176,15 +177,33 @@ impl Color for Binary {
     }
 }
 
+/// A color gradient that can be used to interpolate between two colors
+pub trait ColorGradient {
+    /// The color type of the gradient
+    type Out;
+
+    /// Produce the color at the given position
+    ///
+    /// # Arguments
+    ///
+    /// * `position` - How dominant the other color should be, from 0.0 to 1.0.
+    ///
+    fn interpolate(&self, position: f32) -> Self::Out;
+}
+
 /// Common functionality for interpolatable colors
 pub trait InterpolatableColor: Color + core::ops::AddAssign {
-    /// Interpolates between the current color and another color.
+    /// The gradient producer of the color
+    type Gradient: ColorGradient<Out = Self>;
+
+    /// Create a gradient object that interpolates between the
+    /// current color and another color.
     ///
     /// # Arguments
     ///
     /// * `other` - The other color to interpolate to.
-    /// * `percent` - How dominant the other color should be, from 0.0 to 1.0.
-    fn interpolate(self, other: Self, percent: f32) -> Self;
+    ///
+    fn gradient(self, other: Self) -> Self::Gradient;
 
     /// Creates the maximum between two colors
     fn assign_elementwise_max(&mut self, other: Self);
@@ -194,24 +213,41 @@ pub trait InterpolatableColor: Color + core::ops::AddAssign {
     fn apply_alpha(self, alpha: f32) -> Self;
 }
 
-fn lerp16(value_a: u16, value_b: u16, percent: f32) -> u16 {
+fn lerp16f(a: f32, b: f32, percent: f32) -> u16 {
     let percent = percent.clamp(0.0, 1.0);
-
-    let a: f32 = value_a.into();
-    let b: f32 = value_b.into();
 
     // the + 0.5 is for proper rounding; float->int conversion is always a floor() operation
     (a * (1.0 - percent) + b * percent + 0.5).clamp(0.0, 65535.0) as u16
 }
+fn lerp16(value_a: u16, value_b: u16, percent: f32) -> u16 {
+    let a: f32 = value_a.into();
+    let b: f32 = value_b.into();
+
+    lerp16f(a, b, percent)
+}
+
+/// Can procude an rgb gradient
+pub struct RGBGradient {
+    start: palette::Oklab,
+    end: palette::Oklab,
+}
+
+impl ColorGradient for RGBGradient {
+    type Out = RGB;
+
+    fn interpolate(&self, position: f32) -> Self::Out {
+        palette::Srgb::from_color(self.start.mix(self.end, position.clamp(0.0, 1.0))).into_format()
+    }
+}
 
 impl InterpolatableColor for RGB {
-    fn interpolate(self, other: Self, percent: f32) -> Self {
-        // TODO: Replace with oklab blending
-        RGB::new(
-            lerp16(self.red, other.red, percent),
-            lerp16(self.green, other.green, percent),
-            lerp16(self.blue, other.blue, percent),
-        )
+    type Gradient = RGBGradient;
+
+    fn gradient(self, other: Self) -> Self::Gradient {
+        RGBGradient {
+            start: self.into_format().into_color(),
+            end: other.into_format().into_color(),
+        }
     }
 
     fn assign_elementwise_max(&mut self, other: Self) {
@@ -229,10 +265,28 @@ impl InterpolatableColor for RGB {
     }
 }
 
+/// Can procude a monochrome gradient
+pub struct MonochromeGradient {
+    start: f32,
+    end: f32,
+}
+
+impl ColorGradient for MonochromeGradient {
+    type Out = Monochrome;
+
+    fn interpolate(&self, position: f32) -> Self::Out {
+        Monochrome {
+            v: lerp16f(self.start, self.end, position),
+        }
+    }
+}
+
 impl InterpolatableColor for Monochrome {
-    fn interpolate(self, other: Self, percent: f32) -> Self {
-        Self {
-            v: lerp16(self.v, other.v, percent),
+    type Gradient = MonochromeGradient;
+    fn gradient(self, other: Self) -> Self::Gradient {
+        MonochromeGradient {
+            start: self.v.into(),
+            end: other.v.into(),
         }
     }
 
