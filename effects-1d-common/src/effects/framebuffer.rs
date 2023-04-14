@@ -123,7 +123,7 @@ pub trait FrameBufferRef<C: Color> {
 
         // If we hit only one pixel, draw that one pixel
         if start_pixel == end_pixel {
-            let color = C::zero().interpolate(color, end - start);
+            let color = color.apply_alpha(end - start);
             self.update_pixel(start_pixel, color, blend_mode);
             return;
         }
@@ -133,13 +133,13 @@ pub trait FrameBufferRef<C: Color> {
         {
             // How much the area reaches into the first pixel
             let amount = (start_pixel + 1) as f32 - start;
-            let color = C::zero().interpolate(color, amount);
+            let color = color.apply_alpha(amount);
             self.update_pixel(start_pixel, color, blend_mode);
         }
         {
             // How much the area reaches into the last pixel
             let amount = end - end_pixel as f32;
-            let color = C::zero().interpolate(color, amount);
+            let color = color.apply_alpha(amount);
             self.update_pixel(end_pixel, color, blend_mode);
         }
 

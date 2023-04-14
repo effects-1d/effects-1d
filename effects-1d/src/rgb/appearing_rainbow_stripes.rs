@@ -12,7 +12,7 @@ pub struct AppearingRainbowStripes {
 }
 
 impl BeatBasedEffect for AppearingRainbowStripes {
-    type Color = color::Oklab;
+    type Color = color::RGB;
 
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         Self {
@@ -24,7 +24,7 @@ impl BeatBasedEffect for AppearingRainbowStripes {
 
     fn render_frame(
         &mut self,
-        framebuffer: &mut dyn FrameBufferRef<color::Oklab>,
+        framebuffer: &mut dyn FrameBufferRef<color::RGB>,
         _d_t: f32,
         mut beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {

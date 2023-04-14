@@ -1,14 +1,6 @@
-/// 96-bit Oklab Color.
-///
-/// Oklab was chosen over RGB for better color blending.
-pub type Oklab = palette::Oklab<f32>;
+/// 48-bit sRGB Color.
+pub type RGB = palette::Srgb<u16>;
 pub use palette;
-
-/// Creates an Oklab color from RGB.
-pub fn rgb(r: f32, g: f32, b: f32) -> Oklab {
-    use palette::FromColor;
-    Oklab::from_color(palette::Srgb::new(r, g, b))
-}
 
 /// 16-bit Monochrome Color
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
@@ -163,9 +155,9 @@ pub trait Color: Copy + core::fmt::Debug {
     fn zero() -> Self;
 }
 
-impl Color for Oklab {
+impl Color for RGB {
     fn zero() -> Self {
-        Self::new(0., 0., 0.)
+        Self::new(0, 0, 0)
     }
 }
 impl Color for Monochrome {
@@ -196,6 +188,10 @@ pub trait InterpolatableColor: Color + core::ops::AddAssign {
 
     /// Creates the maximum between two colors
     fn assign_elementwise_max(&mut self, other: Self);
+
+    /// Applies alpha to the color; meant for transparent edges.
+    /// Note that `interpolate` is **not** necessarily linear.
+    fn apply_alpha(self, alpha: f32) -> Self;
 }
 
 fn lerp16(value_a: u16, value_b: u16, percent: f32) -> u16 {
@@ -208,23 +204,28 @@ fn lerp16(value_a: u16, value_b: u16, percent: f32) -> u16 {
     (a * (1.0 - percent) + b * percent + 0.5).clamp(0.0, 65535.0) as u16
 }
 
-impl InterpolatableColor for Oklab {
+impl InterpolatableColor for RGB {
     fn interpolate(self, other: Self, percent: f32) -> Self {
-        use palette::Mix;
-        self.mix(other, percent)
+        // TODO: Replace with oklab blending
+        RGB::new(
+            lerp16(self.red, other.red, percent),
+            lerp16(self.green, other.green, percent),
+            lerp16(self.blue, other.blue, percent),
+        )
     }
 
     fn assign_elementwise_max(&mut self, other: Self) {
-        let max_l = self.l.max(other.l);
-        let total_l = self.l + other.l;
-        if total_l == 0.0 {
-            return;
-        }
-        let mix_factor = other.l / total_l;
+        self.red = self.red.max(other.red);
+        self.green = self.green.max(other.green);
+        self.blue = self.blue.max(other.blue);
+    }
 
-        self.a = self.a * (1.0 - mix_factor) + other.a * mix_factor;
-        self.b = self.b * (1.0 - mix_factor) + other.b * mix_factor;
-        self.l = max_l;
+    fn apply_alpha(self, alpha: f32) -> Self {
+        RGB::new(
+            lerp16(0, self.red, alpha),
+            lerp16(0, self.green, alpha),
+            lerp16(0, self.blue, alpha),
+        )
     }
 }
 
@@ -237,5 +238,11 @@ impl InterpolatableColor for Monochrome {
 
     fn assign_elementwise_max(&mut self, other: Self) {
         self.v = self.v.max(other.v);
+    }
+
+    fn apply_alpha(self, alpha: f32) -> Self {
+        Self {
+            v: lerp16(0, self.v, alpha),
+        }
     }
 }

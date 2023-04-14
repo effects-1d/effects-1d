@@ -9,13 +9,13 @@ use rand::Rng;
 
 #[derive(Debug)]
 struct DebugEffect {
-    old_color: color::RGB,
-    new_color: color::RGB,
+    old_color: color::Oklab,
+    new_color: color::Oklab,
     percent: f32,
     time_total: f64,
 }
 
-fn random_color() -> color::RGB {
+fn random_color() -> color::Oklab {
     let mut rng = rand::thread_rng();
     color::RGB {
         r: rng.gen(),
