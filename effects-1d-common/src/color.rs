@@ -334,7 +334,14 @@ impl ColorGradient for HsvRainbowGradient {
 
     fn interpolate(&self, position: f32) -> RGB {
         let value: palette::Srgb = palette::Hsv::new(
-            360.0 * self.scale * (if self.reversed { -position } else { position }) + self.offset,
+            360.0
+                * self.scale
+                * (if self.reversed {
+                    1.0 - position
+                } else {
+                    position
+                })
+                + self.offset,
             self.saturation,
             self.brightness,
         )
