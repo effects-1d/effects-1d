@@ -38,7 +38,7 @@ impl BeatBasedEffect for SplittingLine {
             line_width_half: line_width / 2.0,
             line_speed,
             split_distance,
-            start_beat: start_beat + 1, /* Small pause, for dramatic effect */
+            start_beat,
         }
     }
 
@@ -92,7 +92,8 @@ impl BeatBasedEffect for SplittingLine {
         }
 
         Ok(EffectState {
-            idle: num_splits > num_segments,
+            /* only unschedule at odd beats, fits better to the animation. */
+            idle: (num_splits > num_segments) && (beat.current % 2 == 1),
         })
     }
 }
