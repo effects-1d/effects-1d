@@ -1,5 +1,5 @@
 use effects_1d_common::{
-    color::{self, InterpolatableColor},
+    color::{self, BlendableColor},
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };

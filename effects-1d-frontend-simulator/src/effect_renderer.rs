@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use effects_1d_common::{
-    color::{self, InterpolatableColor},
+    color::{self, BlendableColor},
     effects::{BlendMode, FrameBufferRef},
 };
 

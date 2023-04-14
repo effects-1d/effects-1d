@@ -180,7 +180,10 @@ impl Color for Binary {
 /// A color gradient that can be used to interpolate between two colors
 pub trait ColorGradient {
     /// The color type of the gradient
-    type Out;
+    type C;
+
+    /// Creates a new gradient
+    fn new(start: Self::C, end: Self::C) -> Self;
 
     /// Produce the color at the given position
     ///
@@ -188,23 +191,11 @@ pub trait ColorGradient {
     ///
     /// * `position` - How dominant the other color should be, from 0.0 to 1.0.
     ///
-    fn interpolate(&self, position: f32) -> Self::Out;
+    fn interpolate(&self, position: f32) -> Self::C;
 }
 
-/// Common functionality for interpolatable colors
-pub trait InterpolatableColor: Color + core::ops::AddAssign {
-    /// The gradient producer of the color
-    type Gradient: ColorGradient<Out = Self>;
-
-    /// Create a gradient object that interpolates between the
-    /// current color and another color.
-    ///
-    /// # Arguments
-    ///
-    /// * `other` - The other color to interpolate to.
-    ///
-    fn gradient(self, other: Self) -> Self::Gradient;
-
+/// Common functionality for blendable colors
+pub trait BlendableColor: Color + core::ops::AddAssign {
     /// Creates the maximum between two colors
     fn assign_elementwise_max(&mut self, other: Self);
 
@@ -226,30 +217,93 @@ fn lerp16(value_a: u16, value_b: u16, percent: f32) -> u16 {
     lerp16f(a, b, percent)
 }
 
-/// Can procude an rgb gradient
-pub struct RGBGradient {
+/// An RGB gradient based on oklab blending
+pub struct OklabGradient {
     start: palette::Oklab,
     end: palette::Oklab,
 }
 
-impl ColorGradient for RGBGradient {
-    type Out = RGB;
+impl ColorGradient for OklabGradient {
+    type C = RGB;
 
-    fn interpolate(&self, position: f32) -> Self::Out {
+    fn new(start: Self::C, end: Self::C) -> Self {
+        Self {
+            start: start.into_format().into_color(),
+            end: end.into_format().into_color(),
+        }
+    }
+
+    fn interpolate(&self, position: f32) -> Self::C {
         palette::Srgb::from_color(self.start.mix(self.end, position.clamp(0.0, 1.0))).into_format()
     }
 }
 
-impl InterpolatableColor for RGB {
-    type Gradient = RGBGradient;
+/// An RGB gradient based on Linear RGB blending
+pub struct LinearRGBGradient {
+    start: palette::LinSrgb,
+    end: palette::LinSrgb,
+}
 
-    fn gradient(self, other: Self) -> Self::Gradient {
-        RGBGradient {
-            start: self.into_format().into_color(),
-            end: other.into_format().into_color(),
+impl ColorGradient for LinearRGBGradient {
+    type C = RGB;
+
+    fn new(start: Self::C, end: Self::C) -> Self {
+        Self {
+            start: start.into_format().into_color(),
+            end: end.into_format().into_color(),
         }
     }
 
+    fn interpolate(&self, position: f32) -> Self::C {
+        palette::Srgb::from_color(self.start.mix(self.end, position.clamp(0.0, 1.0))).into_format()
+    }
+}
+
+/// An RGB gradient based on sRGB blending
+pub struct SRGBGradient {
+    start: palette::Srgb,
+    end: palette::Srgb,
+}
+
+impl ColorGradient for SRGBGradient {
+    type C = RGB;
+
+    fn new(start: Self::C, end: Self::C) -> Self {
+        Self {
+            start: start.into_format(),
+            end: end.into_format(),
+        }
+    }
+
+    fn interpolate(&self, position: f32) -> Self::C {
+        self.start
+            .mix(self.end, position.clamp(0.0, 1.0))
+            .into_format()
+    }
+}
+
+/// An RGB gradient based on HSL blending
+pub struct HslGradient {
+    start: palette::Hsl,
+    end: palette::Hsl,
+}
+
+impl ColorGradient for HslGradient {
+    type C = RGB;
+
+    fn new(start: Self::C, end: Self::C) -> Self {
+        Self {
+            start: start.into_format().into_color(),
+            end: end.into_format().into_color(),
+        }
+    }
+
+    fn interpolate(&self, position: f32) -> Self::C {
+        palette::Srgb::from_color(self.start.mix(self.end, position.clamp(0.0, 1.0))).into_format()
+    }
+}
+
+impl BlendableColor for RGB {
     fn assign_elementwise_max(&mut self, other: Self) {
         self.red = self.red.max(other.red);
         self.green = self.green.max(other.green);
@@ -272,24 +326,23 @@ pub struct MonochromeGradient {
 }
 
 impl ColorGradient for MonochromeGradient {
-    type Out = Monochrome;
+    type C = Monochrome;
 
-    fn interpolate(&self, position: f32) -> Self::Out {
+    fn new(start: Self::C, end: Self::C) -> Self {
+        Self {
+            start: start.v.into(),
+            end: end.v.into(),
+        }
+    }
+
+    fn interpolate(&self, position: f32) -> Self::C {
         Monochrome {
             v: lerp16f(self.start, self.end, position),
         }
     }
 }
 
-impl InterpolatableColor for Monochrome {
-    type Gradient = MonochromeGradient;
-    fn gradient(self, other: Self) -> Self::Gradient {
-        MonochromeGradient {
-            start: self.v.into(),
-            end: other.v.into(),
-        }
-    }
-
+impl BlendableColor for Monochrome {
     fn assign_elementwise_max(&mut self, other: Self) {
         self.v = self.v.max(other.v);
     }

@@ -1,5 +1,5 @@
 use effects_1d_common::{
-    color::{self, ColorGradient, InterpolatableColor, RGB},
+    color::{self, ColorGradient, OklabGradient, RGB},
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
@@ -7,6 +7,8 @@ use effects_1d_frontend_simulator::SimulateEffect;
 
 #[derive(Debug)]
 struct ColorTest;
+
+type Gradient = OklabGradient;
 
 impl TimeBasedEffect for ColorTest {
     type Color = color::RGB;
@@ -22,9 +24,9 @@ impl TimeBasedEffect for ColorTest {
     ) -> Result<EffectState, RenderError> {
         let len = framebuffer.len() as f32;
 
-        let gradient0 = RGB::new(u16::MAX, 0, 0).gradient(RGB::new(0, 0, u16::MAX));
-        let gradient1 = RGB::new(u16::MAX, 0, 0).gradient(RGB::new(0, u16::MAX, 0));
-        let gradient2 = RGB::new(0, 0, 0).gradient(RGB::new(u16::MAX, u16::MAX, u16::MAX));
+        let gradient0 = Gradient::new(RGB::new(u16::MAX, 0, 0), RGB::new(0, 0, u16::MAX));
+        let gradient1 = Gradient::new(RGB::new(u16::MAX, 0, 0), RGB::new(0, u16::MAX, 0));
+        let gradient2 = Gradient::new(RGB::new(0, 0, 0), RGB::new(u16::MAX, u16::MAX, u16::MAX));
 
         for pos in 0..framebuffer.len() {
             let pos_f = pos as f32;

@@ -1,4 +1,4 @@
-use crate::color::{Color, InterpolatableColor};
+use crate::color::{BlendableColor, Color};
 
 use super::BlendMode;
 
@@ -33,7 +33,7 @@ pub trait FrameBufferRef<C: Color> {
     ///                  and the new pixel color
     fn update_pixel(&mut self, pos: u32, color: C, blend_mode: BlendMode)
     where
-        C: InterpolatableColor;
+        C: BlendableColor;
 
     /// Draw a segment with sharp edges, replacing the existing color within the segment.
     ///
@@ -97,7 +97,7 @@ pub trait FrameBufferRef<C: Color> {
     /// * `color` - The color the range shall be set to.
     fn draw_smooth(&mut self, start: f32, end: f32, color: C, blend_mode: BlendMode)
     where
-        C: InterpolatableColor,
+        C: BlendableColor,
     {
         let len = self.len();
         let len_f = len as f32;
@@ -176,7 +176,7 @@ mod tests {
 
         fn update_pixel(&mut self, pos: u32, color: C, blend_mode: BlendMode)
         where
-            C: InterpolatableColor,
+            C: BlendableColor,
         {
             if let Some(v) = self.data.get_mut(pos as usize) {
                 match blend_mode {
