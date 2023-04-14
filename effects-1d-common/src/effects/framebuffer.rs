@@ -1,4 +1,4 @@
-use crate::color::{Color, InterpolatableColor};
+use crate::color::{BlendableColor, Color};
 
 use super::BlendMode;
 
@@ -33,7 +33,7 @@ pub trait FrameBufferRef<C: Color> {
     ///                  and the new pixel color
     fn update_pixel(&mut self, pos: u32, color: C, blend_mode: BlendMode)
     where
-        C: InterpolatableColor;
+        C: BlendableColor;
 
     /// Draw a segment with sharp edges, replacing the existing color within the segment.
     ///
@@ -97,7 +97,7 @@ pub trait FrameBufferRef<C: Color> {
     /// * `color` - The color the range shall be set to.
     fn draw_smooth(&mut self, start: f32, end: f32, color: C, blend_mode: BlendMode)
     where
-        C: InterpolatableColor,
+        C: BlendableColor,
     {
         let len = self.len();
         let len_f = len as f32;
@@ -123,7 +123,7 @@ pub trait FrameBufferRef<C: Color> {
 
         // If we hit only one pixel, draw that one pixel
         if start_pixel == end_pixel {
-            let color = C::zero().interpolate(color, end - start);
+            let color = color.apply_alpha(end - start);
             self.update_pixel(start_pixel, color, blend_mode);
             return;
         }
@@ -133,13 +133,13 @@ pub trait FrameBufferRef<C: Color> {
         {
             // How much the area reaches into the first pixel
             let amount = (start_pixel + 1) as f32 - start;
-            let color = C::zero().interpolate(color, amount);
+            let color = color.apply_alpha(amount);
             self.update_pixel(start_pixel, color, blend_mode);
         }
         {
             // How much the area reaches into the last pixel
             let amount = end - end_pixel as f32;
-            let color = C::zero().interpolate(color, amount);
+            let color = color.apply_alpha(amount);
             self.update_pixel(end_pixel, color, blend_mode);
         }
 
@@ -176,7 +176,7 @@ mod tests {
 
         fn update_pixel(&mut self, pos: u32, color: C, blend_mode: BlendMode)
         where
-            C: InterpolatableColor,
+            C: BlendableColor,
         {
             if let Some(v) = self.data.get_mut(pos as usize) {
                 match blend_mode {

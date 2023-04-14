@@ -12,7 +12,7 @@ use super::WidgetMaterial;
 #[uuid = "69fdd51f-11e6-4ffd-9ebf-2badfdd98f37"]
 pub struct LedStripSimMaterial {
     #[storage(0, read_only)]
-    pub effect_data: Vec<u32>,
+    pub effect_data: Vec<Vec4>,
 
     #[uniform(1)]
     pub widget_size: Vec2,
@@ -29,7 +29,7 @@ impl Material2d for LedStripSimMaterial {
 impl WidgetMaterial for LedStripSimMaterial {
     fn new(rel_size: Vec2, window_size: Vec2) -> Self {
         let mut this = Self {
-            effect_data: vec![0],
+            effect_data: vec![Vec4::ZERO],
             widget_size: default(),
             rel_size,
         };

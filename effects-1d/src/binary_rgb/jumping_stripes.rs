@@ -46,7 +46,7 @@ impl JumpingStripes {
 impl BeatBasedEffect for JumpingStripes {
     type Color = color::BinaryRGB;
 
-    fn init(_resolution_hint: Option<u32>) -> Self {
+    fn init(_resolution_hint: Option<u32>, _start_beat: i32) -> Self {
         let mut this = Self {
             stripe_size: 0.05,
             stripes: Default::default(),

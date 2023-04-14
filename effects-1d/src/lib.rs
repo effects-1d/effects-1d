@@ -31,3 +31,9 @@ pub mod monochrome {
         SplittingLine,
     }
 }
+
+pub mod rgb {
+    export_effects! {
+        AppearingRainbowStripes,
+    }
+}

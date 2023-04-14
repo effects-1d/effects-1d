@@ -14,6 +14,9 @@ pub trait BeatBasedEffect: Send + Sync + 'static + Debug {
     /// # Arguments
     ///
     /// * `resolution_hint` - A hint about what the resolution later might be.
+    /// * `start_beat` - The beat number where the effect should start displaying.
+    ///                  It can be assumed that the first time the effect will be rendered
+    ///                  is a very short time after the `start_beat` started.
     ///
     /// **IMPORTANT**: The `resolution_hint` is an approximate value and is intended to configure
     /// the effect parameters so that it looks good at the given resolution.
@@ -21,7 +24,7 @@ pub trait BeatBasedEffect: Send + Sync + 'static + Debug {
     /// The actual resolution later might change at any point, although it can be assumed that it will lie
     /// in the general area of the hint. The resolution might even change in every frame, for example
     /// at POV displays (where the frame size might depend on the varying rotation speed).
-    fn init(resolution_hint: Option<u32>) -> Self;
+    fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self;
 
     /// Renders the current frame.
     ///
@@ -47,8 +50,8 @@ where
 {
     type Color = <Self as BeatBasedEffect>::Color;
 
-    fn init(resolution_hint: Option<u32>) -> Self {
-        BeatBasedEffect::init(resolution_hint)
+    fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
+        BeatBasedEffect::init(resolution_hint, start_beat)
     }
 
     fn render_frame(

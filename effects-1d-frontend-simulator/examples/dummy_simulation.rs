@@ -1,5 +1,5 @@
 use effects_1d_common::{
-    color,
+    color::{self, Color},
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
@@ -17,11 +17,7 @@ struct DebugEffect {
 
 fn random_color() -> color::RGB {
     let mut rng = rand::thread_rng();
-    color::RGB {
-        r: rng.gen(),
-        g: rng.gen(),
-        b: rng.gen(),
-    }
+    color::RGB::new(rng.gen(), rng.gen(), rng.gen())
 }
 
 const SPEED: f32 = 0.05;
@@ -31,7 +27,7 @@ impl TimeBasedEffect for DebugEffect {
 
     fn init(_resolution_hint: Option<u32>) -> Self {
         Self {
-            old_color: color::RGB::black(),
+            old_color: color::RGB::zero(),
             new_color: random_color(),
             percent: 0.,
             time_total: 0.0,
@@ -49,10 +45,10 @@ impl TimeBasedEffect for DebugEffect {
         if self.percent > 1. {
             self.percent -= 1.;
             self.old_color = self.new_color;
-            if self.old_color == color::RGB::black() {
+            if self.old_color == color::RGB::zero() {
                 self.new_color = random_color();
             } else {
-                self.new_color = color::RGB::black();
+                self.new_color = color::RGB::zero();
             }
         }
 
@@ -61,7 +57,7 @@ impl TimeBasedEffect for DebugEffect {
 
         framebuffer.set_pixel(
             framebuffer.len() / 2 + ((self.time_total as u64) % 10) as u32,
-            color::RGB { r: 255, g: 0, b: 0 },
+            color::RGB::new(u16::MAX, 0, 0),
         );
 
         Ok(EffectState { idle: false })

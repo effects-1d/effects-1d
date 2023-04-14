@@ -1,45 +1,29 @@
-/// 24-bit RGB Color
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
-pub struct RGB {
-    /// Red
-    pub r: u8,
-    /// Green
-    pub g: u8,
-    /// Blue
-    pub b: u8,
-}
+/// 48-bit sRGB Color.
+pub type RGB = palette::Srgb<u16>;
+pub use palette;
+use palette::{FromColor, IntoColor, Mix};
 
-impl RGB {
-    /// A color with all values set to zero
-    pub const fn black() -> Self {
-        Self { r: 0, g: 0, b: 0 }
-    }
-}
-
-impl core::ops::AddAssign for RGB {
-    fn add_assign(&mut self, rhs: Self) {
-        self.r = self.r.saturating_add(rhs.r);
-        self.g = self.g.saturating_add(rhs.g);
-        self.b = self.b.saturating_add(rhs.b);
-    }
-}
-
-/// 8-bit Monochrome Color
+/// 16-bit Monochrome Color
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub struct Monochrome {
     /// Brightness value
-    pub v: u8,
+    pub v: u16,
 }
 
 impl Monochrome {
     /// Creates a new monochrome color value.
-    pub const fn new(v: u8) -> Self {
+    pub const fn new(v: u16) -> Self {
         Self { v }
+    }
+
+    /// Creates a monochrome color with maximum brightness.
+    pub const fn full() -> Self {
+        Self { v: u16::MAX }
     }
 }
 
-impl PartialEq<u8> for Monochrome {
-    fn eq(&self, other: &u8) -> bool {
+impl PartialEq<u16> for Monochrome {
+    fn eq(&self, other: &u16) -> bool {
         self.v.eq(other)
     }
 }
@@ -165,7 +149,7 @@ impl Binary {
 }
 
 /// Common functionality of all colors
-pub trait Color: Copy + core::fmt::Debug + Eq + PartialEq {
+pub trait Color: Copy + core::fmt::Debug {
     /// Returns the zero value of the given color type.
     ///
     /// This is the value that can be added to any color without changing it.
@@ -174,7 +158,7 @@ pub trait Color: Copy + core::fmt::Debug + Eq + PartialEq {
 
 impl Color for RGB {
     fn zero() -> Self {
-        Self::black()
+        Self::new(0, 0, 0)
     }
 }
 impl Color for Monochrome {
@@ -193,53 +177,179 @@ impl Color for Binary {
     }
 }
 
-/// Common functionality for interpolatable colors
-pub trait InterpolatableColor: Color + core::ops::AddAssign {
-    /// Interpolates between the current color and another color.
+/// A color gradient that can be used to interpolate between two colors
+pub trait ColorGradient {
+    /// The color type of the gradient
+    type C;
+
+    /// Creates a new gradient
+    fn new(start: Self::C, end: Self::C) -> Self;
+
+    /// Produce the color at the given position
     ///
     /// # Arguments
     ///
-    /// * `other` - The other color to interpolate to.
-    /// * `percent` - How dominant the other color should be, from 0.0 to 1.0.
-    fn interpolate(self, other: Self, percent: f32) -> Self;
-
-    /// Creates the maximum between two colors
-    fn assign_elementwise_max(&mut self, other: Self);
+    /// * `position` - How dominant the other color should be, from 0.0 to 1.0.
+    ///
+    fn interpolate(&self, position: f32) -> Self::C;
 }
 
-fn lerp8(value_a: u8, value_b: u8, percent: f32) -> u8 {
+/// Common functionality for blendable colors
+pub trait BlendableColor: Color + core::ops::AddAssign {
+    /// Creates the maximum between two colors
+    fn assign_elementwise_max(&mut self, other: Self);
+
+    /// Applies alpha to the color; meant for transparent edges.
+    /// Note that `interpolate` is **not** necessarily linear.
+    fn apply_alpha(self, alpha: f32) -> Self;
+}
+
+fn lerp16f(a: f32, b: f32, percent: f32) -> u16 {
     let percent = percent.clamp(0.0, 1.0);
 
+    // the + 0.5 is for proper rounding; float->int conversion is always a floor() operation
+    (a * (1.0 - percent) + b * percent + 0.5).clamp(0.0, 65535.0) as u16
+}
+fn lerp16(value_a: u16, value_b: u16, percent: f32) -> u16 {
     let a: f32 = value_a.into();
     let b: f32 = value_b.into();
 
-    // the + 0.5 is for proper rounding; float->int conversion is always a floor() operation
-    (a * (1.0 - percent) + b * percent + 0.5).clamp(0.0, 255.0) as u8
+    lerp16f(a, b, percent)
 }
 
-impl InterpolatableColor for RGB {
-    fn interpolate(self, other: Self, percent: f32) -> Self {
+/// An RGB gradient based on oklab blending
+pub struct OklabGradient {
+    start: palette::Oklab,
+    end: palette::Oklab,
+}
+
+impl ColorGradient for OklabGradient {
+    type C = RGB;
+
+    fn new(start: Self::C, end: Self::C) -> Self {
         Self {
-            r: lerp8(self.r, other.r, percent),
-            g: lerp8(self.g, other.g, percent),
-            b: lerp8(self.b, other.b, percent),
+            start: start.into_format().into_color(),
+            end: end.into_format().into_color(),
         }
     }
 
+    fn interpolate(&self, position: f32) -> Self::C {
+        palette::Srgb::from_color(self.start.mix(self.end, position.clamp(0.0, 1.0))).into_format()
+    }
+}
+
+/// An RGB gradient based on Linear RGB blending
+pub struct LinearRGBGradient {
+    start: palette::LinSrgb,
+    end: palette::LinSrgb,
+}
+
+impl ColorGradient for LinearRGBGradient {
+    type C = RGB;
+
+    fn new(start: Self::C, end: Self::C) -> Self {
+        Self {
+            start: start.into_format().into_color(),
+            end: end.into_format().into_color(),
+        }
+    }
+
+    fn interpolate(&self, position: f32) -> Self::C {
+        palette::Srgb::from_color(self.start.mix(self.end, position.clamp(0.0, 1.0))).into_format()
+    }
+}
+
+/// An RGB gradient based on sRGB blending
+pub struct SRGBGradient {
+    start: palette::Srgb,
+    end: palette::Srgb,
+}
+
+impl ColorGradient for SRGBGradient {
+    type C = RGB;
+
+    fn new(start: Self::C, end: Self::C) -> Self {
+        Self {
+            start: start.into_format(),
+            end: end.into_format(),
+        }
+    }
+
+    fn interpolate(&self, position: f32) -> Self::C {
+        self.start
+            .mix(self.end, position.clamp(0.0, 1.0))
+            .into_format()
+    }
+}
+
+/// An RGB gradient based on HSL blending
+pub struct HslGradient {
+    start: palette::Hsl,
+    end: palette::Hsl,
+}
+
+impl ColorGradient for HslGradient {
+    type C = RGB;
+
+    fn new(start: Self::C, end: Self::C) -> Self {
+        Self {
+            start: start.into_format().into_color(),
+            end: end.into_format().into_color(),
+        }
+    }
+
+    fn interpolate(&self, position: f32) -> Self::C {
+        palette::Srgb::from_color(self.start.mix(self.end, position.clamp(0.0, 1.0))).into_format()
+    }
+}
+
+impl BlendableColor for RGB {
     fn assign_elementwise_max(&mut self, other: Self) {
-        self.r = self.r.max(other.r);
-        self.g = self.g.max(other.g);
-        self.b = self.b.max(other.b);
+        self.red = self.red.max(other.red);
+        self.green = self.green.max(other.green);
+        self.blue = self.blue.max(other.blue);
+    }
+
+    fn apply_alpha(self, alpha: f32) -> Self {
+        RGB::new(
+            lerp16(0, self.red, alpha),
+            lerp16(0, self.green, alpha),
+            lerp16(0, self.blue, alpha),
+        )
     }
 }
-impl InterpolatableColor for Monochrome {
-    fn interpolate(self, other: Self, percent: f32) -> Self {
+
+/// Can procude a monochrome gradient
+pub struct MonochromeGradient {
+    start: f32,
+    end: f32,
+}
+
+impl ColorGradient for MonochromeGradient {
+    type C = Monochrome;
+
+    fn new(start: Self::C, end: Self::C) -> Self {
         Self {
-            v: lerp8(self.v, other.v, percent),
+            start: start.v.into(),
+            end: end.v.into(),
         }
     }
 
+    fn interpolate(&self, position: f32) -> Self::C {
+        Monochrome {
+            v: lerp16f(self.start, self.end, position),
+        }
+    }
+}
+
+impl BlendableColor for Monochrome {
     fn assign_elementwise_max(&mut self, other: Self) {
         self.v = self.v.max(other.v);
+    }
+
+    fn apply_alpha(self, alpha: f32) -> Self {
+        Self {
+            v: lerp16(0, self.v, alpha),
+        }
     }
 }

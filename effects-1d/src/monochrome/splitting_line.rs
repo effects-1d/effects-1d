@@ -9,13 +9,13 @@ pub struct SplittingLine {
     line_width_half: f32,
     line_speed: f32,
     split_distance: i32,
-    start_beat: Option<i32>,
+    start_beat: i32,
 }
 
 impl BeatBasedEffect for SplittingLine {
     type Color = color::Monochrome;
 
-    fn init(resolution_hint: Option<u32>) -> Self {
+    fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let mut line_width: f32 = 0.003;
         let mut line_speed: f32 = 0.01;
         let split_distance: i32 = 2;
@@ -38,7 +38,7 @@ impl BeatBasedEffect for SplittingLine {
             line_width_half: line_width / 2.0,
             line_speed,
             split_distance,
-            start_beat: None,
+            start_beat,
         }
     }
 
@@ -48,14 +48,10 @@ impl BeatBasedEffect for SplittingLine {
         _d_t: f32,
         mut beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {
-        let start_beat = *self.start_beat.get_or_insert_with(
-            || beat.next_full_beat().current + 1, /* Small pause, for dramatic effect */
-        );
-
         let split_distance = self.split_distance;
         let split_distance_f = self.split_distance as f32;
 
-        beat.current -= start_beat;
+        beat.current -= self.start_beat;
         // Display nothing until the start of the next beat
         if beat.current < 0 {
             return Ok(EffectState { idle: false });
@@ -69,13 +65,13 @@ impl BeatBasedEffect for SplittingLine {
             framebuffer.draw_smooth(
                 0.5 + offset * self.line_speed * split_distance_f - self.line_width_half,
                 0.5 + offset * self.line_speed * split_distance_f + self.line_width_half,
-                color::Monochrome::new(255),
+                color::Monochrome::full(),
                 BlendMode::Max,
             );
             framebuffer.draw_smooth(
                 0.5 - offset * self.line_speed * split_distance_f - self.line_width_half,
                 0.5 - offset * self.line_speed * split_distance_f + self.line_width_half,
-                color::Monochrome::new(255),
+                color::Monochrome::full(),
                 BlendMode::Max,
             );
         };
@@ -96,7 +92,8 @@ impl BeatBasedEffect for SplittingLine {
         }
 
         Ok(EffectState {
-            idle: num_splits > num_segments,
+            /* only unschedule at odd beats, fits better to the animation. */
+            idle: (num_splits > num_segments) && (beat.current % 2 == 1),
         })
     }
 }

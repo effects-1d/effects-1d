@@ -1,4 +1,4 @@
-@group(1) @binding(0) var<storage> effect_data: array<u32>;
+@group(1) @binding(0) var<storage> effect_data: array<vec4<f32>>;
 @group(1) @binding(1) var<uniform> widget_size: vec2<f32>;
 
 struct FragmentInput {
@@ -6,15 +6,7 @@ struct FragmentInput {
 }
 
 fn get_color(index: u32) -> vec3<f32>{
-    let color = effect_data[index];
-    let color_r = (color >> 0u) & 0xffu;
-    let color_g = (color >> 8u) & 0xffu;
-    let color_b = (color >> 16u) & 0xffu;
-    return vec3<f32>(
-        f32(color_r) / 255.0,
-        f32(color_g) / 255.0,
-        f32(color_b) / 255.0,
-    );
+    return clamp(effect_data[index].rgb, vec3(0.,0.,0.), vec3(1.,1.,1.));
 }
 
 const GRIDLINE_SIZE: f32 = 0.15;

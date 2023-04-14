@@ -12,7 +12,7 @@ use super::WidgetMaterial;
 #[uuid = "a71be379-cac5-4204-8dbd-33982a9e1a60"]
 pub struct LaserSimMaterial {
     #[storage(0, read_only)]
-    pub effect_data: Vec<u32>,
+    pub effect_data: Vec<Vec4>,
 
     #[uniform(1)]
     pub widget_size: Vec2,
@@ -29,7 +29,7 @@ impl Material2d for LaserSimMaterial {
 impl WidgetMaterial for LaserSimMaterial {
     fn new(rel_size: Vec2, window_size: Vec2) -> Self {
         let mut this = Self {
-            effect_data: vec![0],
+            effect_data: vec![Vec4::ZERO],
             widget_size: default(),
             rel_size,
         };

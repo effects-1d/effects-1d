@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use std::time::Instant;
 
 use effects_1d_common::{
+    color::{self, Color},
     effects::{BeatBasedEffect, BeatInfo, FrameBufferRef},
     errors::RenderError,
 };
@@ -30,10 +31,11 @@ where
             let data_len = data.len();
             let t0 = Instant::now();
             let effect_state = loop {
-                data.fill(0);
+                data.fill(color::RGB::zero());
                 let mut framebuffer = SimulationFramebuffer::new(data);
-                let effect =
-                    running_effect.get_or_insert_with(|| Self::init(Some(data_len as u32)));
+                let effect = running_effect.get_or_insert_with(|| {
+                    Self::init(Some(data_len as u32), beat.next_full_beat().current)
+                });
 
                 match effect.render_frame(&mut framebuffer, time.delta_seconds(), beat.clone()) {
                     Ok(effect_state) => break effect_state,
