@@ -1,6 +1,6 @@
 use effects_1d_common::{
     color::{self, HsvRainbowGradient},
-    effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
+    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
     errors::RenderError,
 };
 
