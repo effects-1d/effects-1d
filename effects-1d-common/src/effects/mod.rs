@@ -16,6 +16,13 @@ pub struct EffectState {
     /// Meant for effects that don't have a fix end;
     /// whether or not they get scheduled out is a decision
     /// of the runtime system that the effect can't influence.
+    ///
+    /// If the effect gets scheduled out, this will happen at a beat change.
+    ///
+    /// Effects that can only be scheduled out at specific times
+    /// (for example because they loop and it would look bad to stop them in the middle
+    /// of the loop) should set this flag to `true` during the entire
+    /// last beat in the loop.
     pub idle: bool,
     // TODO: Add transition hints as soon as we implemented transitions
 }
