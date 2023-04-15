@@ -1,6 +1,4 @@
-use bevy::prelude::*;
-
-use std::time::Instant;
+use bevy::{prelude::*, utils::Instant};
 
 use effects_1d_common::{
     color::{self, Color},
