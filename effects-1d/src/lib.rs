@@ -17,6 +17,7 @@ macro_rules! export_effects {
 pub mod binary {
     export_effects! {
         BlinkingStripes,
+        OscillatingStripe,
     }
 }
 
