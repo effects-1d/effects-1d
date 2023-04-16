@@ -1,5 +1,7 @@
-/// Re-export of the `rand` crate
+/// Re-exported from the [`rand`] crate.
 pub use rand::Rng;
+
+pub use rand;
 
 /// The random number generator that should be
 /// used for everything related to effects
