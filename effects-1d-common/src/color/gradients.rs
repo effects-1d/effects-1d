@@ -193,3 +193,35 @@ where
         (self.f)(position)
     }
 }
+
+/// A gradient that reverses the start and end color of another gradient
+pub struct ReversedGradient<T: ColorGradient> {
+    gradient: T,
+}
+
+impl<T: ColorGradient> ReversedGradient<T> {
+    /// Creates a reversed gradient from an existing gradient
+    pub fn new(gradient: T) -> Self {
+        Self { gradient }
+    }
+}
+
+impl<T: ColorGradient> ColorGradient for ReversedGradient<T> {
+    type C = T::C;
+
+    fn interpolate(&self, position: f32) -> Self::C {
+        self.gradient.interpolate(1.0 - position)
+    }
+}
+
+/// All references to gradients are also gradients
+impl<T> ColorGradient for &T
+where
+    T: ColorGradient,
+{
+    type C = T::C;
+
+    fn interpolate(&self, position: f32) -> Self::C {
+        T::interpolate(self, position)
+    }
+}
