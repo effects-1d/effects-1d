@@ -1,6 +1,6 @@
 //! Everything related to gradients.
 
-use super::{Monochrome, RGB};
+use super::{Color, Monochrome, TransparentColor, RGB};
 use palette::{FromColor, IntoColor, Mix};
 
 /// A color gradient that can be used to interpolate between two colors
@@ -15,6 +15,19 @@ pub trait ColorGradient {
     /// * `position` - How dominant the other color should be, from 0.0 to 1.0.
     ///
     fn interpolate(&self, position: f32) -> Self::C;
+
+    /// Adds an alpha value to the gradient
+    fn with_transparency(self, alpha_start: f32, alpha_end: f32) -> TransparentGradient<Self>
+    where
+        Self: Sized,
+        Self::C: Color,
+    {
+        TransparentGradient {
+            alpha_start,
+            alpha_end,
+            color_gradient: self,
+        }
+    }
 }
 
 /// Implements an RGB two-color gradient based on a specific color space.
@@ -115,6 +128,44 @@ impl ColorGradient for MonochromeGradient {
     fn interpolate(&self, position: f32) -> Self::C {
         Monochrome {
             v: super::lerp16f(self.start, self.end, position),
+        }
+    }
+}
+
+/// A gradient that isn't actually a gradient but consist of just a single color.
+pub struct SingleColorGradient<C: Color> {
+    color: C,
+}
+
+impl<C: Color> SingleColorGradient<C> {
+    /// Creates a new single-color gradient.
+    pub fn new(color: C) -> Self {
+        Self { color }
+    }
+}
+
+impl<C: Color> ColorGradient for SingleColorGradient<C> {
+    type C = C;
+
+    fn interpolate(&self, _position: f32) -> Self::C {
+        self.color
+    }
+}
+
+/// A transparent gradient
+pub struct TransparentGradient<G: ColorGradient> {
+    alpha_start: f32,
+    alpha_end: f32,
+    color_gradient: G,
+}
+
+impl<G: ColorGradient> ColorGradient for TransparentGradient<G> {
+    type C = TransparentColor<G::C>;
+
+    fn interpolate(&self, position: f32) -> Self::C {
+        TransparentColor {
+            alpha: self.alpha_start * (1. - position) + self.alpha_end * position,
+            value: self.color_gradient.interpolate(position),
         }
     }
 }
