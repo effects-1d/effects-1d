@@ -5,7 +5,7 @@ resolver = "2"
 members = [
     "effects-1d",
     "effects-1d-common",
-    "effects-1d-frontend-simulator",
+    "effects-1d-simulator",
     "effects-1d-runtime",
 ]
 

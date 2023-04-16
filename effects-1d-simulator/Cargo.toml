@@ -1,5 +1,5 @@
 [package]
-name = "effects-1d-frontend-simulator"
+name = "effects-1d-simulator"
 version = "0.1.0"
 edition = "2021"
 

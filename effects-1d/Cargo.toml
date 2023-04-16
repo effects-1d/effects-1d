@@ -10,4 +10,4 @@ effects-1d-common = { path = "../effects-1d-common" }
 paste = "1.0.12"
 
 [dev-dependencies]
-effects-1d-frontend-simulator = { path = "../effects-1d-frontend-simulator" }
+effects-1d-simulator = { path = "../effects-1d-simulator" }

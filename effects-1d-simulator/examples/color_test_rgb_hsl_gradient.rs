@@ -3,7 +3,7 @@ use effects_1d_common::{
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
-use effects_1d_frontend_simulator::SimulateEffect;
+use effects_1d_simulator::SimulateEffect;
 
 #[derive(Debug)]
 struct ColorTest {
