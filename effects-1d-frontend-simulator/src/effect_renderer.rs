@@ -35,6 +35,16 @@ impl FrameBufferRef<color::RGB> for SimulationFramebuffer<'_> {
             *data = existing_color;
         }
     }
+
+    fn update_pixel_with_transparent_color(
+        &mut self,
+        pos: u32,
+        color: color::TransparentColor<color::RGB>,
+    ) {
+        if let Some(data) = self.data.get_mut(pos as usize) {
+            *data = data.multiply_with(1. - color.alpha) + color.value.multiply_with(color.alpha);
+        }
+    }
 }
 
 impl FrameBufferRef<color::BinaryRGB> for SimulationFramebuffer<'_> {
@@ -53,6 +63,14 @@ impl FrameBufferRef<color::BinaryRGB> for SimulationFramebuffer<'_> {
     }
 
     fn update_pixel(&mut self, _pos: u32, _color: color::BinaryRGB, _blend_mode: BlendMode) {
+        unreachable!();
+    }
+
+    fn update_pixel_with_transparent_color(
+        &mut self,
+        _pos: u32,
+        _color: color::TransparentColor<color::BinaryRGB>,
+    ) {
         unreachable!();
     }
 }
@@ -82,6 +100,17 @@ impl FrameBufferRef<color::Monochrome> for SimulationFramebuffer<'_> {
             }
         }
     }
+
+    fn update_pixel_with_transparent_color(
+        &mut self,
+        pos: u32,
+        color: color::TransparentColor<color::Monochrome>,
+    ) {
+        if let Some(data) = self.data.get_mut(pos as usize) {
+            let color_value = mono_to_rgb(color.value);
+            *data = data.multiply_with(1. - color.alpha) + color_value.multiply_with(color.alpha);
+        }
+    }
 }
 
 impl FrameBufferRef<color::Binary> for SimulationFramebuffer<'_> {
@@ -100,6 +129,14 @@ impl FrameBufferRef<color::Binary> for SimulationFramebuffer<'_> {
     }
 
     fn update_pixel(&mut self, _pos: u32, _color: color::Binary, _blend_mode: BlendMode) {
+        unreachable!();
+    }
+
+    fn update_pixel_with_transparent_color(
+        &mut self,
+        _pos: u32,
+        _color: color::TransparentColor<color::Binary>,
+    ) {
         unreachable!();
     }
 }

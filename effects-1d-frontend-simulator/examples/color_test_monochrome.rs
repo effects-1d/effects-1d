@@ -24,7 +24,7 @@ impl TimeBasedEffect for ColorTest {
         for pos in 0..framebuffer.len() {
             let pos_f = pos as f32;
             let percent = pos_f / len;
-            framebuffer.set_pixel(pos, color::Monochrome::full().apply_alpha(percent))
+            framebuffer.set_pixel(pos, color::Monochrome::full().multiply_with(percent))
         }
         Ok(EffectState { idle: false })
     }

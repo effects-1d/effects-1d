@@ -82,14 +82,14 @@ impl BeatBasedEffect for AppearingRainbowStripes {
                 framebuffer.draw_smooth(
                     i_f * stripe_stride,
                     i_f * stripe_stride + stripe_size,
-                    stripe_color.apply_alpha(beat.fractional),
+                    stripe_color.multiply_with(beat.fractional),
                     BlendMode::Add,
                 )
             } else if beat.current == (stripe_id + start_of_destructure) {
                 framebuffer.draw_smooth(
                     i_f * stripe_stride,
                     i_f * stripe_stride + stripe_size,
-                    stripe_color.apply_alpha(1.0 - beat.fractional),
+                    stripe_color.multiply_with(1.0 - beat.fractional),
                     BlendMode::Add,
                 )
             }

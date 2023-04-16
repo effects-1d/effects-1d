@@ -1,4 +1,4 @@
-use crate::color::{gradients::ColorGradient, BlendableColor, Color};
+use crate::color::{gradients::ColorGradient, BlendableColor, Color, TransparentColor};
 
 use super::BlendMode;
 
@@ -32,6 +32,20 @@ pub trait FrameBufferRef<C: Color> {
     /// * `blend_mode` - The mechanism that should be used to combine the existing
     ///                  and the new pixel color
     fn update_pixel(&mut self, pos: u32, color: C, blend_mode: BlendMode)
+    where
+        C: BlendableColor;
+
+    /// Updates a specific pixel in the framebuffer.
+    ///
+    /// Update the existing color of the pixel based on transparency blending.
+    ///
+    /// # Arguments
+    ///
+    /// * `pos` - The position of the pixel that should get modified.
+    ///           Should be in the range of `0` to `len() - 1`.
+    ///           Can be outside of this range, but then nothing will happen.
+    /// * `color` - The color and transparency the pixel shall be updated with.
+    fn update_pixel_with_transparent_color(&mut self, pos: u32, color: TransparentColor<C>)
     where
         C: BlendableColor;
 
@@ -123,7 +137,7 @@ pub trait FrameBufferRef<C: Color> {
 
         // If we hit only one pixel, draw that one pixel
         if start_pixel == end_pixel {
-            let color = color.apply_alpha(end - start);
+            let color = color.multiply_with(end - start);
             self.update_pixel(start_pixel, color, blend_mode);
             return;
         }
@@ -133,13 +147,13 @@ pub trait FrameBufferRef<C: Color> {
         {
             // How much the area reaches into the first pixel
             let amount = (start_pixel + 1) as f32 - start;
-            let color = color.apply_alpha(amount);
+            let color = color.multiply_with(amount);
             self.update_pixel(start_pixel, color, blend_mode);
         }
         {
             // How much the area reaches into the last pixel
             let amount = end - end_pixel as f32;
-            let color = color.apply_alpha(amount);
+            let color = color.multiply_with(amount);
             self.update_pixel(end_pixel, color, blend_mode);
         }
 
@@ -243,6 +257,15 @@ mod tests {
                     BlendMode::Add => *v += color,
                     BlendMode::Max => v.assign_elementwise_max(color),
                 };
+            }
+        }
+
+        fn update_pixel_with_transparent_color(&mut self, pos: u32, color: TransparentColor<C>)
+        where
+            C: BlendableColor,
+        {
+            if let Some(v) = self.data.get_mut(pos as usize) {
+                *v = v.multiply_with(1. - color.alpha) + color.value.multiply_with(color.alpha);
             }
         }
     }

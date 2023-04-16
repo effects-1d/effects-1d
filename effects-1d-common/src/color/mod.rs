@@ -31,7 +31,16 @@ impl PartialEq<u16> for Monochrome {
 
 impl core::ops::AddAssign for Monochrome {
     fn add_assign(&mut self, rhs: Self) {
-        self.v = self.v.saturating_add(rhs.v)
+        *self = *self + rhs;
+    }
+}
+
+impl core::ops::Add for Monochrome {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self {
+        Self {
+            v: self.v.saturating_add(rhs.v),
+        }
     }
 }
 
@@ -179,13 +188,15 @@ impl Color for Binary {
 }
 
 /// Common functionality for blendable colors
-pub trait BlendableColor: Color + core::ops::AddAssign {
+pub trait BlendableColor:
+    Color + core::ops::AddAssign<Self> + core::ops::Add<Self, Output = Self>
+{
     /// Creates the maximum between two colors
     fn assign_elementwise_max(&mut self, other: Self);
 
     /// Applies alpha to the color; meant for transparent edges.
     /// Note that `interpolate` is **not** necessarily linear.
-    fn apply_alpha(self, alpha: f32) -> Self;
+    fn multiply_with(self, alpha: f32) -> Self;
 }
 
 impl BlendableColor for RGB {
@@ -195,7 +206,7 @@ impl BlendableColor for RGB {
         self.blue = self.blue.max(other.blue);
     }
 
-    fn apply_alpha(self, alpha: f32) -> Self {
+    fn multiply_with(self, alpha: f32) -> Self {
         RGB::new(
             lerp16(0, self.red, alpha),
             lerp16(0, self.green, alpha),
@@ -209,11 +220,19 @@ impl BlendableColor for Monochrome {
         self.v = self.v.max(other.v);
     }
 
-    fn apply_alpha(self, alpha: f32) -> Self {
+    fn multiply_with(self, alpha: f32) -> Self {
         Self {
             v: lerp16(0, self.v, alpha),
         }
     }
+}
+
+/// A color with an attached transparency value
+pub struct TransparentColor<C> {
+    /// The color component.
+    pub value: C,
+    /// The transparency component.
+    pub alpha: f32,
 }
 
 fn lerp16f(a: f32, b: f32, percent: f32) -> u16 {
