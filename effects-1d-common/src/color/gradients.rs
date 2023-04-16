@@ -66,20 +66,18 @@ two_color_gradient_impl!(Hsl);
 
 /// A rainbow gradient.
 pub struct HsvRainbowGradient {
-    /// Saturation; the 's' component of the Hsv colors.
-    ///
-    /// Must be between 0.0 and 1.0.
+    /// The 's' component of the Hsv colors.
+    /// Must be between `0.0` and `1.0`.
     pub saturation: f32,
 
-    /// Brightness; the 'v' component of the Hsv colors.
-    ///
-    /// Must be between 0.0 and 1.0.
+    /// The 'v' component of the Hsv colors.
+    /// Must be between `0.0` and `1.0`.
     pub brightness: f32,
 
-    /// Offset. An offset of '360.0' produces the same color as an offset of '0'.
+    /// An offset of `360.0` produces the same color as an offset of `0`.
     pub offset: f32,
 
-    /// Scale factor. A factor of `2.0` means that the colors are twice as close together.
+    /// A factor of `2.0` means that the colors are twice as close together.
     pub scale: f32,
 
     /// Reverses the color order
@@ -107,7 +105,7 @@ impl ColorGradient for HsvRainbowGradient {
     }
 }
 
-/// Can procude a monochrome gradient
+/// A linear gradient for monochrome colors.
 pub struct MonochromeGradient {
     start: f32,
     end: f32,
@@ -152,7 +150,7 @@ impl<C: Color> ColorGradient for SingleColorGradient<C> {
     }
 }
 
-/// A transparent gradient
+/// A transparent gradient.
 pub struct TransparentGradient<G: ColorGradient> {
     alpha_start: f32,
     alpha_end: f32,
@@ -167,5 +165,31 @@ impl<G: ColorGradient> ColorGradient for TransparentGradient<G> {
             alpha: self.alpha_start * (1. - position) + self.alpha_end * position,
             value: self.color_gradient.interpolate(position),
         }
+    }
+}
+
+/// A generic gradient based on the provided closure
+pub struct CustomGradient<T> {
+    f: T,
+}
+
+impl<T, C> CustomGradient<T>
+where
+    T: Fn(f32) -> C,
+{
+    /// Creates a new gradient based on the given color generator function
+    pub fn new(f: T) -> Self {
+        Self { f }
+    }
+}
+
+impl<T, C> ColorGradient for CustomGradient<T>
+where
+    T: Fn(f32) -> C,
+{
+    type C = C;
+
+    fn interpolate(&self, position: f32) -> Self::C {
+        (self.f)(position)
     }
 }
