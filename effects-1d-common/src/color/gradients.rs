@@ -168,7 +168,7 @@ impl<G: ColorGradient> ColorGradient for TransparentGradient<G> {
     }
 }
 
-/// A generic gradient based on the provided closure
+/// A generic gradient based on a provided closure.
 pub struct CustomGradient<T> {
     f: T,
 }
