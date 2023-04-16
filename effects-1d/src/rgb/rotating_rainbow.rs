@@ -1,5 +1,5 @@
 use effects_1d_common::{
-    color::{self, HsvRainbowGradient},
+    color::{self, gradients::HsvRainbowGradient},
     effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
     errors::RenderError,
 };

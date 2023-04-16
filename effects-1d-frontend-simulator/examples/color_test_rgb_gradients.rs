@@ -1,5 +1,5 @@
 use effects_1d_common::{
-    color::{self, HslGradient, RGB},
+    color::{self, gradients::HslGradient, RGB},
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };

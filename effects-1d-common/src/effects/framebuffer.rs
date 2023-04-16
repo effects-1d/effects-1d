@@ -1,4 +1,4 @@
-use crate::color::{BlendableColor, Color, ColorGradient};
+use crate::color::{gradients::ColorGradient, BlendableColor, Color};
 
 use super::BlendMode;
 
