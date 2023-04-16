@@ -37,5 +37,7 @@ pub mod rgb {
     export_effects! {
         AppearingRainbowStripes,
         RotatingRainbow,
+        TwoColorWaves,
+        RotatingFronts
     }
 }
