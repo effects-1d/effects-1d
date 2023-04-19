@@ -95,6 +95,8 @@ impl BeatBasedEffect for AppearingRainbowStripes {
             }
         }
 
-        Ok(EffectState { idle: false })
+        Ok(EffectState {
+            idle: beat.current + 1 == repetition_duration,
+        })
     }
 }

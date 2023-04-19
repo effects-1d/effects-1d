@@ -43,6 +43,6 @@ impl BeatBasedEffect for RotatingFronts {
             framebuffer.draw_gradient(pos, pos + segment_size, &gradient);
         }
 
-        Ok(EffectState { idle: false })
+        Ok(EffectState { idle: true })
     }
 }

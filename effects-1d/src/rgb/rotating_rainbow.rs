@@ -42,6 +42,6 @@ impl BeatBasedEffect for RotatingRainbow {
             },
         );
 
-        Ok(EffectState { idle: false })
+        Ok(EffectState { idle: true })
     }
 }

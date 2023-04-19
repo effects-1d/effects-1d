@@ -69,6 +69,8 @@ impl BeatBasedEffect for TwoColorWaves {
             };
         }
 
-        Ok(EffectState { idle: false })
+        Ok(EffectState {
+            idle: beat.current + 1 == i32::from(self.cycle_length),
+        })
     }
 }
