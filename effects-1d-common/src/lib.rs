@@ -11,3 +11,5 @@ pub mod effects;
 pub mod errors;
 /// Randomness
 pub mod random;
+/// Sequencer for beat based cyclic actions
+pub mod sequencer;

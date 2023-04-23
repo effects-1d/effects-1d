@@ -47,6 +47,12 @@ pub struct BeatInfo {
     pub is_new_beat: bool,
 }
 
+impl Default for BeatInfo {
+    fn default() -> Self {
+        Self::zero()
+    }
+}
+
 impl BeatInfo {
     /// Creates a new BeatInfo object.
     ///
