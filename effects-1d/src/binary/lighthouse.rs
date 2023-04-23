@@ -7,13 +7,13 @@ use effects_1d_common::{
 };
 
 #[derive(Debug)]
-pub struct OscillatingStripe {
+pub struct Lighthouse {
     stripe_width: f32,
     cycle_length: u16,
     start_beat: i32,
 }
 
-impl BeatBasedEffect for OscillatingStripe {
+impl BeatBasedEffect for Lighthouse {
     type Color = color::Binary;
 
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
@@ -40,7 +40,7 @@ impl BeatBasedEffect for OscillatingStripe {
         mut beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {
         beat.current -= self.start_beat;
-        beat.current %= i32::from(self.cycle_length);
+        beat.current = beat.current.rem_euclid(i32::from(self.cycle_length));
         let cycle_pos = (beat - BeatInfo::zero()) / f32::from(self.cycle_length);
 
         let stripe_pos = (0.5 - 0.5 * (cycle_pos * 2. * PI).cos()) * (1. - self.stripe_width);
