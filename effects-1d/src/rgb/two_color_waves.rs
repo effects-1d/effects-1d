@@ -6,6 +6,7 @@ use effects_1d_common::{
     },
     effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
     errors::RenderError,
+    rhythm::MultiBeatCycle,
 };
 
 #[derive(Debug)]
@@ -13,18 +14,18 @@ pub struct TwoColorWaves {
     color_1: RGB,
     color_2: RGB,
     num_segments: u16,
-    cycle_length: u16,
+    cycle: MultiBeatCycle,
 }
 
 impl BeatBasedEffect for TwoColorWaves {
     type Color = color::RGB;
 
-    fn init(_resolution_hint: Option<u32>, _start_beat: i32) -> Self {
+    fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         Self {
             color_1: RGB::new(0, 0, u16::MAX),
             color_2: RGB::new(0, u16::MAX, u16::MAX),
             num_segments: 10,
-            cycle_length: 4,
+            cycle: MultiBeatCycle::new(4, start_beat),
         }
     }
 
@@ -32,11 +33,11 @@ impl BeatBasedEffect for TwoColorWaves {
         &mut self,
         framebuffer: &mut dyn FrameBufferRef<color::RGB>,
         _d_t: f32,
-        mut beat: BeatInfo,
+        beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {
-        beat.current = beat.current.rem_euclid(i32::from(self.cycle_length));
+        self.cycle.update(beat);
 
-        let mut cycle_pos = (beat - BeatInfo::zero()) / f32::from(self.cycle_length);
+        let mut cycle_pos = self.cycle.cycle_progress();
         if cycle_pos > 0.5 {
             cycle_pos = 1.0 - cycle_pos
         }
@@ -70,7 +71,7 @@ impl BeatBasedEffect for TwoColorWaves {
         }
 
         Ok(EffectState {
-            idle: beat.current + 1 == i32::from(self.cycle_length),
+            idle: self.cycle.is_last_beat_of_cycle(),
         })
     }
 }
