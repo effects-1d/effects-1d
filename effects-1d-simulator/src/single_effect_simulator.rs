@@ -47,7 +47,7 @@ where
             let render_duration = t0.elapsed();
 
             let result = format!(
-                "{:#?}\nCompute Time: {:.01?}\n{:#.01?}\n{:#?}",
+                "{:#?}\nCompute Time: {:.01?}\n{:#?}\n{:#?}",
                 running_effect.as_mut().unwrap(),
                 render_duration,
                 beat,
