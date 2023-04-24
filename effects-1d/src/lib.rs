@@ -19,7 +19,7 @@ pub mod binary {
         BlinkingStripes,
         Lighthouse,
         StrobingRotatingLines,
-        //Wiping,
+        Wiping,
     }
 }
 
