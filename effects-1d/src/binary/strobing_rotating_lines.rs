@@ -2,7 +2,7 @@ use effects_1d_common::{
     color,
     effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
     errors::RenderError,
-    sequencer::Sequencer,
+    rhythm::Sequencer,
 };
 
 #[derive(Debug)]
