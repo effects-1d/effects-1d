@@ -67,3 +67,73 @@ impl MultiBeatCycle {
         self.is_last_beat_of_cycle
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use approx::assert_relative_eq;
+    struct BeatTester {
+        previous_cycle: i32,
+        start_beat: i32,
+        cycle_length: u16,
+    }
+
+    impl BeatTester {
+        pub fn test(&mut self, base: BeatInfo, cycle: &MultiBeatCycle) {
+            let f_base = base - BeatInfo::new(self.start_beat, 0.0);
+            let f_cycle =
+                BeatInfo::new(cycle.cycle_number(), cycle.cycle_progress()) - BeatInfo::zero();
+
+            assert_relative_eq!(
+                f_cycle * f32::from(self.cycle_length),
+                f_base,
+                epsilon = f32::EPSILON * 10.0
+            );
+
+            assert!(cycle.cycle_progress() >= 0.0);
+            assert!(cycle.cycle_progress() <= 1.0);
+
+            if cycle.cycle_number() != self.previous_cycle {
+                assert!(cycle.is_new_cycle());
+                assert!(base.is_new_beat);
+            } else {
+                assert!(!cycle.is_new_cycle());
+            }
+            if !base.is_new_beat {
+                assert!(!cycle.is_new_cycle());
+            }
+
+            if (base.current - self.start_beat).rem_euclid(i32::from(self.cycle_length)) + 1
+                == i32::from(self.cycle_length)
+            {
+                assert!(cycle.is_last_beat_of_cycle());
+            } else {
+                assert!(!cycle.is_last_beat_of_cycle());
+            }
+
+            self.previous_cycle = cycle.cycle_number();
+        }
+    }
+
+    #[test]
+    fn multi_beat_cycle() {
+        let mut t = BeatTester {
+            previous_cycle: -2,
+            start_beat: 2,
+            cycle_length: 3,
+        };
+
+        let mut cycle = MultiBeatCycle::new(3, 2);
+
+        let mut base_beat = BeatInfo::new(-2, 0.5);
+
+        for i in 1..100u16 {
+            let diff = f32::from(i) / 4.7;
+
+            base_beat.progress(diff);
+
+            cycle.update(base_beat);
+            t.test(base_beat, &cycle);
+        }
+    }
+}
