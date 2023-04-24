@@ -42,7 +42,7 @@ impl BeatBasedEffect for AppearingRainbowStripes {
             return Err(RenderError::EffectOver);
         }
 
-        beat.current %= repetition_duration;
+        beat.current = beat.current.rem_euclid(repetition_duration);
 
         let num_stripes = self.num_stripes_per_side * 2 - 1;
         let stripe_size =

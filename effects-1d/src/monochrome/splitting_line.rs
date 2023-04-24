@@ -58,8 +58,9 @@ impl BeatBasedEffect for SplittingLine {
         }
 
         let num_splits = beat.current / split_distance;
-        let cycle_position =
-            (beat.fractional + (beat.current % (split_distance * 2)) as f32) / split_distance_f;
+        let cycle_position = (beat.fractional
+            + (beat.current.rem_euclid(split_distance * 2)) as f32)
+            / split_distance_f;
 
         let mut draw_line = |offset: f32| {
             framebuffer.draw_smooth(
@@ -93,7 +94,7 @@ impl BeatBasedEffect for SplittingLine {
 
         Ok(EffectState {
             /* only unschedule at odd beats, fits better to the animation. */
-            idle: (num_splits > num_segments) && (beat.current % 2 == 1),
+            idle: (num_splits > num_segments) && (beat.current.rem_euclid(2) == 1),
         })
     }
 }

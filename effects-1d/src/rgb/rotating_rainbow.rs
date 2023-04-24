@@ -26,7 +26,7 @@ impl BeatBasedEffect for RotatingRainbow {
         _d_t: f32,
         mut beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {
-        beat.current %= i32::from(self.cycle_len);
+        beat.current = beat.current.rem_euclid(i32::from(self.cycle_len));
 
         let cycle_pos = (beat - BeatInfo::zero()) / f32::from(self.cycle_len);
 

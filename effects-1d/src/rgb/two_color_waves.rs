@@ -34,7 +34,7 @@ impl BeatBasedEffect for TwoColorWaves {
         _d_t: f32,
         mut beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {
-        beat.current %= i32::from(self.cycle_length);
+        beat.current = beat.current.rem_euclid(i32::from(self.cycle_length));
 
         let mut cycle_pos = (beat - BeatInfo::zero()) / f32::from(self.cycle_length);
         if cycle_pos > 0.5 {
