@@ -32,7 +32,7 @@ impl Sequencer {
             possible_unschedule_beats,
             sequences,
             beat: Default::default(),
-            beat_multiplier: BeatMultiplier::new(start_beat, subbeats),
+            beat_multiplier: BeatMultiplier::new(subbeats, start_beat),
         }
     }
 
