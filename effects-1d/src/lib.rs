@@ -41,6 +41,7 @@ pub mod rgb {
         AppearingRainbowStripes,
         RotatingRainbow,
         TwoColorWaves,
-        RotatingFronts
+        RotatingFronts,
+        RotatingLinesWithBorders,
     }
 }

@@ -18,7 +18,7 @@ impl BeatBasedEffect for RotatingLines {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
         Self {
             cycle: MultiBeatCycle::new(3, start_beat),
-            lines: Lines::new_with_resolution_hint(0.003, 0.035, 0.0, resolution_hint),
+            lines: Lines::new_with_resolution_hint(0.005, 0.035, 0.0, resolution_hint),
         }
     }
 
