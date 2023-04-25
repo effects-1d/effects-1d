@@ -254,7 +254,7 @@ mod tests {
         {
             if let Some(v) = self.data.get_mut(pos as usize) {
                 match blend_mode {
-                    BlendMode::Add => *v += color,
+                    BlendMode::Add => v.elementwise_add(color),
                     BlendMode::Max => v.assign_elementwise_max(color),
                 };
             }
@@ -265,7 +265,8 @@ mod tests {
             C: BlendableColor,
         {
             if let Some(v) = self.data.get_mut(pos as usize) {
-                *v = v.multiply_with(1. - color.alpha) + color.value.multiply_with(color.alpha);
+                *v = v.multiply_with(1. - color.alpha);
+                v.elementwise_add(color.value.multiply_with(color.alpha));
             }
         }
     }

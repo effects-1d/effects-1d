@@ -4,6 +4,11 @@ pub use palette;
 /// 48-bit sRGB Color.
 pub type RGB = palette::Srgb<u16>;
 
+/// Creates an RGB color from 0.255 color values.
+pub fn rgb8(r: u8, g: u8, b: u8) -> RGB {
+    palette::Srgb::<u8>::new(r, g, b).into_format()
+}
+
 /// 16-bit Monochrome Color
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub struct Monochrome {
@@ -26,21 +31,6 @@ impl Monochrome {
 impl PartialEq<u16> for Monochrome {
     fn eq(&self, other: &u16) -> bool {
         self.v.eq(other)
-    }
-}
-
-impl core::ops::AddAssign for Monochrome {
-    fn add_assign(&mut self, rhs: Self) {
-        *self = *self + rhs;
-    }
-}
-
-impl core::ops::Add for Monochrome {
-    type Output = Self;
-    fn add(self, rhs: Self) -> Self {
-        Self {
-            v: self.v.saturating_add(rhs.v),
-        }
     }
 }
 
@@ -188,15 +178,18 @@ impl Color for Binary {
 }
 
 /// Common functionality for blendable colors
-pub trait BlendableColor:
-    Color + core::ops::AddAssign<Self> + core::ops::Add<Self, Output = Self>
-{
+pub trait BlendableColor: Color {
     /// Creates the maximum between two colors
     fn assign_elementwise_max(&mut self, other: Self);
 
     /// Applies alpha to the color; meant for transparent edges.
     /// Note that `interpolate` is **not** necessarily linear.
     fn multiply_with(self, alpha: f32) -> Self;
+
+    /// Adds another color to this color.
+    ///
+    /// Performs a saturating add on each channel.
+    fn elementwise_add(&mut self, other: Self);
 }
 
 impl BlendableColor for RGB {
@@ -213,6 +206,12 @@ impl BlendableColor for RGB {
             lerp16(0, self.blue, alpha),
         )
     }
+
+    fn elementwise_add(&mut self, other: Self) {
+        self.red = self.red.saturating_add(other.red);
+        self.green = self.green.saturating_add(other.green);
+        self.blue = self.blue.saturating_add(other.blue);
+    }
 }
 
 impl BlendableColor for Monochrome {
@@ -225,9 +224,14 @@ impl BlendableColor for Monochrome {
             v: lerp16(0, self.v, alpha),
         }
     }
+
+    fn elementwise_add(&mut self, other: Self) {
+        self.v = self.v.saturating_add(other.v);
+    }
 }
 
 /// A color with an attached transparency value
+#[derive(Debug, Copy, Clone)]
 pub struct TransparentColor<C> {
     /// The color component.
     pub value: C,
