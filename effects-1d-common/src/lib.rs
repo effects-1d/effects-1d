@@ -5,6 +5,8 @@
 
 /// Pixel colors
 pub mod color;
+/// Utilities that assist in drawing shapes
+pub mod drawing;
 /// Effect-releated traits and structs
 pub mod effects;
 /// Common error types
