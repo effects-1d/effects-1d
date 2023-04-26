@@ -16,9 +16,9 @@ impl BeatBasedEffect for OpeningClosingFan {
     type Color = color::Monochrome;
 
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
-        let line_width = 0.03;
+        let line_width = 0.05;
         Self {
-            lines: Lines::new_with_resolution_hint(0.0, line_width, 0.5, resolution_hint),
+            lines: Lines::new_with_resolution_hint(0.0, line_width, 0.0, resolution_hint),
             cycle: MultiBeatCycle::new(12, start_beat),
         }
     }
