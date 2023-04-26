@@ -7,5 +7,21 @@ edition = "2021"
 
 [dependencies]
 effects-1d-common = { path = "../effects-1d-common" }
-bevy = { version = "0.11.0-dev", git = "https://github.com/bevyengine/bevy.git", rev = "e71078af4919346b1dd3b0b66eeb8b1c18fb6a7e" }
 rand = "0.8.5"
+
+[dependencies.bevy]
+version = "0.11.0-dev"
+git = "https://github.com/bevyengine/bevy.git"
+rev = "75130bd5ecfe58693b6a6777fd5cee04b6a34489"
+default-features = false
+features = [
+    "bevy_asset",
+    "bevy_core_pipeline",
+    "bevy_pbr",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_winit",
+    "default_font",
+]
