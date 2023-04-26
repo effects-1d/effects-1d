@@ -23,5 +23,5 @@ features = [
     "bevy_text",
     "bevy_ui",
     "bevy_winit",
-    "default_font",
+    #"default_font",
 ]
