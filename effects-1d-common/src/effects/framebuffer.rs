@@ -1,4 +1,4 @@
-use crate::color::{gradients::ColorGradient, BlendableColor, Color, TransparentColor};
+use crate::color::{gradients::ColorGradient, BlendableColor, Color};
 
 use super::BlendMode;
 
@@ -32,20 +32,6 @@ pub trait FrameBufferRef<C: Color> {
     /// * `blend_mode` - The mechanism that should be used to combine the existing
     ///                  and the new pixel color
     fn update_pixel(&mut self, pos: u32, color: C, blend_mode: BlendMode)
-    where
-        C: BlendableColor;
-
-    /// Updates a specific pixel in the framebuffer.
-    ///
-    /// Update the existing color of the pixel based on transparency blending.
-    ///
-    /// # Arguments
-    ///
-    /// * `pos` - The position of the pixel that should get modified.
-    ///           Should be in the range of `0` to `len() - 1`.
-    ///           Can be outside of this range, but then nothing will happen.
-    /// * `color` - The color and transparency the pixel shall be updated with.
-    fn update_pixel_with_transparent_color(&mut self, pos: u32, color: TransparentColor<C>)
     where
         C: BlendableColor;
 
@@ -97,6 +83,36 @@ pub trait FrameBufferRef<C: Color> {
         }
     }
 
+    /// Draw a partially covered pixel.
+    ///
+    /// Intended for drawing smooth edges at the start and end of a section.
+    ///
+    /// Used internally; probably not useful for endusers.
+    fn draw_partial_pixel(
+        &mut self,
+        position: u32,
+        mut color: C,
+        overlap: f32,
+        mut blend_mode: BlendMode,
+    ) where
+        C: BlendableColor,
+    {
+        // Different edge pixel blending types have to be handled in different ways
+        match blend_mode {
+            // Add - need to modify the color itself because we cannot change the blend mode
+            BlendMode::Add => color = C::zero().elementwise_lerp(color, overlap),
+            // Max - need to modify the color itself because we cannot change the blend mode
+            BlendMode::Max => color = C::zero().elementwise_lerp(color, overlap),
+            // None - we need to use the `Alpha` blend mode to do transparency, as passing on `None`
+            // would completely delete the background pixel
+            BlendMode::None => blend_mode = BlendMode::Alpha(overlap),
+            // Alpha - we need to multiply the desired alpha with the overlap value to achieve
+            // the correct transparency.
+            BlendMode::Alpha(alpha) => blend_mode = BlendMode::Alpha(overlap * alpha),
+        };
+        self.update_pixel(position, color, blend_mode)
+    }
+
     /// Draw a segment with sharp edges, replacing the existing color within the segment.
     ///
     /// This function performs no anti-aliasing, so all the pixels that
@@ -135,24 +151,9 @@ pub trait FrameBufferRef<C: Color> {
         let start_pixel = (start as u32).clamp(0, len - 1);
         let end_pixel = (end as u32).clamp(0, len - 1);
 
-        // Different edge pixel blending types have to be handled in different ways
-        let update_edge_pixel = |this: &mut Self,
-                                 position: u32,
-                                 mut color: C,
-                                 overlap: f32,
-                                 mut blend_mode: BlendMode| {
-            match blend_mode {
-                BlendMode::Add => color = C::zero().elementwise_lerp(color, overlap),
-                BlendMode::Max => color = C::zero().elementwise_lerp(color, overlap),
-                BlendMode::None => blend_mode = BlendMode::Alpha(overlap),
-                BlendMode::Alpha(alpha) => blend_mode = BlendMode::Alpha(overlap * alpha),
-            };
-            this.update_pixel(position, color, blend_mode)
-        };
-
         // If we hit only one pixel, draw that one pixel
         if start_pixel == end_pixel {
-            update_edge_pixel(self, start_pixel, color, end - start, blend_mode);
+            self.draw_partial_pixel(start_pixel, color, end - start, blend_mode);
             return;
         }
 
@@ -161,12 +162,12 @@ pub trait FrameBufferRef<C: Color> {
         {
             // How much the area reaches into the first pixel
             let amount = (start_pixel + 1) as f32 - start;
-            update_edge_pixel(self, start_pixel, color, amount, blend_mode);
+            self.draw_partial_pixel(start_pixel, color, amount, blend_mode);
         }
         {
             // How much the area reaches into the last pixel
             let amount = end - end_pixel as f32;
-            update_edge_pixel(self, end_pixel, color, amount, blend_mode);
+            self.draw_partial_pixel(end_pixel, color, amount, blend_mode);
         }
 
         for pos in (start_pixel + 1)..end_pixel {
@@ -271,15 +272,6 @@ mod tests {
                     BlendMode::Max => *v = v.elementwise_max(color),
                     BlendMode::Alpha(alpha) => *v = v.elementwise_lerp(color, alpha),
                 };
-            }
-        }
-
-        fn update_pixel_with_transparent_color(&mut self, pos: u32, color: TransparentColor<C>)
-        where
-            C: BlendableColor,
-        {
-            if let Some(v) = self.data.get_mut(pos as usize) {
-                *v = v.elementwise_lerp(color.value, color.alpha)
             }
         }
     }

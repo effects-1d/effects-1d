@@ -1,5 +1,5 @@
 use effects_1d_common::{
-    color::{self, TransparentColor},
+    color,
     drawing::lines::Lines,
     effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
     errors::RenderError,
@@ -43,12 +43,12 @@ impl BeatBasedEffect for RotatingLinesWithBorders {
 
         for pos in 0..border_size {
             let alpha = 1.0 - (pos as f32) / len;
-            let color = TransparentColor {
-                value: self.border_color,
-                alpha,
-            };
-            framebuffer.update_pixel_with_transparent_color(pos, color);
-            framebuffer.update_pixel_with_transparent_color(framebuffer.len() - 1 - pos, color);
+            framebuffer.update_pixel(pos, self.border_color, BlendMode::Alpha(alpha));
+            framebuffer.update_pixel(
+                framebuffer.len() - 1 - pos,
+                self.border_color,
+                BlendMode::Alpha(alpha),
+            );
         }
 
         Ok(EffectState {
