@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 effects-1d-common = { path = "../effects-1d-common" }
 rand = "0.8.5"
+console_error_panic_hook = "0.1.7"
 
 [dependencies.bevy]
 version = "0.11.0-dev"

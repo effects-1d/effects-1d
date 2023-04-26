@@ -1104,6 +1104,7 @@ name = "effects-1d-simulator"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "console_error_panic_hook",
  "effects-1d-common",
  "rand",
 ]

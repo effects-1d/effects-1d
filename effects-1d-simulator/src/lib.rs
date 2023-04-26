@@ -31,6 +31,10 @@ struct EngineStateText;
 
 /// Runs a simulation for the given effect/engine
 pub fn run_simulation(effect_renderer: EffectRenderer) {
+    // When building for WASM, print panics to the browser console
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
+
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
         .insert_resource(effect_renderer)
