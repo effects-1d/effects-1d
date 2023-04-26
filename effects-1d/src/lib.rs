@@ -43,5 +43,6 @@ pub mod rgb {
         TwoColorWaves,
         RotatingFronts,
         RotatingLinesWithBorders,
+        FadingColoredLighthouse,
     }
 }
