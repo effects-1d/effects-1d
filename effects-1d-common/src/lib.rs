@@ -11,6 +11,8 @@ pub mod drawing;
 pub mod effects;
 /// Common error types
 pub mod errors;
+/// Linear interpolation
+pub mod lerp;
 /// Randomness
 pub mod random;
 /// Sequencer for beat based cyclic actions

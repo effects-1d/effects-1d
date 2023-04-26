@@ -1,12 +1,19 @@
 pub mod gradients;
 pub use palette;
+use palette::IntoColor;
 
 /// 48-bit sRGB Color.
 pub type RGB = palette::Srgb<u16>;
 
-/// Creates an RGB color from 0.255 color values.
+/// Creates an RGB color from 8bit color values.
 pub fn rgb8(r: u8, g: u8, b: u8) -> RGB {
     palette::Srgb::<u8>::new(r, g, b).into_format()
+}
+
+/// Creates an RGB color from 8bit hsl color values.
+pub fn hsv8(h: f32, s: f32, v: f32) -> RGB {
+    let rgb: palette::Srgb<f32> = palette::Hsv::new(h, s, v).into_color();
+    rgb.into_format()
 }
 
 /// 16-bit Monochrome Color

@@ -1,4 +1,4 @@
-use crate::effects::BeatInfo;
+use crate::{effects::BeatInfo, lerp::Lerp};
 
 /// Combines many beats into a multi-beat cycle.
 #[derive(Debug)]
@@ -65,6 +65,17 @@ impl MultiBeatCycle {
     /// Often used for the idle state.
     pub fn is_last_beat_of_cycle(&self) -> bool {
         self.is_last_beat_of_cycle
+    }
+
+    /// Interpolates between two values.
+    ///
+    /// Returns the first value at the beginning of the cycle
+    /// and the second value at the end of the cycle.
+    pub fn lerp<T>(&self, a: T, b: T) -> T
+    where
+        T: Lerp,
+    {
+        a.lerp(b, self.cycle_progress())
     }
 }
 
