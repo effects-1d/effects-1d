@@ -2,6 +2,8 @@ pub mod gradients;
 pub use palette;
 use palette::IntoColor;
 
+use crate::lerp::Lerp;
+
 /// 48-bit sRGB Color.
 pub type RGB = palette::Srgb<u16>;
 
@@ -187,53 +189,75 @@ impl Color for Binary {
 /// Common functionality for blendable colors
 pub trait BlendableColor: Color {
     /// Creates the maximum between two colors
-    fn assign_elementwise_max(&mut self, other: Self);
-
-    /// Applies alpha to the color; meant for transparent edges.
-    /// Note that `interpolate` is **not** necessarily linear.
-    fn multiply_with(self, alpha: f32) -> Self;
+    #[must_use]
+    fn elementwise_max(self, other: Self) -> Self;
 
     /// Adds another color to this color.
     ///
     /// Performs a saturating add on each channel.
-    fn elementwise_add(&mut self, other: Self);
+    #[must_use]
+    fn elementwise_add(self, other: Self) -> Self;
+
+    /// Linearly interpolates this color to another.
+    ///
+    /// A `percent` of `0.0` will return `self`,
+    /// a `percent` of `1.0` will return `other`.
+    ///
+    /// Meant for transparent edges.
+    /// Should not be used to generate gradients - use gradients instead.
+    #[must_use]
+    fn elementwise_lerp(self, other: Self, percent: f32) -> Self;
 }
 
 impl BlendableColor for RGB {
-    fn assign_elementwise_max(&mut self, other: Self) {
-        self.red = self.red.max(other.red);
-        self.green = self.green.max(other.green);
-        self.blue = self.blue.max(other.blue);
-    }
-
-    fn multiply_with(self, alpha: f32) -> Self {
+    #[inline]
+    fn elementwise_max(self, other: Self) -> Self {
         RGB::new(
-            lerp16(0, self.red, alpha),
-            lerp16(0, self.green, alpha),
-            lerp16(0, self.blue, alpha),
+            self.red.max(other.red),
+            self.green.max(other.green),
+            self.blue.max(other.blue),
         )
     }
 
-    fn elementwise_add(&mut self, other: Self) {
-        self.red = self.red.saturating_add(other.red);
-        self.green = self.green.saturating_add(other.green);
-        self.blue = self.blue.saturating_add(other.blue);
+    #[inline]
+    fn elementwise_add(self, other: Self) -> Self {
+        RGB::new(
+            self.red.saturating_add(other.red),
+            self.green.saturating_add(other.green),
+            self.blue.saturating_add(other.blue),
+        )
+    }
+
+    #[inline]
+    fn elementwise_lerp(self, other: Self, percent: f32) -> Self {
+        RGB::new(
+            self.red.clamping_lerp(other.red, percent),
+            self.green.clamping_lerp(other.green, percent),
+            self.blue.clamping_lerp(other.blue, percent),
+        )
     }
 }
 
 impl BlendableColor for Monochrome {
-    fn assign_elementwise_max(&mut self, other: Self) {
-        self.v = self.v.max(other.v);
-    }
-
-    fn multiply_with(self, alpha: f32) -> Self {
+    #[inline]
+    fn elementwise_max(self, other: Self) -> Self {
         Self {
-            v: lerp16(0, self.v, alpha),
+            v: self.v.max(other.v),
         }
     }
 
-    fn elementwise_add(&mut self, other: Self) {
-        self.v = self.v.saturating_add(other.v);
+    #[inline]
+    fn elementwise_add(self, other: Self) -> Self {
+        Self {
+            v: self.v.saturating_add(other.v),
+        }
+    }
+
+    #[inline]
+    fn elementwise_lerp(self, other: Self, percent: f32) -> Self {
+        Self {
+            v: self.v.clamping_lerp(other.v, percent),
+        }
     }
 }
 
@@ -244,17 +268,4 @@ pub struct TransparentColor<C> {
     pub value: C,
     /// The transparency component.
     pub alpha: f32,
-}
-
-fn lerp16f(a: f32, b: f32, percent: f32) -> u16 {
-    let percent = percent.clamp(0.0, 1.0);
-
-    // the + 0.5 is for proper rounding; float->int conversion is always a floor() operation
-    (a * (1.0 - percent) + b * percent + 0.5).clamp(0.0, 65535.0) as u16
-}
-fn lerp16(value_a: u16, value_b: u16, percent: f32) -> u16 {
-    let a: f32 = value_a.into();
-    let b: f32 = value_b.into();
-
-    lerp16f(a, b, percent)
 }

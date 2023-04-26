@@ -149,7 +149,7 @@ mod tests {
 }
 
 /// Different blend modes used for smooth rendering
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum BlendMode {
     /// Additive blend mode
     ///
@@ -160,4 +160,12 @@ pub enum BlendMode {
     ///
     /// The pixel becomes the maximum of its existing color and the new color.
     Max,
+
+    /// No blend mode, simply replace the previous color
+    None,
+
+    /// Blend by a fixed alpha value
+    ///
+    /// A value of 1.0 is equivalent to `BlendMode::None`.
+    Alpha(f32),
 }

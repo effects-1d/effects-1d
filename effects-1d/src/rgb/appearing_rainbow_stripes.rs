@@ -2,7 +2,6 @@ use effects_1d_common::{
     color::{
         self,
         gradients::{ColorGradient, HsvRainbowGradient},
-        BlendableColor,
     },
     effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
     errors::RenderError,
@@ -76,21 +75,21 @@ impl BeatBasedEffect for AppearingRainbowStripes {
                     i_f * stripe_stride,
                     i_f * stripe_stride + stripe_size,
                     stripe_color,
-                    BlendMode::Add,
+                    BlendMode::None,
                 )
             } else if stripe_id == beat.current {
                 framebuffer.draw_smooth(
                     i_f * stripe_stride,
                     i_f * stripe_stride + stripe_size,
-                    stripe_color.multiply_with(beat.fractional),
-                    BlendMode::Add,
+                    stripe_color,
+                    BlendMode::Alpha(beat.fractional),
                 )
             } else if beat.current == (stripe_id + start_of_destructure) {
                 framebuffer.draw_smooth(
                     i_f * stripe_stride,
                     i_f * stripe_stride + stripe_size,
-                    stripe_color.multiply_with(1.0 - beat.fractional),
-                    BlendMode::Add,
+                    stripe_color,
+                    BlendMode::Alpha(1.0 - beat.fractional),
                 )
             }
         }

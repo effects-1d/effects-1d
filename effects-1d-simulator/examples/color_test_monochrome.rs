@@ -1,5 +1,5 @@
 use effects_1d_common::{
-    color::{self, BlendableColor},
+    color::{self, BlendableColor, Color},
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
@@ -24,7 +24,10 @@ impl TimeBasedEffect for ColorTest {
         for pos in 0..framebuffer.len() {
             let pos_f = pos as f32;
             let percent = pos_f / len;
-            framebuffer.set_pixel(pos, color::Monochrome::full().multiply_with(percent))
+            framebuffer.set_pixel(
+                pos,
+                color::Monochrome::zero().elementwise_lerp(color::Monochrome::full(), percent),
+            )
         }
         Ok(EffectState { idle: false })
     }

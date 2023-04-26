@@ -135,10 +135,24 @@ pub trait FrameBufferRef<C: Color> {
         let start_pixel = (start as u32).clamp(0, len - 1);
         let end_pixel = (end as u32).clamp(0, len - 1);
 
+        // Different edge pixel blending types have to be handled in different ways
+        let update_edge_pixel = |this: &mut Self,
+                                 position: u32,
+                                 mut color: C,
+                                 overlap: f32,
+                                 mut blend_mode: BlendMode| {
+            match blend_mode {
+                BlendMode::Add => color = C::zero().elementwise_lerp(color, overlap),
+                BlendMode::Max => color = C::zero().elementwise_lerp(color, overlap),
+                BlendMode::None => blend_mode = BlendMode::Alpha(overlap),
+                BlendMode::Alpha(alpha) => blend_mode = BlendMode::Alpha(overlap * alpha),
+            };
+            this.update_pixel(position, color, blend_mode)
+        };
+
         // If we hit only one pixel, draw that one pixel
         if start_pixel == end_pixel {
-            let color = color.multiply_with(end - start);
-            self.update_pixel(start_pixel, color, blend_mode);
+            update_edge_pixel(self, start_pixel, color, end - start, blend_mode);
             return;
         }
 
@@ -147,14 +161,12 @@ pub trait FrameBufferRef<C: Color> {
         {
             // How much the area reaches into the first pixel
             let amount = (start_pixel + 1) as f32 - start;
-            let color = color.multiply_with(amount);
-            self.update_pixel(start_pixel, color, blend_mode);
+            update_edge_pixel(self, start_pixel, color, amount, blend_mode);
         }
         {
             // How much the area reaches into the last pixel
             let amount = end - end_pixel as f32;
-            let color = color.multiply_with(amount);
-            self.update_pixel(end_pixel, color, blend_mode);
+            update_edge_pixel(self, end_pixel, color, amount, blend_mode);
         }
 
         for pos in (start_pixel + 1)..end_pixel {
@@ -254,8 +266,10 @@ mod tests {
         {
             if let Some(v) = self.data.get_mut(pos as usize) {
                 match blend_mode {
-                    BlendMode::Add => v.elementwise_add(color),
-                    BlendMode::Max => v.assign_elementwise_max(color),
+                    BlendMode::None => *v = color,
+                    BlendMode::Add => *v = v.elementwise_add(color),
+                    BlendMode::Max => *v = v.elementwise_max(color),
+                    BlendMode::Alpha(alpha) => *v = v.elementwise_lerp(color, alpha),
                 };
             }
         }
@@ -265,8 +279,7 @@ mod tests {
             C: BlendableColor,
         {
             if let Some(v) = self.data.get_mut(pos as usize) {
-                *v = v.multiply_with(1. - color.alpha);
-                v.elementwise_add(color.value.multiply_with(color.alpha));
+                *v = v.elementwise_lerp(color.value, color.alpha)
             }
         }
     }

@@ -1,5 +1,7 @@
 //! Everything related to gradients.
 
+use crate::lerp::Lerp;
+
 use super::{Color, Monochrome, TransparentColor, RGB};
 use palette::{FromColor, IntoColor, Mix};
 
@@ -125,7 +127,7 @@ impl ColorGradient for MonochromeGradient {
 
     fn interpolate(&self, position: f32) -> Self::C {
         Monochrome {
-            v: super::lerp16f(self.start, self.end, position),
+            v: (self.start.lerp(self.end, position) + 0.5) as u16,
         }
     }
 }

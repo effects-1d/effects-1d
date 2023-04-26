@@ -1,5 +1,5 @@
 use effects_1d_common::{
-    color::{self, BlendableColor, RGB},
+    color::{self, RGB},
     effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
     errors::RenderError,
     random::{EffectRng, Rng},
@@ -82,9 +82,12 @@ impl BeatBasedEffect for FadingColoredLighthouse {
             2.0 * (1.0 - progress)
         };
 
-        let color = self.color.multiply_with(brightness);
-
-        framebuffer.draw_smooth(pos, pos + self.line_width, color, BlendMode::Add);
+        framebuffer.draw_smooth(
+            pos,
+            pos + self.line_width,
+            self.color,
+            BlendMode::Alpha(brightness),
+        );
 
         Ok(EffectState {
             idle: self.cycle.is_last_beat_of_cycle(),

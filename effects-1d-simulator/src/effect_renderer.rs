@@ -27,12 +27,12 @@ impl FrameBufferRef<color::RGB> for SimulationFramebuffer<'_> {
 
     fn update_pixel(&mut self, pos: u32, color: color::RGB, blend_mode: BlendMode) {
         if let Some(data) = self.data.get_mut(pos as usize) {
-            let mut existing_color = *data;
-            match blend_mode {
-                BlendMode::Add => existing_color.elementwise_add(color),
-                BlendMode::Max => existing_color.assign_elementwise_max(color),
-            }
-            *data = existing_color;
+            *data = match blend_mode {
+                BlendMode::Add => data.elementwise_add(color),
+                BlendMode::Max => data.elementwise_max(color),
+                BlendMode::None => color,
+                BlendMode::Alpha(alpha) => data.elementwise_lerp(color, alpha),
+            };
         }
     }
 
@@ -42,8 +42,7 @@ impl FrameBufferRef<color::RGB> for SimulationFramebuffer<'_> {
         color: color::TransparentColor<color::RGB>,
     ) {
         if let Some(data) = self.data.get_mut(pos as usize) {
-            *data = data.multiply_with(1. - color.alpha);
-            data.elementwise_add(color.value.multiply_with(color.alpha));
+            *data = data.elementwise_lerp(color.value, color.alpha);
         }
     }
 }
@@ -95,9 +94,11 @@ impl FrameBufferRef<color::Monochrome> for SimulationFramebuffer<'_> {
     fn update_pixel(&mut self, pos: u32, color: color::Monochrome, blend_mode: BlendMode) {
         if let Some(data) = self.data.get_mut(pos as usize) {
             let color = mono_to_rgb(color);
-            match blend_mode {
+            *data = match blend_mode {
                 BlendMode::Add => data.elementwise_add(color),
-                BlendMode::Max => data.assign_elementwise_max(color),
+                BlendMode::Max => data.elementwise_max(color),
+                BlendMode::None => color,
+                BlendMode::Alpha(alpha) => data.elementwise_lerp(color, alpha),
             }
         }
     }
@@ -109,8 +110,7 @@ impl FrameBufferRef<color::Monochrome> for SimulationFramebuffer<'_> {
     ) {
         if let Some(data) = self.data.get_mut(pos as usize) {
             let color_value = mono_to_rgb(color.value);
-            *data = data.multiply_with(1. - color.alpha);
-            data.elementwise_add(color_value.multiply_with(color.alpha));
+            *data = data.elementwise_lerp(color_value, color.alpha);
         }
     }
 }
