@@ -60,6 +60,16 @@ impl Lines {
             num_total: self.num_lines,
         }
     }
+
+    /// Change the line width
+    pub fn set_line_width(&mut self, line_width: f32) {
+        self.line_width = line_width;
+    }
+
+    /// Returns the offset between two lines
+    pub fn get_line_stride(&self) -> f32 {
+        self.line_stride
+    }
 }
 
 /// The properties of a line on the screen

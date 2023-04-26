@@ -33,6 +33,7 @@ pub mod monochrome {
     export_effects! {
         SplittingLine,
         RotatingLines,
+        OpeningClosingFan,
     }
 }
 
