@@ -22,13 +22,6 @@ impl BeatMultiplier {
     ///
     /// Needs to be called in every update.
     pub fn generate_beat(&mut self, base_beat: BeatInfo) -> BeatInfo {
-        extern crate std;
-        std::println!(
-            "{:?} {:?} {:?}",
-            base_beat.current,
-            self.start_beat,
-            self.multiplication_factor
-        );
         let mut full_beat_part =
             (base_beat.current - self.start_beat) * i32::from(self.multiplication_factor);
 
