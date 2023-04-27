@@ -14,7 +14,7 @@ pub trait SimulateEffect {
     fn simulate();
 }
 
-const BPM: f32 = 120.0;
+const BPM: f32 = 125.0;
 
 impl<T> SimulateEffect for T
 where
