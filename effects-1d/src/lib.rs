@@ -45,5 +45,6 @@ pub mod rgb {
         RotatingFronts,
         RotatingLinesWithBorders,
         FadingColoredLighthouse,
+        RapidFireStripes
     }
 }
