@@ -20,6 +20,7 @@ pub mod binary {
         Lighthouse,
         StrobingRotatingLines,
         Wiping,
+        JumpingLine,
     }
 }
 
