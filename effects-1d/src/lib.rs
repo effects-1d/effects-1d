@@ -34,6 +34,7 @@ pub mod monochrome {
         SplittingLine,
         RotatingLines,
         OpeningClosingFan,
+        FanWave,
     }
 }
 
