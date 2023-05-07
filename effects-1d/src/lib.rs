@@ -48,6 +48,7 @@ pub mod rgb {
         RotatingFronts,
         RotatingLinesWithBorders,
         FadingColoredLighthouse,
-        RapidFireStripes
+        RapidFireStripes,
+        SegmentedSnake,
     }
 }
