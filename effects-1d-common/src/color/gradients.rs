@@ -6,7 +6,7 @@ use super::{Color, Monochrome, TransparentColor, RGB};
 use palette::{FromColor, IntoColor, Mix};
 
 /// A color gradient that can be used to interpolate between two colors
-pub trait ColorGradient {
+pub trait ColorGradient: core::fmt::Debug {
     /// The color type of the gradient
     type C;
 
@@ -37,6 +37,7 @@ macro_rules! two_color_gradient_impl {
     ($blendtype:ident) => {
         ::paste::paste! {
             #[doc = "An RGB gradient based on `" $blendtype "` blending."]
+            #[derive(Debug)]
             pub struct [<$blendtype Gradient>] {
                 start: palette::$blendtype,
                 end: palette::$blendtype,
@@ -67,6 +68,7 @@ two_color_gradient_impl!(Srgb);
 two_color_gradient_impl!(Hsl);
 
 /// A rainbow gradient.
+#[derive(Debug)]
 pub struct HsvRainbowGradient {
     /// The 's' component of the Hsv colors.
     /// Must be between `0.0` and `1.0`.
@@ -108,6 +110,7 @@ impl ColorGradient for HsvRainbowGradient {
 }
 
 /// A linear gradient for monochrome colors.
+#[derive(Debug)]
 pub struct MonochromeGradient {
     start: f32,
     end: f32,
@@ -133,6 +136,7 @@ impl ColorGradient for MonochromeGradient {
 }
 
 /// A gradient that isn't actually a gradient but consist of just a single color.
+#[derive(Debug)]
 pub struct SingleColorGradient<C: Color> {
     color: C,
 }
@@ -153,6 +157,7 @@ impl<C: Color> ColorGradient for SingleColorGradient<C> {
 }
 
 /// A transparent gradient.
+#[derive(Debug)]
 pub struct TransparentGradient<G: ColorGradient> {
     alpha_start: f32,
     alpha_end: f32,
@@ -171,6 +176,7 @@ impl<G: ColorGradient> ColorGradient for TransparentGradient<G> {
 }
 
 /// A generic gradient based on a provided closure.
+#[derive(Debug)]
 pub struct CustomGradient<T> {
     f: T,
 }
@@ -188,6 +194,7 @@ where
 impl<T, C> ColorGradient for CustomGradient<T>
 where
     T: Fn(f32) -> C,
+    T: core::fmt::Debug,
 {
     type C = C;
 
@@ -197,6 +204,7 @@ where
 }
 
 /// A gradient that reverses the start and end color of another gradient
+#[derive(Debug)]
 pub struct ReversedGradient<T: ColorGradient> {
     gradient: T,
 }
