@@ -71,11 +71,8 @@ impl BeatBasedEffect for RapidFireStripes {
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let line_width = 0.1;
 
-        let mut stripe_counter = 0;
-        let stripes = [(); NUM_STRIPES].map(|()| {
-            let stripe = Stripe::new(stripe_counter, line_width, CYCLE_LENGTH);
-            stripe_counter += 1;
-            stripe
+        let stripes = core::array::from_fn(|stripe_counter| {
+            Stripe::new(stripe_counter as u16, line_width, CYCLE_LENGTH)
         });
 
         let mut this = Self {
