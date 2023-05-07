@@ -6,15 +6,15 @@ use effects_1d_common::{
 };
 
 // Parameters
-const NUM_LINES: usize = 16;
-const STARTUP_DURATION: f32 = 2.0;
-const DECAY_DURATION_MIN: f32 = 1.0;
-const DECAY_DURATION_MAX: f32 = 2.0;
+const NUM_LINES: usize = 14;
+const DECAY_DURATION_MIN: f32 = 2.0;
+const DECAY_DURATION_MAX: f32 = 4.0;
 const DECAY_SPEED: f32 = 1.0;
+const DECAY_EXPONENTIAL: bool = true;
+const DECAY_EXPONENTIAL_FACTOR: f32 = 0.5;
 
 #[derive(Debug)]
 enum LineState {
-    Startup { t: f32 },
     Decaying { t: f32, val: f32 },
 }
 
@@ -39,30 +39,21 @@ fn generate_decay_duration(rng: &mut EffectRng) -> f32 {
 }
 
 impl Line {
-    fn new(start: f32, end: f32, delay: f32) -> Self {
+    fn new(start: f32, end: f32, rng: &mut EffectRng) -> Self {
         Self {
             start,
             end,
-            state: LineState::Startup { t: delay },
+            state: LineState::Decaying {
+                t: rng.gen_range(0.0..(DECAY_DURATION_MAX - DECAY_DURATION_MIN)),
+                val: 0.0,
+            },
         }
     }
 
-    fn update(&mut self, d_t: f32, rng: &mut EffectRng) -> bool {
-        let mut starting = false;
-
+    fn update(&mut self, d_t: f32, rng: &mut EffectRng) {
         let mut leftover_d_t = Some(d_t);
         while let Some(d_t) = leftover_d_t {
             match &mut self.state {
-                LineState::Startup { t } => {
-                    starting = true;
-                    leftover_d_t = progress_t(t, d_t);
-                    if leftover_d_t.is_some() {
-                        self.state = LineState::Decaying {
-                            t: generate_decay_duration(rng),
-                            val: 1.0,
-                        }
-                    }
-                }
                 LineState::Decaying { t, val } => {
                     leftover_d_t = progress_t(t, d_t);
                     if leftover_d_t.is_some() {
@@ -71,19 +62,19 @@ impl Line {
                             val: 1.0,
                         }
                     } else {
-                        // TODO update brightness
-                        *val = (*val - d_t * DECAY_SPEED).clamp(0.0, 1.0);
+                        if DECAY_EXPONENTIAL {
+                            *val = *val * DECAY_EXPONENTIAL_FACTOR.powf(d_t * DECAY_SPEED);
+                        } else {
+                            *val = (*val - d_t * DECAY_SPEED).clamp(0.0, 1.0);
+                        }
                     }
                 }
             }
         }
-
-        starting
     }
 
     fn render(&self, framebuffer: &mut dyn FrameBufferRef<color::Monochrome>) {
         match self.state {
-            LineState::Startup { t: _ } => (),
             LineState::Decaying { t: _, val } => {
                 framebuffer.draw_sharp(self.start, self.end, val.into())
             }
@@ -95,21 +86,24 @@ impl Line {
 pub struct RandomBlinkingPixels {
     rng: EffectRng,
     lines: [Line; NUM_LINES],
+    startup: f32,
 }
 
 impl TimeBasedEffect for RandomBlinkingPixels {
     type Color = color::Monochrome;
 
     fn init(_resolution_hint: Option<u32>) -> Self {
-        Self {
-            rng: EffectRng::new(),
-            lines: core::array::from_fn(|pos| {
-                let start = (pos as f32) / (NUM_LINES as f32);
-                let end = ((pos + 1) as f32) / (NUM_LINES as f32);
-                let delay = start * STARTUP_DURATION;
+        let mut rng = EffectRng::new();
+        let lines = core::array::from_fn(|pos| {
+            let start = (pos as f32) / (NUM_LINES as f32);
+            let end = ((pos + 1) as f32) / (NUM_LINES as f32);
 
-                Line::new(start, end, delay)
-            }),
+            Line::new(start, end, &mut rng)
+        });
+        Self {
+            rng,
+            lines,
+            startup: 2.0 * DECAY_DURATION_MAX,
         }
     }
 
@@ -118,37 +112,15 @@ impl TimeBasedEffect for RandomBlinkingPixels {
         framebuffer: &mut dyn FrameBufferRef<color::Monochrome>,
         d_t: f32,
     ) -> Result<EffectState, RenderError> {
-        let mut starting = false;
+        self.startup -= d_t;
 
         for line in &mut self.lines {
-            starting &= line.update(d_t, &mut self.rng);
+            line.update(d_t, &mut self.rng);
             line.render(framebuffer);
         }
-        // self.cycle.update(beat);
-
-        // let progress = self.cycle.cycle_progress();
-
-        // let coverage = if progress < 0.5 {
-        //     progress * 2.0
-        // } else {
-        //     (1.0 - progress) * 2.0
-        // };
-        // let draw_offset = (progress * 2.0 - 1.0).clamp(0.0, 1.0);
-
-        // self.lines
-        //     .set_line_width(coverage * self.lines.get_line_stride());
-
-        // for line in self.lines.draw_iter(draw_offset) {
-        //     framebuffer.draw_smooth(
-        //         line.start,
-        //         line.end,
-        //         color::Monochrome::full(),
-        //         BlendMode::Add,
-        //     );
-        // }
 
         Ok(EffectState {
-            idle: false && !starting,
+            idle: self.startup <= 0.0,
         })
     }
 }
