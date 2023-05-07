@@ -37,6 +37,14 @@ impl Monochrome {
     }
 }
 
+impl From<f32> for Monochrome {
+    fn from(value: f32) -> Self {
+        Self {
+            v: (value * (f32::from(u16::MAX) + 1.0)) as u16,
+        }
+    }
+}
+
 impl PartialEq<u16> for Monochrome {
     fn eq(&self, other: &u16) -> bool {
         self.v.eq(other)
