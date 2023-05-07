@@ -36,6 +36,7 @@ pub mod monochrome {
         RotatingLines,
         OpeningClosingFan,
         FanWave,
+        RandomBlinkingPixels,
     }
 }
 
