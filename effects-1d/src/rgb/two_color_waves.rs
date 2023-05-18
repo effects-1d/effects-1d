@@ -1,3 +1,6 @@
+#[allow(unused_imports)]
+use effects_1d_common::prelude::*;
+
 use effects_1d_common::{
     color::{
         self,
@@ -49,7 +52,11 @@ impl BeatBasedEffect for TwoColorWaves {
         cycle_pos_2 = cycle_pos_2 * cycle_pos_2; // Power of 2
         cycle_pos_2 = cycle_pos_2 * cycle_pos_2; // Power of 4
 
-        let cycle_pos_3 = (1.0 - cycle_pos_2) * cycle_pos.signum();
+        let cycle_pos_3 = if cycle_pos >= 0.0 {
+            1.0 - cycle_pos_2
+        } else {
+            cycle_pos_2 - 1.0
+        };
         let gradient_cycle_pos = cycle_pos_3 * 0.5 + 0.5;
 
         let gradient = HslGradient::new(self.color_1, self.color_2);

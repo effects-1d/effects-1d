@@ -17,3 +17,11 @@ pub mod lerp;
 pub mod random;
 /// Sequencer for beat based cyclic actions
 pub mod rhythm;
+
+/// Target-specific imports like F32Ext
+///
+/// Meant to be used as `use effects-1d-common::prelude::*;`.
+pub mod prelude {
+    #[cfg(all(target_arch = "arm", target_os = "none"))]
+    pub use micromath::F32Ext;
+}

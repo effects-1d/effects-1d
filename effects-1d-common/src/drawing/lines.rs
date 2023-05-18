@@ -1,3 +1,6 @@
+#[allow(unused_imports)]
+use crate::prelude::*;
+
 /// Utility for rendering evenly spaced lines on the entire frame
 #[derive(Debug)]
 pub struct Lines {

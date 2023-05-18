@@ -1,4 +1,5 @@
-use core::f32::consts::PI;
+#[allow(unused_imports)]
+use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color::{
@@ -9,6 +10,8 @@ use effects_1d_common::{
     errors::RenderError,
     rhythm::MultiBeatCycle,
 };
+
+use core::f32::consts::PI;
 
 #[derive(Debug)]
 pub struct SegmentedSnake {

@@ -1,10 +1,13 @@
-use core::f32::consts::PI;
+#[allow(unused_imports)]
+use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
     effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
     errors::RenderError,
 };
+
+use core::f32::consts::PI;
 
 #[derive(Debug)]
 pub struct Lighthouse {

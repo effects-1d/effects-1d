@@ -1,3 +1,6 @@
+#[allow(unused_imports)]
+use effects_1d_common::prelude::*;
+
 use effects_1d_common::{
     color::{self, gradients::HslGradient, RGB},
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
