@@ -3,14 +3,13 @@ use effects_1d_common::{
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
-use effects_1d_simulator::SimulateEffect;
 
 #[derive(Debug)]
-struct ColorTest;
+pub struct ColorTestRgbGradients;
 
 type Gradient = HslGradient;
 
-impl TimeBasedEffect for ColorTest {
+impl TimeBasedEffect for ColorTestRgbGradients {
     type Color = color::RGB;
 
     fn init(_resolution_hint: Option<u32>) -> Self {
@@ -32,8 +31,4 @@ impl TimeBasedEffect for ColorTest {
 
         Ok(EffectState { idle: false })
     }
-}
-
-fn main() {
-    ColorTest::simulate();
 }

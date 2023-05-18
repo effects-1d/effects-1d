@@ -52,3 +52,11 @@ pub mod rgb {
         SegmentedSnake,
     }
 }
+
+pub mod calibration {
+    export_effects! {
+        ColorTestMonochrome,
+        ColorTestRgbGradients,
+        ColorTestRgbHslGradient,
+    }
+}

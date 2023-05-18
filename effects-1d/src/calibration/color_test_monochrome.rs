@@ -3,12 +3,11 @@ use effects_1d_common::{
     effects::{EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
-use effects_1d_simulator::SimulateEffect;
 
 #[derive(Debug)]
-struct ColorTest;
+pub struct ColorTestMonochrome;
 
-impl TimeBasedEffect for ColorTest {
+impl TimeBasedEffect for ColorTestMonochrome {
     type Color = color::Monochrome;
 
     fn init(_resolution_hint: Option<u32>) -> Self {
@@ -31,8 +30,4 @@ impl TimeBasedEffect for ColorTest {
         }
         Ok(EffectState { idle: false })
     }
-}
-
-fn main() {
-    ColorTest::simulate();
 }
