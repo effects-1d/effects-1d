@@ -1,7 +1,11 @@
+use core::sync::atomic::{AtomicU32, Ordering};
+
 /// Re-exported from the [`rand`] crate.
 pub use rand::Rng;
 
 pub use rand;
+
+static NEXT_SEED: AtomicU32 = AtomicU32::new(1);
 
 /// The random number generator that should be
 /// used for everything related to effects
@@ -10,7 +14,13 @@ impl EffectRng {
     /// Creates a random number generator
     pub fn new() -> Self {
         use rand::SeedableRng;
-        Self(rand::rngs::SmallRng::from_entropy())
+        let seed = NEXT_SEED.fetch_add(1, Ordering::Relaxed);
+        Self(rand::rngs::SmallRng::seed_from_u64(seed.into()))
+    }
+
+    /// Initializes the random number generator with a given seed
+    pub fn seed(val: u32) {
+        NEXT_SEED.store(val, Ordering::Relaxed);
     }
 }
 
