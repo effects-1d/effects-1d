@@ -10,6 +10,16 @@ pub trait F32Ext {
     fn rem_euclid(self, div: Self) -> Self;
 }
 
+#[no_mangle]
+extern "C" fn sinf(val: f32) -> f32 {
+    micromath::F32(val).sin().0
+}
+
+#[no_mangle]
+extern "C" fn cosf(val: f32) -> f32 {
+    micromath::F32(val).cos().0
+}
+
 impl F32Ext for f32 {
     fn sin(self) -> f32 {
         unsafe { core::intrinsics::sinf32(self) }
