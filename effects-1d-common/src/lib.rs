@@ -14,8 +14,6 @@ pub mod effects;
 pub mod errors;
 /// Linear interpolation
 pub mod lerp;
-/// Math functionality that is missing in `core`.
-pub mod math;
 /// Randomness
 pub mod random;
 /// Sequencer for beat based cyclic actions
@@ -25,5 +23,5 @@ pub mod rhythm;
 ///
 /// Meant to be used as `use effects-1d-common::prelude::*;`.
 pub mod prelude {
-    pub use super::math::F32Ext;
+    pub use micromath::F32Ext;
 }
