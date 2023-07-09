@@ -53,21 +53,23 @@ impl BeatBasedEffect for SegmentedSnake {
 
         let two_pi = 2.0 * PI;
 
-        for line_id in (0..self.line_count).rev() {
-            let offset = f32::from(line_id) / (2.0 * f32::from(self.line_count));
-            if self.cycle.cycle_number() == 0 && progress < offset {
-                continue;
+        if self.cycle.cycle_number() >= 0 {
+            for line_id in (0..self.line_count).rev() {
+                let offset = f32::from(line_id) / (2.0 * f32::from(self.line_count));
+                if self.cycle.cycle_number() == 0 && progress < offset {
+                    continue;
+                }
+
+                let pos = (progress - offset).rem_euclid(1.0);
+                let pos = (pos * two_pi).cos() * 0.5 + 0.5;
+
+                let color = self
+                    .color
+                    .interpolate((f32::from(line_id) + 1.0) / f32::from(self.line_count));
+                let start = pos * (1.0 - self.line_size);
+                let end = start + self.line_size;
+                framebuffer.draw_smooth(start, end, color, BlendMode::None);
             }
-
-            let pos = (progress - offset).rem_euclid(1.0);
-            let pos = (pos * two_pi).cos() * 0.5 + 0.5;
-
-            let color = self
-                .color
-                .interpolate((f32::from(line_id) + 1.0) / f32::from(self.line_count));
-            let start = pos * (1.0 - self.line_size);
-            let end = start + self.line_size;
-            framebuffer.draw_smooth(start, end, color, BlendMode::None);
         }
 
         Ok(EffectState {
