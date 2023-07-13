@@ -25,6 +25,12 @@ impl FrameBufferRef<color::RGB> for SimulationFramebuffer<'_> {
         }
     }
 
+    fn set_pixels(&mut self, pixel_fn: &dyn Fn(u32) -> color::RGB) {
+        for (pos, v) in self.data.iter_mut().enumerate() {
+            *v = pixel_fn(pos as u32);
+        }
+    }
+
     fn update_pixel(&mut self, pos: u32, color: color::RGB, blend_mode: BlendMode) {
         if let Some(data) = self.data.get_mut(pos as usize) {
             *data = match blend_mode {
@@ -52,6 +58,18 @@ impl FrameBufferRef<color::BinaryRGB> for SimulationFramebuffer<'_> {
         }
     }
 
+    fn set_pixels(&mut self, pixel_fn: &dyn Fn(u32) -> color::BinaryRGB) {
+        for (pos, v) in self.data.iter_mut().enumerate() {
+            let color = pixel_fn(pos as u32);
+
+            let r = if color.r { u16::MAX } else { 0 };
+            let g = if color.g { u16::MAX } else { 0 };
+            let b = if color.b { u16::MAX } else { 0 };
+
+            *v = color::RGB::new(r, g, b);
+        }
+    }
+
     fn update_pixel(&mut self, _pos: u32, _color: color::BinaryRGB, _blend_mode: BlendMode) {
         unreachable!();
     }
@@ -70,6 +88,12 @@ impl FrameBufferRef<color::Monochrome> for SimulationFramebuffer<'_> {
     fn set_pixel(&mut self, pos: u32, color: color::Monochrome) {
         if let Some(data) = self.data.get_mut(pos as usize) {
             *data = mono_to_rgb(color);
+        }
+    }
+
+    fn set_pixels(&mut self, pixel_fn: &dyn Fn(u32) -> color::Monochrome) {
+        for (pos, v) in self.data.iter_mut().enumerate() {
+            *v = mono_to_rgb(pixel_fn(pos as u32));
         }
     }
 
@@ -94,6 +118,16 @@ impl FrameBufferRef<color::Binary> for SimulationFramebuffer<'_> {
     fn set_pixel(&mut self, pos: u32, color: color::Binary) {
         if let Some(data) = self.data.get_mut(pos as usize) {
             *data = if color.v {
+                mono_to_rgb(color::Monochrome::new(u16::MAX))
+            } else {
+                mono_to_rgb(color::Monochrome::new(0))
+            };
+        }
+    }
+
+    fn set_pixels(&mut self, pixel_fn: &dyn Fn(u32) -> color::Binary) {
+        for (pos, v) in self.data.iter_mut().enumerate() {
+            *v = if pixel_fn(pos as u32).v {
                 mono_to_rgb(color::Monochrome::new(u16::MAX))
             } else {
                 mono_to_rgb(color::Monochrome::new(0))

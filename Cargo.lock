@@ -510,7 +510,7 @@ name = "bevy_math"
 version = "0.11.0-dev"
 source = "git+https://github.com/bevyengine/bevy.git?rev=75130bd5ecfe58693b6a6777fd5cee04b6a34489#75130bd5ecfe58693b6a6777fd5cee04b6a34489"
 dependencies = [
- "glam",
+ "glam 0.23.0",
  "serde",
 ]
 
@@ -519,7 +519,7 @@ name = "bevy_mikktspace"
 version = "0.11.0-dev"
 source = "git+https://github.com/bevyengine/bevy.git?rev=75130bd5ecfe58693b6a6777fd5cee04b6a34489#75130bd5ecfe58693b6a6777fd5cee04b6a34489"
 dependencies = [
- "glam",
+ "glam 0.23.0",
 ]
 
 [[package]]
@@ -559,7 +559,7 @@ dependencies = [
  "bevy_utils",
  "downcast-rs",
  "erased-serde",
- "glam",
+ "glam 0.23.0",
  "once_cell",
  "parking_lot",
  "serde",
@@ -1080,6 +1080,7 @@ dependencies = [
  "debug-ignore",
  "effects-1d-common",
  "effects-1d-simulator",
+ "glam 0.24.1",
  "paste",
 ]
 
@@ -1117,7 +1118,7 @@ checksum = "e6591f13a63571c4821802eb5b10fd1155b1290bce87086440003841c8c3909b"
 dependencies = [
  "const_panic",
  "encase_derive",
- "glam",
+ "glam 0.23.0",
  "thiserror",
 ]
 
@@ -1273,6 +1274,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "glam"
+version = "0.24.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42218cb640844e3872cc3c153dc975229e080a6c4733b34709ef445610550226"
+dependencies = [
+ "libm",
+]
+
+[[package]]
 name = "glow"
 version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1409,7 +1419,7 @@ version = "8.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bd41d443f978bfa380a6dad58b62a08c43bcb960631f13e9d015b911eaf73588"
 dependencies = [
- "glam",
+ "glam 0.23.0",
  "once_cell",
 ]
 

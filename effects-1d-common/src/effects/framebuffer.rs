@@ -19,6 +19,11 @@ pub trait FrameBufferRef<C: Color> {
     /// * `color` - The color the pixel shall be set to.
     fn set_pixel(&mut self, pos: u32, color: C);
 
+    /// Sets all the pixels of the framebuffer.
+    ///
+    /// Replaces the previous color of each pixel.
+    fn set_pixels(&mut self, pixel_fn: &dyn Fn(u32) -> C);
+
     /// Updates a specific pixel in the framebuffer.
     ///
     /// Update the existing color of the pixel based on the given blend mode.
@@ -258,6 +263,12 @@ mod tests {
         fn set_pixel(&mut self, pos: u32, color: C) {
             if let Some(v) = self.data.get_mut(pos as usize) {
                 *v = color;
+            }
+        }
+
+        fn set_pixels(&mut self, pixel_fn: &dyn Fn(u32) -> C) {
+            for (pos, v) in self.data.iter_mut().enumerate() {
+                *v = pixel_fn(pos as u32);
             }
         }
 

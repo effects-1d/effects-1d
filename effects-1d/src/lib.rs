@@ -50,6 +50,7 @@ pub mod rgb {
         FadingColoredLighthouse,
         RapidFireStripes,
         SegmentedSnake,
+        Psychedelic1,
     }
 }
 
