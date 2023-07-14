@@ -77,7 +77,7 @@ impl FrameBufferRef<color::BinaryRGB> for SimulationFramebuffer<'_> {
 
 fn mono_to_rgb(color: color::Monochrome) -> color::RGB {
     let value = color.v;
-    color::RGB::new(value, value, value)
+    color::RGB::new(0, value, 0)
 }
 
 impl FrameBufferRef<color::Monochrome> for SimulationFramebuffer<'_> {
