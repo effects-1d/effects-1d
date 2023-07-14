@@ -24,7 +24,7 @@ where
     fn simulate() {
         let mut running_effect = None;
         let mut beat: BeatInfo = BeatInfo::zero();
-        let mut first_idle = None;
+        //let mut first_idle = None;
 
         let effect_renderer = EffectRenderer::new(Box::new(move |data, time| {
             let data_len = data.len();
@@ -57,6 +57,7 @@ where
 
             beat.progress(BPM * time.delta_seconds() / 60.0);
 
+            /*
             if let Some(since) = first_idle.as_mut() {
                 *since += time.delta_seconds();
             }
@@ -73,6 +74,7 @@ where
                     first_idle = Some(0.0);
                 }
             }
+            */
 
             result
         }));
