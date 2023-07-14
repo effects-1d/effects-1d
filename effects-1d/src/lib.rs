@@ -37,7 +37,7 @@ pub mod monochrome {
         OpeningClosingFan,
         FanWave,
         RandomBlinkingPixels,
-        Psychedelic1,
+        MonoPsychedelic1,
     }
 }
 

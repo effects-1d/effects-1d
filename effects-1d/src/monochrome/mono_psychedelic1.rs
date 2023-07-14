@@ -18,7 +18,7 @@ use glam::f32::{Vec2, Vec3};
 use core::f32::consts::PI;
 
 #[derive(Debug)]
-pub struct Psychedelic1 {
+pub struct MonoPsychedelic1 {
     cycle: MultiBeatCycle,
 }
 
@@ -34,7 +34,7 @@ fn palette(t: f32) -> Vec3 {
     return A + B * j;
 }
 
-impl BeatBasedEffect for Psychedelic1 {
+impl BeatBasedEffect for MonoPsychedelic1 {
     type Color = color::Monochrome;
 
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
