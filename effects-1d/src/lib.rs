@@ -34,6 +34,7 @@ pub mod monochrome {
     export_effects! {
         SplittingLine,
         RotatingLines,
+        RotatingLinesFilled,
         OpeningClosingFan,
         FanWave,
         RandomBlinkingPixels,
