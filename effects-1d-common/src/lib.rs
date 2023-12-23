@@ -1,8 +1,7 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
-//#![deny(unsafe_code)]
+#![deny(unsafe_code)]
 #![no_std]
-#![feature(core_intrinsics)]
 
 /// Pixel colors
 pub mod color;
