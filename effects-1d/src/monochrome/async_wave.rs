@@ -21,7 +21,7 @@ impl BeatBasedEffect for AsyncWave {
     type Color = color::Monochrome;
 
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
-        let max_buckets = 32;
+        let max_buckets = 50;
         let blink_period = 4;
         let effect_duration_periods = 50;
 
