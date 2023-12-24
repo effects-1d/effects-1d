@@ -3,6 +3,7 @@ use crate::{effects::BeatInfo, lerp::Lerp};
 /// Combines many beats into a multi-beat cycle.
 #[derive(Debug)]
 pub struct MultiBeatCycle {
+    beat: i32,
     cycle_number: i32,
     cycle_progress: f32,
     is_new_cycle: bool,
@@ -15,6 +16,7 @@ impl MultiBeatCycle {
     /// Creates a new multi-beat cycle.
     pub fn new(cycle_length: u16, start_beat: i32) -> Self {
         Self {
+            beat: 0,
             cycle_number: 0,
             cycle_progress: 0.0,
             is_new_cycle: true,
@@ -30,6 +32,7 @@ impl MultiBeatCycle {
     /// it might cause weird behavior.
     pub fn update(&mut self, mut beat: BeatInfo) {
         beat.current -= self.start_beat;
+        self.beat = beat.current;
 
         let previous_cycle_number = self.cycle_number;
         self.cycle_number = beat.current.div_euclid(i32::from(self.cycle_length));
@@ -65,6 +68,11 @@ impl MultiBeatCycle {
     /// Often used for the idle state.
     pub fn is_last_beat_of_cycle(&self) -> bool {
         self.is_last_beat_of_cycle
+    }
+
+    /// Get the current beat relative to `start_beat`.
+    pub fn beat(&self) -> i32 {
+        self.beat
     }
 
     /// Interpolates between two values.

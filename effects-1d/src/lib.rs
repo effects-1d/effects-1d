@@ -39,6 +39,7 @@ pub mod monochrome {
         FanWave,
         RandomBlinkingPixels,
         MonoPsychedelic1,
+        AsyncWave,
     }
 }
 
