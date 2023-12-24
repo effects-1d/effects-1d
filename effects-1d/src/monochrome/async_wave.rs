@@ -28,10 +28,9 @@ impl BeatBasedEffect for AsyncWave {
         let mut num_buckets = max_buckets;
 
         if let Some(resolution_hint) = resolution_hint {
-            num_buckets = u32::from(num_buckets)
-                .min(resolution_hint)
-                .try_into()
-                .unwrap();
+            if resolution_hint < 2 * u32::from(max_buckets) {
+                num_buckets = resolution_hint as u16;
+            }
         }
 
         Self {
