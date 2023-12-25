@@ -8,8 +8,9 @@ edition = "2021"
 [dependencies]
 debug-ignore = "1.0.5"
 effects-1d-common = { path = "../effects-1d-common" }
-glam = { version = "0.24.1", default-features = false, features = ["libm"] }
-paste = "1.0.12"
+paste = { workspace = true }
+glam = { version = "0.25.0", default-features = false, features = ["libm"] }
+
 
 [dev-dependencies]
 effects-1d-simulator = { path = "../effects-1d-simulator" }
