@@ -40,6 +40,7 @@ pub mod monochrome {
         RandomBlinkingPixels,
         MonoPsychedelic1,
         AsyncWave,
+        BinaryExplosions,
     }
 }
 

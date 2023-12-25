@@ -4,7 +4,9 @@ use effects_1d_common::{
     color::{self, Color},
     effects::{BeatBasedEffect, BeatInfo, FrameBufferRef},
     errors::RenderError,
+    random::EffectRng,
 };
+use rand::{rngs::OsRng, RngCore};
 
 use crate::{effect_renderer::SimulationFramebuffer, run_simulation, EffectRenderer};
 
@@ -22,6 +24,8 @@ where
     for<'a> SimulationFramebuffer<'a>: FrameBufferRef<<T as BeatBasedEffect>::Color>,
 {
     fn simulate() {
+        EffectRng::seed(OsRng.next_u32());
+
         let mut running_effect = None;
         let mut beat: BeatInfo = BeatInfo::zero();
         //let mut first_idle = None;
