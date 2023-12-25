@@ -96,6 +96,7 @@ fn setup(
                 font: fonts::roboto(),
                 font_size: 15.0,
                 color: Color::WHITE,
+                ..default()
             },
         ) // Set the alignment of the Text
         .with_text_alignment(TextAlignment::Left)
