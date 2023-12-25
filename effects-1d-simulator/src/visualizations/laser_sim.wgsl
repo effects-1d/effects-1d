@@ -1,6 +1,9 @@
-#import bevy_sprite::mesh2d_types
-// The time since startup data is in the globals binding which is part of the mesh_view_bindings import
-#import bevy_sprite::mesh2d_view_bindings
+#import bevy_sprite::{
+    mesh2d_types,
+    // The time since startup data is in the globals binding which is part of the mesh_view_bindings import
+    mesh2d_view_bindings::globals,
+    mesh2d_vertex_output::VertexOutput,
+}
 
 fn pcg_hash(data: u32) -> u32
 {
@@ -44,11 +47,6 @@ fn get_color(index: u32) -> vec3<f32>{
     return clamp(effect_data[index].rgb, vec3(0.,0.,0.), vec3(1.,1.,1.));
 }
 
-struct FragmentInput{
-    @builtin(position) position: vec4<f32>,
-    #import bevy_pbr::mesh_vertex_output
-}
-
 const BRIGHTNESS: f32 = 0.02;
 const MSAA_SAMPLES: u32 = 8u;
 
@@ -84,7 +82,7 @@ fn get_laser_color(uv: vec2<f32>) -> vec3<f32> {
 
 @fragment
 fn fragment(
-    in: FragmentInput
+    in: VertexOutput
 ) -> @location(0) vec4<f32> {
     var rng_state = init_rand_state(in.uv);
 

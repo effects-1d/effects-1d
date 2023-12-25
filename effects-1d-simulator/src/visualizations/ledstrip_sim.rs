@@ -8,7 +8,7 @@ use bevy::{
 
 use super::WidgetMaterial;
 
-#[derive(AsBindGroup, TypeUuid, Debug, Clone)]
+#[derive(AsBindGroup, TypeUuid, Debug, Clone, Asset, TypePath)]
 #[uuid = "69fdd51f-11e6-4ffd-9ebf-2badfdd98f37"]
 pub struct LedStripSimMaterial {
     #[storage(0, read_only)]
@@ -22,7 +22,7 @@ pub struct LedStripSimMaterial {
 
 impl Material2d for LedStripSimMaterial {
     fn fragment_shader() -> ShaderRef {
-        LEDSTRIPSIM_SHADER_HANDLE.typed().into()
+        LEDSTRIPSIM_SHADER_HANDLE.into()
     }
 }
 
@@ -42,8 +42,7 @@ impl WidgetMaterial for LedStripSimMaterial {
     }
 }
 
-pub const LEDSTRIPSIM_SHADER_HANDLE: HandleUntyped =
-    HandleUntyped::weak_from_u64(Shader::TYPE_UUID, 13317158258890179713);
+pub const LEDSTRIPSIM_SHADER_HANDLE: Handle<Shader> = Handle::weak_from_u128(13317158258890179713);
 
 pub struct LedStripSimPlugin;
 impl Plugin for LedStripSimPlugin {
@@ -55,6 +54,6 @@ impl Plugin for LedStripSimPlugin {
             Shader::from_wgsl
         );
 
-        app.add_plugin(Material2dPlugin::<LedStripSimMaterial>::default());
+        app.add_plugins(Material2dPlugin::<LedStripSimMaterial>::default());
     }
 }

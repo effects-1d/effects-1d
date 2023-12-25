@@ -8,7 +8,7 @@ use bevy::{
 
 use super::WidgetMaterial;
 
-#[derive(AsBindGroup, TypeUuid, Debug, Clone)]
+#[derive(AsBindGroup, TypeUuid, Debug, Clone, Asset, TypePath)]
 #[uuid = "a71be379-cac5-4204-8dbd-33982a9e1a60"]
 pub struct LaserSimMaterial {
     #[storage(0, read_only)]
@@ -22,7 +22,7 @@ pub struct LaserSimMaterial {
 
 impl Material2d for LaserSimMaterial {
     fn fragment_shader() -> ShaderRef {
-        LASERSIM_SHADER_HANDLE.typed().into()
+        LASERSIM_SHADER_HANDLE.into()
     }
 }
 
@@ -42,8 +42,7 @@ impl WidgetMaterial for LaserSimMaterial {
     }
 }
 
-pub const LASERSIM_SHADER_HANDLE: HandleUntyped =
-    HandleUntyped::weak_from_u64(Shader::TYPE_UUID, 2240791260128260106);
+pub const LASERSIM_SHADER_HANDLE: Handle<Shader> = Handle::weak_from_u128(2240791260128260106);
 
 pub struct LaserSimPlugin;
 impl Plugin for LaserSimPlugin {
@@ -55,6 +54,6 @@ impl Plugin for LaserSimPlugin {
             Shader::from_wgsl
         );
 
-        app.add_plugin(Material2dPlugin::<LaserSimMaterial>::default());
+        app.add_plugins(Material2dPlugin::<LaserSimMaterial>::default());
     }
 }

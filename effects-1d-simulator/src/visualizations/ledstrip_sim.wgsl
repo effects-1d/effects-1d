@@ -1,9 +1,9 @@
+#import bevy_sprite::{
+    mesh2d_vertex_output::VertexOutput,
+}
+
 @group(1) @binding(0) var<storage> effect_data: array<vec4<f32>>;
 @group(1) @binding(1) var<uniform> widget_size: vec2<f32>;
-
-struct FragmentInput {
-    #import bevy_pbr::mesh_vertex_output
-}
 
 fn get_color(index: u32) -> vec3<f32>{
     return clamp(effect_data[index].rgb, vec3(0.,0.,0.), vec3(1.,1.,1.));
@@ -12,7 +12,7 @@ fn get_color(index: u32) -> vec3<f32>{
 const GRIDLINE_SIZE: f32 = 0.15;
 
 @fragment
-fn fragment(in: FragmentInput) -> @location(0) vec4<f32> {
+fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let pixel_size = 1.0 / widget_size.x;
 
     let effect_data_len = arrayLength(&effect_data);

@@ -51,10 +51,10 @@ pub fn run_simulation(effect_renderer: EffectRenderer) {
             ..default()
         }))
         //.add_plugin(bevy::diagnostic::LogDiagnosticsPlugin::default())
-        .add_plugin(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
-        .add_plugin(LaserSimPlugin)
-        .add_plugin(LedStripSimPlugin)
-        .add_plugin(RobotoFontPlugin)
+        .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
+        .add_plugins(LaserSimPlugin)
+        .add_plugins(LedStripSimPlugin)
+        .add_plugins(RobotoFontPlugin)
         .add_systems(Startup, setup)
         .add_systems(Update, on_resize_system)
         .add_systems(Update, render_effect_frame)
@@ -116,7 +116,7 @@ fn on_resize_system(
     mut ledstrip_sim_materials: ResMut<Assets<LedStripSimMaterial>>,
     mut laser_sim_materials: ResMut<Assets<LaserSimMaterial>>,
 ) {
-    for e in resize_reader.iter() {
+    for e in resize_reader.read() {
         let window_size = Vec2::new(e.width, e.height);
 
         for (mut transform, simwidget) in simwidgets.iter_mut() {
