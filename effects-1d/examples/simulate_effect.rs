@@ -5,5 +5,5 @@ use effects_1d::{binary::*, binary_rgb::*, calibration::*, monochrome::*, rgb::*
 use effects_1d_simulator::SimulateEffect;
 
 fn main() {
-    BinaryExplosions::simulate();
+    AsyncWave::simulate();
 }
