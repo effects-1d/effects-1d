@@ -45,6 +45,7 @@ where
                 match effect.render_frame(&mut framebuffer, time.delta_seconds(), beat.clone()) {
                     Ok(effect_state) => break effect_state,
                     Err(RenderError::EffectOver) => {
+                        info!("Effect is over. Restarting ...");
                         running_effect = None;
                         continue;
                     }
@@ -62,6 +63,7 @@ where
             );
 
             if switch_timer.update(time.delta_seconds(), effect_state.idle) {
+                info!("Switching idle effect ...");
                 running_effect = None;
             }
 
