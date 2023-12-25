@@ -50,7 +50,7 @@ pub fn run_simulation(effect_renderer: EffectRenderer) {
             }),
             ..default()
         }))
-        //.add_plugin(bevy::diagnostic::LogDiagnosticsPlugin::default())
+        //.add_plugins(bevy::diagnostic::LogDiagnosticsPlugin::default())
         .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
         .add_plugins(LaserSimPlugin)
         .add_plugins(LedStripSimPlugin)
