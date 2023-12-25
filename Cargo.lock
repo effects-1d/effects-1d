@@ -1250,6 +1250,7 @@ dependencies = [
  "bevy",
  "console_error_panic_hook",
  "effects-1d-common",
+ "effects-1d-runtime",
  "rand",
 ]
 
