@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use effects_1d_common::{
-    color::{self, BlendableColor},
+    color::{self, BlendableColor, Color, RGB},
     effects::{BlendMode, FrameBufferRef},
 };
 
@@ -11,6 +11,12 @@ pub struct SimulationFramebuffer<'a> {
 impl<'a> SimulationFramebuffer<'a> {
     pub fn new(data: &'a mut [color::RGB]) -> Self {
         Self { data }
+    }
+
+    pub fn fade(&mut self, progress: f32) {
+        for pixel in self.data.iter_mut() {
+            *pixel = pixel.elementwise_lerp(RGB::zero(), progress);
+        }
     }
 }
 

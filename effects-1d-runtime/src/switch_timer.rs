@@ -34,10 +34,10 @@ impl SwitchTimer {
     /// Updates the timer.
     ///
     /// Returns true if the effect must be changed.
-    pub fn update(&mut self, d_t: f32, effect_idle: bool) -> bool {
+    pub fn update(&mut self, d_t: f32, switch_possible: bool) -> bool {
         self.current_duration += d_t;
 
-        if !effect_idle {
+        if !switch_possible {
             return false;
         }
 

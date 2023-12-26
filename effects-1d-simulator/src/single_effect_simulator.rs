@@ -29,10 +29,17 @@ where
         EffectRng::seed(OsRng.gen());
 
         let mut running_effect = None;
-        let mut beat: BeatInfo = BeatInfo::zero();
+        let mut beat = BeatInfo::zero();
         let mut switch_timer = SwitchTimer::new(10.0);
+        let mut switch_requested = false;
 
         let effect_renderer = EffectRenderer::new(Box::new(move |data, time| {
+            if switch_requested && beat.is_new_beat {
+                info!("Effect switched.");
+                running_effect = None;
+                switch_requested = false;
+            }
+
             let data_len = data.len();
             let t0 = Instant::now();
             let effect_state = loop {
@@ -43,7 +50,13 @@ where
                 });
 
                 match effect.render_frame(&mut framebuffer, time.delta_seconds(), beat.clone()) {
-                    Ok(effect_state) => break effect_state,
+                    Ok(effect_state) => {
+                        if switch_requested {
+                            // Simulate some fade-out transition
+                            framebuffer.fade(beat.fractional);
+                        }
+                        break effect_state;
+                    }
                     Err(RenderError::EffectOver) => {
                         info!("Effect is over. Restarting ...");
                         running_effect = None;
@@ -62,9 +75,11 @@ where
                 effect_state
             );
 
-            if switch_timer.update(time.delta_seconds(), effect_state.idle) {
-                info!("Switching idle effect ...");
-                running_effect = None;
+            if switch_timer.update(time.delta_seconds(), effect_state.idle && beat.is_new_beat)
+                && !switch_requested
+            {
+                info!("Request effect switching ...");
+                switch_requested = true;
             }
 
             beat.progress(BPM * time.delta_seconds() / 60.0);
