@@ -49,7 +49,7 @@ where
                     Self::init(Some(data_len as u32), beat.next_full_beat().current)
                 });
 
-                match effect.render_frame(&mut framebuffer, time.delta_seconds(), beat.clone()) {
+                match effect.render_frame(&mut framebuffer, time.delta_seconds(), beat) {
                     Ok(effect_state) => {
                         if switch_requested {
                             // Simulate some fade-out transition
@@ -75,7 +75,7 @@ where
                 effect_state
             );
 
-            if switch_timer.update(time.delta_seconds(), effect_state.idle && beat.is_new_beat)
+            if switch_timer.update(time.delta_seconds(), beat, effect_state.idle)
                 && !switch_requested
             {
                 info!("Request effect switching ...");

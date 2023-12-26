@@ -59,6 +59,8 @@ impl BeatBasedEffect for BlinkingStripes {
             }
         }
 
-        Ok(EffectState { idle: true })
+        Ok(EffectState {
+            idle: beat.current % 4 == 3,
+        })
     }
 }

@@ -1,6 +1,11 @@
+use core::f32::consts::E;
+
 #[allow(unused_imports)]
 use effects_1d_common::prelude::*;
-use effects_1d_common::random::{EffectRng, Rng};
+use effects_1d_common::{
+    effects::BeatInfo,
+    random::{EffectRng, Rng},
+};
 
 /// A timer that determines whether or not an effect
 /// should be changed.
@@ -34,9 +39,10 @@ impl SwitchTimer {
     /// Updates the timer.
     ///
     /// Returns true if the effect must be changed.
-    pub fn update(&mut self, d_t: f32, switch_possible: bool) -> bool {
+    pub fn update(&mut self, d_t: f32, beat: BeatInfo, effect_idle: bool) -> bool {
         self.current_duration += d_t;
 
+        let switch_possible = beat.is_new_beat && effect_idle;
         if !switch_possible {
             return false;
         }
@@ -50,6 +56,9 @@ impl SwitchTimer {
         if self.current_probability >= 1.0 {
             return true;
         }
+        if target_probability > 0.999 {
+            return true;
+        }
 
         let draw_probability =
             (target_probability - self.current_probability) / (1.0 - self.current_probability);
@@ -59,6 +68,19 @@ impl SwitchTimer {
         } else {
             self.rng.gen_bool(f64::from(draw_probability))
         };
+
+        // {
+        //     extern crate std;
+        //     std::println!(
+        //         "{:.04} -> {:.04}: {:.04}",
+        //         self.current_probability,
+        //         target_probability,
+        //         draw_probability
+        //     );
+        //     if should_finish {
+        //         std::println!();
+        //     }
+        // }
 
         if should_finish {
             self.reset();
@@ -75,7 +97,11 @@ impl SwitchTimer {
 
     /// Computes the desired switching CDF over time
     fn switching_cdf(mean: f32, t: f32) -> f32 {
-        1.0 - (1.0 - 1.0 / mean).powf(t)
+        // geometric distribution
+        // 1.0 - (1.0 - 1.0 / mean).powf(t)
+
+        // logistics function
+        1.0 / (1.0 + E.powf(10.0 * (1.0 - t / mean)))
     }
 
     /// Resets the timer.
