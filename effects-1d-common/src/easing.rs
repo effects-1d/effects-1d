@@ -104,12 +104,19 @@ macro_rules! easing_function {
     };
     (@easings_net $name:ident, ($x0:literal, $y0:literal, $x1:literal, $y1:literal)) => {
         easing_function!($name, ($x0, $y0, $x1, $y1), concat!(
-            "based on [", stringify!($name), "](https://easings.net/#", stringify!($name), ")"
+            "taken from [easings.net](https://easings.net/#", stringify!($name), ")"
         ));
     };
 }
 
-// For more info, look at https://easings.net.
+// Basic easing function
+easing_function!(
+    ease,
+    (0.25, 0.1, 0.25, 1.0),
+    "basic easing function for movement"
+);
+
+// Taken from https://easings.net.
 easing_function!(@easings_net easeInSine, (0.12, 0.0, 0.39, 0.0));
 easing_function!(@easings_net easeOutSine, (0.61, 1.0, 0.88, 1.0));
 easing_function!(@easings_net easeInOutSine, (0.37, 0.0, 0.63, 1.0));
@@ -229,5 +236,4 @@ easing_function!(@easings_net easeInOutSine, (0.37, 0.0, 0.63, 1.0));
 //       ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
 //       : (Math.pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
 
-/// aaaa
-pub fn aaa() {}
+// TODO: tests (by checking against math formula from easings.net)

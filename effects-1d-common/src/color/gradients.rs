@@ -235,3 +235,5 @@ where
         T::interpolate(self, position)
     }
 }
+
+// TODO: more functions like `.ease`.
