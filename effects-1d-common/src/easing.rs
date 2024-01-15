@@ -74,15 +74,16 @@ impl BezierEasing {
 
 macro_rules! easing_function {
     (@small_svg ($x0:literal, $y0:literal, $x1:literal, $y1:literal)) => {
-        concat!(r#"<svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" style="position: relative; top: 0.2em;"><rect width="100%" height="100%" style="fill:darkgray;fill-opacity:0.5" /><g transform="scale(16 -16) translate(0.0625, -1.0625)"><path d="M 0 0 c "#, $x0, ",", $y0, " ", $x1, ",", $y1, r#" 1,1" style="fill:none; stroke:darkred; stroke-width:.125px; stroke-opacity:1.0; stroke-linecap:round"></path></g></svg>"#)
+      //concat!(r#"<svg width="26" height="18" xmlns="http://www.w3.org/2000/svg" style="position: relative; top: 0.2em;"><rect width="100%" height="100%" style="fill:darkgray;fill-opacity:0.5" /><g transform="scale(1 -1) translate(1, -17)"><path d="M 0 0 c "#, $x0, ",", $y0, " ", $x1, ",", $y1, r#" 24,16" style="fill:none; stroke:darkred; stroke-width:1.5px; stroke-opacity:1.0; stroke-linecap:round"></path></g></svg>"#)
+        concat!(r#"<svg width="26" height="18" xmlns="http://www.w3.org/2000/svg" style="position: relative; top: 0.2em;"><rect width="100%" height="100%" style="fill:darkgray;fill-opacity:0.5" /><g transform="scale(24 -16) translate(0.04166666, -1.0625)"><path d="M 0 0 c "#, $x0, ",", $y0, " ", $x1, ",", $y1, r#" 1,1" style="fill:none; stroke:darkred; stroke-width:0.07px; stroke-opacity:1.0; stroke-linecap:square"></path></g></svg>"#)
     };
     (@large_svg ($x0:literal, $y0:literal, $x1:literal, $y1:literal)) => {
-        concat!(r#"<svg width="108" height="108" xmlns="http://www.w3.org/2000/svg">
-        <rect x="1" y="1" width="104" height="104" style="fill:darkgray;stroke:black;stroke-width:2;fill-opacity:0.5;stroke-opacity:0.7" />
-        <g transform="scale(100 -100) translate(0.03, -1.03)">
+        concat!(r#"<svg width="158" height="106" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="156" height="104" style="fill:darkgray;stroke:black;stroke-width:2;fill-opacity:0.5;stroke-opacity:0.7" />
+        <g transform="scale(150 -100) translate(0.03, -1.03)">
         <path
             d="M 0 0 c "#, $x0, ",", $y0, " ", $x1, ",", $y1, r#" 1,1"
-            style="fill:none; stroke:darkred; stroke-width:.05px; stroke-opacity:1.0; stroke-linecap:round"
+            style="fill:none; stroke:darkred; stroke-width:.05px; stroke-opacity:1.0; stroke-linecap:square"
         ></path>
         </g>
         </svg>"#)
