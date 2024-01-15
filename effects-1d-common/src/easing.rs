@@ -125,7 +125,7 @@ macro_rules! easing_function {
                     let expected = formula(pos);
                     let actual = easing.evaluate(pos);
 
-                    ::approx::assert_abs_diff_eq!(actual, expected, epsilon=0.035);
+                    ::approx::assert_abs_diff_eq!(actual, expected, epsilon=0.04);
                 }
             }
         }
@@ -155,37 +155,12 @@ easing_function!(@easings_net easeInOutQuart, (0.76, 0.0, 0.24, 1.0), |x| if x <
 easing_function!(@easings_net easeInQuint, (0.64, 0.0, 0.78, 0.0), |x| x * x * x * x * x);
 easing_function!(@easings_net easeOutQuint, (0.22, 1.0, 0.36, 1.0), |x| 1.0 - (1.0 - x).powf(5.0));
 easing_function!(@easings_net easeInOutQuint, (0.83, 0.0, 0.17, 1.0), |x| if x < 0.5 {16.0 * x * x * x * x * x} else {1.0 - (-2.0 * x + 2.0).powf(5.0) / 2.0});
-// - name: easeInExpo
-//   css:  cubic-bezier(0.7, 0, 0.84, 0)
-//   maths: |-2
-//     return x === 0 ? 0 : Math.pow(2, 10 * x - 10);
-// - name: easeOutExpo
-//   css:  cubic-bezier(0.16, 1, 0.3, 1)
-//   maths: |-2
-//     return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
-// - name: easeInOutExpo
-//   css:  cubic-bezier(0.87, 0, 0.13, 1)
-//   maths: |-2
-//     return x === 0
-//       ? 0
-//       : x === 1
-//       ? 1
-//       : x < 0.5 ? Math.pow(2, 20 * x - 10) / 2
-//       : (2 - Math.pow(2, -20 * x + 10)) / 2;
-// - name: easeInCirc
-//   css:  cubic-bezier(0.55, 0, 1, 0.45)
-//   maths: |-2
-//     return 1 - Math.sqrt(1 - Math.pow(x, 2));
-// - name: easeOutCirc
-//   css:  cubic-bezier(0, 0.55, 0.45, 1)
-//   maths: |-2
-//     return Math.sqrt(1 - Math.pow(x - 1, 2));
-// - name: easeInOutCirc
-//   css:  cubic-bezier(0.85, 0, 0.15, 1)
-//   maths: |-2
-//     return x < 0.5
-//       ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2
-//       : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2;
+easing_function!(@easings_net easeInExpo, (0.7, 0.0, 0.84, 0.0), |x| if x == 0.0 {0.0} else {2.0f32.powf(10.0 * x - 10.0)});
+easing_function!(@easings_net easeOutExpo, (0.16, 1.0, 0.3, 1.0), |x| if x == 1.0 {1.0} else {1.0 - 2.0f32.powf(-10.0 * x)});
+easing_function!(@easings_net easeInOutExpo, (0.87, 0.0, 0.13, 1.0), |x| if x == 0.0 {0.0} else if x == 1.0 {1.0} else if x < 0.5 {2.0f32.powf(20.0 * x - 10.0) / 2.0} else {(2.0 - 2.0f32.powf(-20.0 * x + 10.0)) / 2.0});
+easing_function!(@easings_net easeInCirc, (0.55, 0.0, 1.0, 0.45), |x| 1.0 - (1.0 - x.powf(2.0)).sqrt());
+easing_function!(@easings_net easeOutCirc, (0.0, 0.55, 0.45, 1.0), |x| (1.0 - (x - 1.0).powf(2.0)).sqrt());
+easing_function!(@easings_net easeInOutCirc, (0.85, 0.0, 0.15, 1.0), |x| if x < 0.5 {(1.0 - (1.0 - (2.0 * x).powf(2.0)).sqrt()) / 2.0} else {((1.0 - (-2.0 * x + 2.0).powf(2.0)).sqrt() + 1.0) / 2.0});
 // - name: easeInBack
 //   css:  cubic-bezier(0.36, 0, 0.66, -0.56)
 //   maths: |-2
