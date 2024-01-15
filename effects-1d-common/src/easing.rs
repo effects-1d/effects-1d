@@ -9,7 +9,7 @@ pub struct BezierEasingStep {
 
 const BEZIER_EASING_STEPS: usize = 32;
 
-/// Bezier based easing
+/// Cubic Bezier based easing curve.
 pub struct BezierEasing {
     steps: [BezierEasingStep; BEZIER_EASING_STEPS],
 }
@@ -20,7 +20,7 @@ impl BezierEasing {
     /// # Arguments
     ///
     /// * `x0`,`y0` - The coordinates of the first control point. This control point determines the start of the easing.
-    /// * `x0`,`y0` - The coordinates of the second control point. This control point determines the end of the easing.
+    /// * `x1`,`y1` - The coordinates of the second control point. This control point determines the end of the easing.
     ///
     /// All control point coordinates must lie in the interval of `[0.0, 1.0]`. Values outside of that range will get clipped to it.
     pub fn new(x0: f32, y0: f32, x1: f32, y1: f32) -> Self {

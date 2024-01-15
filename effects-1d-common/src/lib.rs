@@ -7,6 +7,8 @@
 pub mod color;
 /// Utilities that assist in drawing shapes
 pub mod drawing;
+/// Easing functions
+pub mod easing;
 /// Effect-releated traits and structs
 pub mod effects;
 /// Common error types
@@ -17,8 +19,6 @@ pub mod lerp;
 pub mod random;
 /// Sequencer for beat based cyclic actions
 pub mod rhythm;
-/// Interpolation easing
-pub mod easing;
 
 /// Target-specific imports like F32Ext
 ///
