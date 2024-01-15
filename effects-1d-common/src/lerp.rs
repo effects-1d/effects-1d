@@ -12,7 +12,7 @@ pub trait Lerp {
     ///
     /// A `percent` value of `0.0` returns `self`, a value of `1.0` returns `other`.
     ///
-    /// Contrary to [`lerp()`], it will not extrapolate beyond 0.0 and 1.0, clamping `percent`
+    /// Contrary to [`lerp()`](Self::lerp), it will not extrapolate beyond 0.0 and 1.0, clamping `percent`
     /// inside of that range.
     #[inline]
     fn clamping_lerp(self, other: Self, percent: f32) -> Self

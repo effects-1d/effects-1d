@@ -4,7 +4,7 @@ use crate::{color::Color, errors::RenderError};
 
 use super::{framebuffer::FrameBufferRef, EffectState, MeasureInfo};
 
-/// An effect whos animation is purely time-based.
+/// An effect whos animation is based on time, beat and measure.
 pub trait MeasureBasedEffect: Send + Sync + 'static + Debug {
     /// The color space the effect will render to.
     type Color: Color;
