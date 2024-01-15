@@ -17,6 +17,8 @@ pub mod lerp;
 pub mod random;
 /// Sequencer for beat based cyclic actions
 pub mod rhythm;
+/// Interpolation easing
+pub mod easing;
 
 /// Target-specific imports like F32Ext
 ///

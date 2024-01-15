@@ -1,0 +1,15 @@
+[package]
+name = "utilities"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+effects-1d-common = { path = "../effects-1d-common" }
+
+eframe = { workspace = true }
+egui_plot = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
