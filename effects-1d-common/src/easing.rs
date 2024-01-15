@@ -78,12 +78,12 @@ macro_rules! easing_function {
         concat!(r#"<svg width="26" height="18" xmlns="http://www.w3.org/2000/svg" style="position: relative; top: 0.2em;"><rect width="100%" height="100%" style="fill:darkgray;fill-opacity:0.5" /><g transform="scale(24 -16) translate(0.04166666, -1.0625)"><path d="M 0 0 c "#, $x0, ",", $y0, " ", $x1, ",", $y1, r#" 1,1" style="fill:none; stroke:darkred; stroke-width:0.07px; stroke-opacity:1.0; stroke-linecap:square"></path></g></svg>"#)
     };
     (@large_svg ($x0:literal, $y0:literal, $x1:literal, $y1:literal)) => {
-        concat!(r#"<svg width="158" height="106" xmlns="http://www.w3.org/2000/svg">
-        <rect x="1" y="1" width="156" height="104" style="fill:darkgray;stroke:black;stroke-width:2;fill-opacity:0.5;stroke-opacity:0.7" />
-        <g transform="scale(150 -100) translate(0.03, -1.03)">
+        concat!(r#"<svg width="157" height="105" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="155" height="103" style="fill:darkgray;stroke:black;stroke-width:2;fill-opacity:0.5;stroke-opacity:0.7" />
+        <g transform="scale(155 -102) translate(0.00645, -1.015)">
         <path
             d="M 0 0 c "#, $x0, ",", $y0, " ", $x1, ",", $y1, r#" 1,1"
-            style="fill:none; stroke:darkred; stroke-width:.05px; stroke-opacity:1.0; stroke-linecap:square"
+            style="fill:none; stroke:darkred; stroke-width:.025px; stroke-opacity:1.0; stroke-linecap:square"
         ></path>
         </g>
         </svg>"#)
@@ -100,13 +100,37 @@ macro_rules! easing_function {
         easing_function!(@inner $name, ($x0, $y0, $x1, $y1), concat!(
             easing_function!(@small_svg ($x0, $y0, $x1, $y1)),
             ", ", $doc, ".",
+            "\n\n", "Equivalent to [`BezierEasing::new(", $x0, ", ", $y0, ", ", $x1, ", ", $y1, ")`](BezierEasing::new).",
             "\n\n", easing_function!(@large_svg ($x0, $y0, $x1, $y1)),
         ));
     };
-    (@easings_net $name:ident, ($x0:literal, $y0:literal, $x1:literal, $y1:literal)) => {
+    (@easings_net $name:ident, ($x0:literal, $y0:literal, $x1:literal, $y1:literal), $formula:expr) => {
         easing_function!($name, ($x0, $y0, $x1, $y1), concat!(
             "taken from [easings.net](https://easings.net/#", stringify!($name), ")"
         ));
+
+        ::paste::paste! {
+            #[cfg(test)]
+            #[test]
+            fn [< test_ $name:snake >](){
+                #[allow(unused_imports)]
+                use core::f32::consts::PI;
+
+                let formula: fn(f32)->f32 = $formula;
+
+                let easing = [< $name:snake >]();
+
+                const STEPS: u16 = 512;
+                for step in 0..=STEPS {
+                    let pos = f32::from(step) / f32::from(STEPS);
+
+                    let expected = formula(pos);
+                    let actual = easing.evaluate(pos);
+
+                    ::approx::assert_abs_diff_eq!(actual, expected, epsilon=0.01);
+                }
+            }
+        }
     };
 }
 
@@ -118,34 +142,12 @@ easing_function!(
 );
 
 // Taken from https://easings.net.
-easing_function!(@easings_net easeInSine, (0.12, 0.0, 0.39, 0.0));
-easing_function!(@easings_net easeOutSine, (0.61, 1.0, 0.88, 1.0));
-easing_function!(@easings_net easeInOutSine, (0.37, 0.0, 0.63, 1.0));
-
-// - name: easeInSine
-//   css:  cubic-bezier(0.12, 0, 0.39, 0)
-//   maths: |-2
-//       return 1 - Math.cos((x * Math.PI) / 2);
-// - name: easeOutSine
-//   css:  cubic-bezier(0.61, 1, 0.88, 1)
-//   maths: |-2
-//       return Math.sin((x * Math.PI) / 2);
-// - name: easeInOutSine
-//   css:  cubic-bezier(0.37, 0, 0.63, 1)
-//   maths: |-2
-//     return -(Math.cos(Math.PI * x) - 1) / 2;
-// - name: easeInQuad
-//   css:  cubic-bezier(0.11, 0, 0.5, 0)
-//   maths: |-2
-//     return x * x;
-// - name: easeOutQuad
-//   css:  cubic-bezier(0.5, 1, 0.89, 1)
-//   maths: |-2
-//     return 1 - (1 - x) * (1 - x);
-// - name: easeInOutQuad
-//   css:  cubic-bezier(0.45, 0, 0.55, 1)
-//   maths: |-2
-//     return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+easing_function!(@easings_net easeInSine, (0.12, 0.0, 0.39, 0.0), |x| 1.0 - ((x * PI) / 2.0).cos());
+easing_function!(@easings_net easeOutSine, (0.61, 1.0, 0.88, 1.0), |x| ((x * PI) / 2.0).sin());
+easing_function!(@easings_net easeInOutSine, (0.37, 0.0, 0.63, 1.0), |x| -((x * PI).cos() - 1.0) / 2.0);
+easing_function!(@easings_net easeInQuad, (0.11, 0.0, 0.5, 0.0), |x| x * x);
+easing_function!(@easings_net easeOutQuad, (0.5, 1.0, 0.89, 1.0), |x| 1.0 - (1.0 - x) * (1.0 - x));
+easing_function!(@easings_net easeInOutQuad, (0.45, 0.0, 0.55, 1.0), |x| if x < 0.5 {2.0 * x * x} else {1.0 - (-2.0 * x + 2.0).powf(2.0) / 2.0});
 // - name: easeInCubic
 //   css:  cubic-bezier(0.32, 0, 0.67, 0)
 //   maths: |-2
@@ -236,5 +238,3 @@ easing_function!(@easings_net easeInOutSine, (0.37, 0.0, 0.63, 1.0));
 //     return x < 0.5
 //       ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
 //       : (Math.pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
-
-// TODO: tests (by checking against math formula from easings.net)
