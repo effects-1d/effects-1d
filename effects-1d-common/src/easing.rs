@@ -161,26 +161,23 @@ easing_function!(@easings_net easeInOutExpo, (0.87, 0.0, 0.13, 1.0), |x| if x ==
 easing_function!(@easings_net easeInCirc, (0.55, 0.0, 1.0, 0.45), |x| 1.0 - (1.0 - x.powf(2.0)).sqrt());
 easing_function!(@easings_net easeOutCirc, (0.0, 0.55, 0.45, 1.0), |x| (1.0 - (x - 1.0).powf(2.0)).sqrt());
 easing_function!(@easings_net easeInOutCirc, (0.85, 0.0, 0.15, 1.0), |x| if x < 0.5 {(1.0 - (1.0 - (2.0 * x).powf(2.0)).sqrt()) / 2.0} else {((1.0 - (-2.0 * x + 2.0).powf(2.0)).sqrt() + 1.0) / 2.0});
-// - name: easeInBack
-//   css:  cubic-bezier(0.36, 0, 0.66, -0.56)
-//   maths: |-2
-//     const c1 = 1.70158;
-//     const c3 = c1 + 1;
+easing_function!(@easings_net easeInBack, (0.36, 0.0, 0.66, -0.56), |x| {
+    let c1 = 1.70158;
+    let c3 = c1 + 1.0;
+    c3 * x * x * x - c1 * x * x
+});
+easing_function!(@easings_net easeOutBack, (0.34, 1.56, 0.64, 1.0), |x| {
+    let c1 = 1.70158;
+    let c3 = c1 + 1.0;
+    1.0 + c3 * (x - 1.0).powf(3.0) + c1 * (x - 1.0).powf(2.0)
+});
+easing_function!(@easings_net easeInOutBack, (0.68, -0.6, 0.32, 1.6), |x| {
+    let c1 = 1.70158;
+    let c2 = c1 * 1.525;
 
-//     return c3 * x * x * x - c1 * x * x;
-// - name: easeOutBack
-//   css:  cubic-bezier(0.34, 1.56, 0.64, 1)
-//   maths: |-2
-//     const c1 = 1.70158;
-//     const c3 = c1 + 1;
-
-//     return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
-// - name: easeInOutBack
-//   css:  cubic-bezier(0.68, -0.6, 0.32, 1.6)
-//   maths: |-2
-//     const c1 = 1.70158;
-//     const c2 = c1 * 1.525;
-
-//     return x < 0.5
-//       ? (Math.pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
-//       : (Math.pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
+    if x < 0.5 {
+        ((2.0 * x).powf(2.0) * ((c2 + 1.0) * 2.0 * x - c2)) / 2.0
+    } else {
+        ((2.0 * x - 2.0).powf(2.0) * ((c2 + 1.0) * (x * 2.0 - 2.0) + c2) + 2.0) / 2.0
+    }
+});
