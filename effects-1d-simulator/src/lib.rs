@@ -9,7 +9,7 @@ pub use effect_renderer::EffectRenderer;
 pub use single_effect_simulator::SimulateEffect;
 
 /// Runs a simulation for the given effect/engine
-pub fn run_simulation(_effect_renderer: EffectRenderer) {
+pub fn run_simulation(mut effect_renderer: EffectRenderer) {
     let window = Window::new(WindowSettings {
         title: "1D Effects Simulator".to_string(),
         max_size: Some((1280, 720)),
@@ -36,8 +36,26 @@ pub fn run_simulation(_effect_renderer: EffectRenderer) {
     window.render_loop(move |mut frame_input| {
         let viewport = gui.update(&mut frame_input);
 
-        laser_sim_widget.update(viewport);
-        led_strip_widget.update(viewport);
+        {
+            use effects_1d_common::color::{self, palette::FromColor, Color};
+
+            let mut framebuffer = vec![color::RGB::zero(); 1024];
+            let effect_state = effect_renderer
+                .render_next_frame(&mut framebuffer, (frame_input.elapsed_time / 1000.0) as f32);
+
+            // Todo display effect state string
+
+            let rgb_colors: Vec<[f32; 3]> = framebuffer
+                .into_iter()
+                .map(|srgb_col| {
+                    let linrgb_col = color::palette::LinSrgb::from_color(srgb_col.into_format());
+                    [linrgb_col.red, linrgb_col.green, linrgb_col.blue]
+                })
+                .collect();
+
+            laser_sim_widget.update(viewport, &rgb_colors);
+            led_strip_widget.update(viewport, &rgb_colors);
+        }
 
         frame_input
             .screen()

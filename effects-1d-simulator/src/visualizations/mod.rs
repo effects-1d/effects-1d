@@ -31,7 +31,7 @@ impl SimWidget {
         }
     }
 
-    pub fn update(&mut self, viewport: Viewport) {
+    pub fn update(&mut self, viewport: Viewport, data: &[[f32; 3]]) {
         let width = viewport.width as f32 * self.rel_size.x;
         let height = viewport.height as f32 * self.rel_size.y;
         let x = viewport.width as f32 * self.rel_position.x;
@@ -39,17 +39,8 @@ impl SimWidget {
         self.gm.geometry.set_center((x, y));
         self.gm.geometry.set_size(width, height);
 
-        let mut data = [[0f32; 3]; 16];
-        let data_len = data.len();
-        for (pos, el) in data.iter_mut().enumerate() {
-            let pct = pos as f32 / (data_len - 1) as f32;
-            el[0] = 1.0 - pct;
-            el[1] = 0.0;
-            el[2] = pct;
-        }
-
         // Update data
-        self.gm.material.update_data(&data)
+        self.gm.material.update_data(data)
     }
 
     pub fn obj(&self) -> &dyn Object {
