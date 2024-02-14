@@ -20,8 +20,18 @@ pub fn run_simulation(_effect_renderer: EffectRenderer) {
 
     let mut gui = gui::EffectGUI::new(&context);
 
-    let mut laser_sim_widget = visualizations::SimWidget::new(&context, (0.5, 0.45), (0.98, 0.88));
-    let mut led_strip_widget = visualizations::SimWidget::new(&context, (0.5, 0.95), (0.98, 0.05));
+    let mut laser_sim_widget = visualizations::SimWidget::new(
+        &context,
+        (0.5, 0.45),
+        (0.98, 0.88),
+        visualizations::LedStripSimMaterial::new(),
+    );
+    let mut led_strip_widget = visualizations::SimWidget::new(
+        &context,
+        (0.5, 0.95),
+        (0.98, 0.05),
+        visualizations::LedStripSimMaterial::new(),
+    );
 
     window.render_loop(move |mut frame_input| {
         let viewport = gui.update(&mut frame_input);
