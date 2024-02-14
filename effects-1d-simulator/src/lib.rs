@@ -24,13 +24,13 @@ pub fn run_simulation(_effect_renderer: EffectRenderer) {
         &context,
         (0.5, 0.45),
         (0.98, 0.88),
-        visualizations::LedStripSimMaterial::new(),
+        visualizations::SimMaterial::ledstrip(&context),
     );
     let mut led_strip_widget = visualizations::SimWidget::new(
         &context,
         (0.5, 0.95),
         (0.98, 0.05),
-        visualizations::LedStripSimMaterial::new(),
+        visualizations::SimMaterial::ledstrip(&context),
     );
 
     window.render_loop(move |mut frame_input| {
