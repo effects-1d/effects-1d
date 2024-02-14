@@ -1009,6 +1009,8 @@ dependencies = [
  "effects-1d-simulator",
  "glam",
  "paste",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
