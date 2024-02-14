@@ -1036,6 +1036,7 @@ version = "0.1.0"
 dependencies = [
  "effects-1d-common",
  "effects-1d-runtime",
+ "rand",
  "three-d",
  "tracing",
  "tracing-subscriber",

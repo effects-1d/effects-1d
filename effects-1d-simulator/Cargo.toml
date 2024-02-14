@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 effects-1d-common = { path = "../effects-1d-common" }
 effects-1d-runtime = { path = "../effects-1d-runtime" }
-# rand = { workspace = true, features = ["default"] }
+rand = { workspace = true, features = ["default"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 # console_error_panic_hook = "0.1.7"

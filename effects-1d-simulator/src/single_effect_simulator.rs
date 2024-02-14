@@ -1,5 +1,3 @@
-use bevy::{prelude::*, utils::Instant};
-
 use effects_1d_common::{
     color::{self, Color},
     effects::{BeatBasedEffect, BeatInfo, FrameBufferRef},
@@ -9,6 +7,7 @@ use effects_1d_common::{
 use effects_1d_runtime::SwitchTimer;
 
 use rand::rngs::OsRng;
+use tracing::{error, info};
 
 use crate::{effect_renderer::SimulationFramebuffer, run_simulation, EffectRenderer};
 
@@ -33,7 +32,7 @@ where
         let mut switch_timer = SwitchTimer::new(10.0);
         let mut switch_requested = false;
 
-        let effect_renderer = EffectRenderer::new(Box::new(move |data, time| {
+        let effect_renderer = EffectRenderer::new(Box::new(move |data, delta_seconds| {
             if switch_requested && beat.is_new_beat {
                 info!("Effect switched.");
                 running_effect = None;
@@ -41,7 +40,7 @@ where
             }
 
             let data_len = data.len();
-            let t0 = Instant::now();
+            let t0 = std::time::Instant::now();
             let effect_state = loop {
                 data.fill(color::RGB::zero());
                 let mut framebuffer = SimulationFramebuffer::new(data);
@@ -49,7 +48,7 @@ where
                     Self::init(Some(data_len as u32), beat.next_full_beat().current)
                 });
 
-                match effect.render_frame(&mut framebuffer, time.delta_seconds(), beat) {
+                match effect.render_frame(&mut framebuffer, delta_seconds, beat) {
                     Ok(effect_state) => {
                         if switch_requested {
                             // Simulate some fade-out transition
@@ -75,14 +74,12 @@ where
                 effect_state
             );
 
-            if switch_timer.update(time.delta_seconds(), beat, effect_state.idle)
-                && !switch_requested
-            {
+            if switch_timer.update(delta_seconds, beat, effect_state.idle) && !switch_requested {
                 info!("Request effect switching ...");
                 switch_requested = true;
             }
 
-            beat.progress(BPM * time.delta_seconds() / 60.0);
+            beat.progress(BPM * delta_seconds / 60.0);
 
             result
         }));
