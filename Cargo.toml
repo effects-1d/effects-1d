@@ -5,7 +5,7 @@ resolver = "2"
 members = [
     "effects-1d",
     "effects-1d-common",
-    # "effects-1d-simulator",
+    "effects-1d-simulator",
     "effects-1d-runtime",
     "utilities",
 ]
@@ -25,7 +25,7 @@ palette = { version = "0.7.0", default-features = false, features = ["libm"] }
 paste = "1.0.12"
 
 # Simulator dependencies
-eframe = "0.25.0"
-egui_plot = "0.25.0"
+eframe = "0.26.1"
+egui_plot = "0.26.1"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
