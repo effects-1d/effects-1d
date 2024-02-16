@@ -33,7 +33,7 @@ impl SimMaterial {
     }
 
     pub fn ledstrip(context: &Context) -> Self {
-        Self::new(context, include_str!("ledstrip_sim.frag"))
+        Self::new(context, include_str!("shaders/sim_ledstrip.frag"))
     }
 
     pub fn update_data(&mut self, data: &[[f32; 3]]) {
@@ -52,7 +52,11 @@ impl SimMaterial {
 
 impl Material for SimMaterial {
     fn fragment_shader_source(&self, _lights: &[&dyn Light]) -> String {
-        self.fragment_shader.to_string()
+        format!(
+            "{}\n{}",
+            include_str!("shaders/sim_common.frag"),
+            self.fragment_shader
+        )
     }
 
     fn fragment_attributes(&self) -> FragmentAttributes {
