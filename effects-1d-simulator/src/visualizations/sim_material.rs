@@ -67,8 +67,8 @@ impl Material for SimMaterial {
     }
 
     fn use_uniforms(&self, program: &Program, _camera: &Camera, _lights: &[&dyn Light]) {
-        program.use_texture("data", &self.data);
-        program.use_uniform("data_size", &self.data_size);
+        program.use_texture("effect_data", &self.data);
+        program.use_uniform("effect_data_len", &self.data_size);
         program.use_uniform("widget_size", &self.widget_size);
     }
 
@@ -77,12 +77,13 @@ impl Material for SimMaterial {
             depth_test: DepthTest::Always,
             write_mask: WriteMask::COLOR,
             cull: Cull::Back,
+            blend: Blend::TRANSPARENCY,
             ..Default::default()
         }
     }
 
     fn material_type(&self) -> MaterialType {
-        MaterialType::Opaque
+        MaterialType::Transparent
     }
 
     fn id(&self) -> u16 {

@@ -39,7 +39,7 @@ pub fn run_simulation(mut effect_renderer: EffectRenderer) {
         {
             use effects_1d_common::color::{self, palette::FromColor, Color};
 
-            let mut framebuffer = vec![color::RGB::zero(); 1024];
+            let mut framebuffer = vec![color::RGB::zero(); 64];
             let effect_state = effect_renderer
                 .render_next_frame(&mut framebuffer, (frame_input.elapsed_time / 1000.0) as f32);
 
