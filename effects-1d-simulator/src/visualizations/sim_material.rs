@@ -5,6 +5,7 @@ pub struct SimMaterial {
     data: Texture2D,
     data_size: u32,
     fragment_shader: &'static str,
+    widget_size: Vec2,
 }
 
 fn create_1d_texture(context: &Context, len: u32) -> Texture2D {
@@ -27,6 +28,7 @@ impl SimMaterial {
             data: create_1d_texture(context, 1),
             data_size: 1,
             fragment_shader,
+            widget_size: Vec2::new(1.0, 1.0),
         }
     }
 
@@ -40,6 +42,11 @@ impl SimMaterial {
             self.data = create_1d_texture(&self.context, self.data_size);
         }
         self.data.fill(data);
+    }
+
+    pub fn set_size(&mut self, width: f32, height: f32) {
+        self.widget_size.x = width;
+        self.widget_size.y = height;
     }
 }
 
@@ -57,6 +64,8 @@ impl Material for SimMaterial {
 
     fn use_uniforms(&self, program: &Program, _camera: &Camera, _lights: &[&dyn Light]) {
         program.use_texture("data", &self.data);
+        program.use_uniform("data_size", &self.data_size);
+        program.use_uniform("widget_size", &self.widget_size);
     }
 
     fn render_states(&self) -> RenderStates {

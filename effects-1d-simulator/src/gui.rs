@@ -37,8 +37,10 @@ impl EffectGUI {
         three_d::Viewport {
             x: (panel_width * frame_input.device_pixel_ratio) as i32,
             y: 0,
-            width: frame_input.viewport.width
-                - (panel_width * frame_input.device_pixel_ratio) as u32,
+            width: frame_input
+                .viewport
+                .width
+                .saturating_sub((panel_width * frame_input.device_pixel_ratio) as u32),
             height: frame_input.viewport.height,
         }
     }

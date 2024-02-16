@@ -38,9 +38,10 @@ impl SimWidget {
         let y = viewport.height as f32 * self.rel_position.y;
         self.gm.geometry.set_center((x, y));
         self.gm.geometry.set_size(width, height);
+        self.gm.material.set_size(width, height);
 
         // Update data
-        self.gm.material.update_data(data)
+        self.gm.material.update_data(data);
     }
 
     pub fn obj(&self) -> &dyn Object {
