@@ -1,17 +1,17 @@
 use effects_1d_common::effects::BeatInfo;
 use three_d::*;
 
-mod effect_renderer;
+mod backends;
+mod effect_backend;
 mod gui;
 mod settings;
-mod single_effect_simulator;
 mod visualizations;
 
-pub use effect_renderer::EffectRenderer;
-pub use single_effect_simulator::SimulateEffect;
+pub use backends::single_effect::SimulateEffect;
+pub use effect_backend::EffectBackend;
 
 /// Runs a simulation for the given effect/engine
-pub fn run_simulation(mut effect_renderer: EffectRenderer) {
+pub fn run_simulation(mut backend: impl EffectBackend + 'static) {
     let window = Window::new(WindowSettings {
         title: "1D Effects Simulator".to_string(),
         max_size: Some((1280, 720)),
@@ -48,7 +48,7 @@ pub fn run_simulation(mut effect_renderer: EffectRenderer) {
 
             beat.progress(f32::from(settings.bpm) * frame_input.elapsed_time as f32 / 60_000.);
 
-            let effect_state = effect_renderer.render_next_frame(
+            let effect_state = backend.render_next_frame(
                 &mut framebuffer,
                 (frame_input.elapsed_time / 1000.0) as f32,
                 beat,
