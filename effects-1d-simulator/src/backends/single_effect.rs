@@ -102,9 +102,11 @@ where
         let mut effect_duration = self.switch_timer.get_effect_duration();
         ui.add(
             Slider::new(&mut effect_duration, 5.0..=600.0)
-                .text("Effect Duration (secs)")
+                .suffix(" s")
+                .text("Effect Duration")
                 .logarithmic(true),
         );
+        self.switch_timer.set_effect_duration(effect_duration);
     }
 }
 
