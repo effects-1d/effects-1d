@@ -36,6 +36,11 @@ impl SwitchTimer {
         self.mean_effect_duration_secs = duration_secs;
     }
 
+    /// How many seconds an effect should be shown, on average
+    pub fn get_effect_duration(&mut self) -> f32 {
+        self.mean_effect_duration_secs
+    }
+
     /// Updates the timer.
     ///
     /// Returns true if the effect must be changed.

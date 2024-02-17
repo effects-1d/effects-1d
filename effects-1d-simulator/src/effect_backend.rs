@@ -1,7 +1,6 @@
-use bevy::prelude::*;
 use effects_1d_common::{
     color::{self, BlendableColor, Color, RGB},
-    effects::{BlendMode, FrameBufferRef},
+    effects::{BeatInfo, BlendMode, FrameBufferRef},
 };
 
 pub struct SimulationFramebuffer<'a> {
@@ -146,25 +145,13 @@ impl FrameBufferRef<color::Binary> for SimulationFramebuffer<'_> {
     }
 }
 
-/// An object that can render an effect to a simulation framebuffer
-#[derive(Resource)]
-pub struct EffectRenderer {
-    render_callback: Box<dyn FnMut(&mut [color::RGB], &Time) -> String + Send + Sync>,
-}
-
-impl EffectRenderer {
-    /// Create a new effect renderer
-    pub fn new(
-        render_callback: Box<dyn FnMut(&mut [color::RGB], &Time) -> String + Send + Sync>,
-    ) -> Self {
-        Self { render_callback }
-    }
-
-    pub(crate) fn render_next_frame(
+pub trait EffectBackend {
+    fn render_next_frame(
         &mut self,
-        framebuffer: &mut [color::RGB],
-        time: &Time,
-    ) -> String {
-        (self.render_callback)(framebuffer, time)
-    }
+        data: &mut [color::RGB],
+        elapsed_time_seconds: f32,
+        beat: BeatInfo,
+    ) -> String;
+
+    fn render_settings_gui(&mut self, ui: &mut three_d::egui::Ui);
 }

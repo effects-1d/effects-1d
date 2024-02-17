@@ -1,168 +1,90 @@
-#![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
-#![deny(unsafe_code)]
+use effects_1d_common::effects::BeatInfo;
+use three_d::*;
 
-use bevy::{
-    prelude::*,
-    window::{PresentMode, WindowResized},
-};
-
-mod effect_renderer;
-mod fonts;
-mod single_effect_simulator;
+mod backends;
+mod effect_backend;
+mod gui;
+mod settings;
 mod visualizations;
 
-pub use effect_renderer::EffectRenderer;
-use effects_1d_common::color::{self, palette::FromColor};
-pub use single_effect_simulator::SimulateEffect;
-
-use fonts::RobotoFontPlugin;
-use visualizations::{
-    laser_sim::{LaserSimMaterial, LaserSimPlugin},
-    ledstrip_sim::{LedStripSimMaterial, LedStripSimPlugin},
-    SimWidget, SimWidgetBundle, WidgetMaterial,
-};
-
-#[derive(Component)]
-struct SimulationStateText;
-
-#[derive(Component)]
-struct EngineStateText;
+pub use backends::single_effect::SimulateEffect;
+pub use effect_backend::EffectBackend;
 
 /// Runs a simulation for the given effect/engine
-pub fn run_simulation(effect_renderer: EffectRenderer) {
-    // When building for WASM, print panics to the browser console
-    #[cfg(target_arch = "wasm32")]
-    console_error_panic_hook::set_once();
+pub fn run_simulation(mut backend: impl EffectBackend + 'static) {
+    let window = Window::new(WindowSettings {
+        title: "1D Effects Simulator".to_string(),
+        max_size: Some((1280, 720)),
+        ..Default::default()
+    })
+    .unwrap();
+    let context = window.gl();
 
-    App::new()
-        .insert_resource(ClearColor(Color::rgb(0.1, 0.1, 0.1)))
-        .insert_resource(effect_renderer)
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "1D Effects Simulator".to_string(),
-                present_mode: PresentMode::AutoVsync,
-                // Tells wasm to resize the window according to the available canvas
-                fit_canvas_to_parent: true,
-                // Tells wasm not to override default event handling, like F5, Ctrl+R etc.
-                prevent_default_event_handling: false,
-                ..default()
-            }),
-            ..default()
-        }))
-        //.add_plugins(bevy::diagnostic::LogDiagnosticsPlugin::default())
-        .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
-        .add_plugins(LaserSimPlugin)
-        .add_plugins(LedStripSimPlugin)
-        .add_plugins(RobotoFontPlugin)
-        .add_systems(Startup, setup)
-        .add_systems(Update, on_resize_system)
-        .add_systems(Update, render_effect_frame)
-        .run();
-}
+    let mut gui = gui::EffectGUI::new(&context);
+    let mut settings = settings::SimulatorSettings::default();
 
-fn setup(
-    windows: Query<&Window>,
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut laser_materials: ResMut<Assets<LaserSimMaterial>>,
-    mut ledstrip_materials: ResMut<Assets<LedStripSimMaterial>>,
-) {
-    // Assumes we only have one window
-    let window = windows.single();
+    let mut laser_sim_widget = visualizations::SimWidget::new(
+        &context,
+        (0.5, 0.45),
+        (0.98, 0.88),
+        visualizations::SimMaterial::laser(&context),
+    );
+    let mut led_strip_widget = visualizations::SimWidget::new(
+        &context,
+        (0.5, 0.95),
+        (0.98, 0.05),
+        visualizations::SimMaterial::ledstrip(&context),
+    );
 
-    commands.spawn(Camera2dBundle::default());
+    let mut beat = BeatInfo::zero();
 
-    commands.spawn(SimWidgetBundle::new(
-        &mut meshes,
-        &mut laser_materials,
-        window,
-        Vec2::new(0.0, 0.0),
-        Vec2::new(1.0, 0.9),
-    ));
-    commands.spawn(SimWidgetBundle::new(
-        &mut meshes,
-        &mut ledstrip_materials,
-        window,
-        Vec2::new(0.0, 0.925),
-        Vec2::new(1.0, 0.05),
-    ));
-    commands.spawn((
-        // Create a TextBundle that has a Text with a single section.
-        TextBundle::from_section(
-            // Accepts a `String` or any type that converts into a `String`, such as `&str`
-            "",
-            TextStyle {
-                font: fonts::roboto(),
-                font_size: 15.0,
-                color: Color::WHITE,
-                ..default()
-            },
-        ) // Set the alignment of the Text
-        .with_text_alignment(TextAlignment::Left)
-        // Set the style of the TextBundle itself.
-        .with_style(Style {
-            position_type: PositionType::Absolute,
-            bottom: Val::Px(5.0),
-            left: Val::Px(15.0),
-            ..default()
-        }),
-        SimulationStateText,
-    ));
-}
+    window.render_loop(move |mut frame_input| {
+        use effects_1d_common::color::{self, palette::FromColor, Color};
 
-fn on_resize_system(
-    mut resize_reader: EventReader<WindowResized>,
-    mut simwidgets: Query<(&mut Transform, &SimWidget)>,
-    mut ledstrip_sim_materials: ResMut<Assets<LedStripSimMaterial>>,
-    mut laser_sim_materials: ResMut<Assets<LaserSimMaterial>>,
-) {
-    for e in resize_reader.read() {
-        let window_size = Vec2::new(e.width, e.height);
+        let mut framebuffer = vec![color::RGB::zero(); settings.resolution];
 
-        for (mut transform, simwidget) in simwidgets.iter_mut() {
-            (*transform) = simwidget.compute_transform(window_size);
-        }
+        beat.progress(f32::from(settings.bpm) * frame_input.elapsed_time as f32 / 60_000.);
 
-        for (_, ledstrip_sim_material) in ledstrip_sim_materials.iter_mut() {
-            ledstrip_sim_material.update_window_size(window_size);
-        }
+        let effect_state = backend.render_next_frame(
+            &mut framebuffer,
+            (frame_input.elapsed_time / 1000.0) as f32,
+            beat,
+        );
 
-        for (_, laser_sim_material) in laser_sim_materials.iter_mut() {
-            laser_sim_material.update_window_size(window_size);
-        }
-    }
-}
+        let viewport = gui.update(&mut frame_input, &mut settings, &mut backend, &effect_state);
 
-fn render_effect_frame(
-    time: Res<Time>,
-    mut effect_renderer: ResMut<EffectRenderer>,
-    mut ledstrip_sim_materials: ResMut<Assets<LedStripSimMaterial>>,
-    mut laser_sim_materials: ResMut<Assets<LaserSimMaterial>>,
-    mut simulation_state_texts: Query<&mut Text, With<SimulationStateText>>,
-) {
-    use color::Color;
-    let mut framebuffer = vec![color::RGB::zero(); 1024];
-    let effect_state = effect_renderer
-        .as_mut()
-        .render_next_frame(&mut framebuffer, time.as_ref());
+        let rgb_colors: Vec<[f32; 3]> = framebuffer
+            .into_iter()
+            .map(|srgb_col| {
+                let linrgb_col = color::palette::LinSrgb::from_color(srgb_col.into_format());
+                [linrgb_col.red, linrgb_col.green, linrgb_col.blue]
+            })
+            .collect();
 
-    for mut simulation_state_text in simulation_state_texts.iter_mut() {
-        simulation_state_text.sections[0].value = effect_state.clone();
-    }
+        laser_sim_widget.update(
+            viewport,
+            &rgb_colors,
+            frame_input.accumulated_time as f32 * 1000.0,
+        );
+        led_strip_widget.update(
+            viewport,
+            &rgb_colors,
+            frame_input.accumulated_time as f32 * 1000.0,
+        );
 
-    let rgb_colors: Vec<Vec4> = framebuffer
-        .into_iter()
-        .map(|srgb_col| {
-            let linrgb_col = color::palette::LinSrgb::from_color(srgb_col.into_format());
-            Vec4::new(linrgb_col.red, linrgb_col.green, linrgb_col.blue, 0.)
-        })
-        .collect();
+        frame_input
+            .screen()
+            .clear(ClearState::color_and_depth(1.0, 0.0, 1.0, 1.0, 1.0))
+            .clear_partially(viewport.into(), ClearState::color(0.1, 0.1, 0.1, 1.0))
+            .render_partially(
+                viewport.into(),
+                &Camera::new_2d(viewport),
+                &[laser_sim_widget.obj(), led_strip_widget.obj()],
+                &[],
+            )
+            .write(|| gui.render());
 
-    for (_, laser_sim_material) in laser_sim_materials.iter_mut() {
-        laser_sim_material.effect_data = rgb_colors.clone();
-    }
-    for (_, ledstrip_sim_material) in ledstrip_sim_materials.iter_mut() {
-        ledstrip_sim_material.effect_data = rgb_colors.clone();
-    }
+        // Returns default frame output to end the frame
+        FrameOutput::default()
+    });
 }

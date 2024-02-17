@@ -5,5 +5,9 @@ use effects_1d::{binary::*, binary_rgb::*, calibration::*, monochrome::*, rgb::*
 use effects_1d_simulator::SimulateEffect;
 
 fn main() {
-    RandomBlinkingPixels::simulate();
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
+
+    RotatingLinesFilled::simulate();
 }

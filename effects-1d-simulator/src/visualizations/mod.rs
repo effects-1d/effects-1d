@@ -1,67 +1,53 @@
-use bevy::{
-    prelude::*,
-    sprite::{Material2d, MaterialMesh2dBundle},
-};
+use three_d::*;
 
-pub mod laser_sim;
-pub mod ledstrip_sim;
+mod sim_material;
+pub use sim_material::SimMaterial;
 
-#[derive(Component)]
 pub struct SimWidget {
-    /// Position of the widget's top left point
-    ///  - (0,0) would be the in the top left corner
-    ///  - (0.5,0.5) would mean the top left corner of the widget is in the center of the screen
-    pub rel_position: Vec2,
+    /// Position of the widget's center point
+    ///  - (0.5,0.5) would mean that the widget is in the center of the screen
+    rel_position: Vec2,
     /// Size of the widget
-    pub rel_size: Vec2,
+    rel_size: Vec2,
+    /// The actual rectangle to render
+    gm: Gm<Rectangle, SimMaterial>,
 }
 
 impl SimWidget {
-    pub fn compute_transform(&self, window_size: Vec2) -> Transform {
-        Transform::default()
-            .with_scale((window_size * self.rel_size).extend(0.))
-            .with_translation(
-                (window_size * (self.rel_position + self.rel_size * 0.5 - 0.5)).extend(0.),
-            )
-    }
-}
-
-#[derive(Bundle)]
-pub struct SimWidgetBundle<M: WidgetMaterial> {
-    pub widget: SimWidget,
-    pub content: MaterialMesh2dBundle<M>,
-}
-
-impl<M: WidgetMaterial> SimWidgetBundle<M> {
     pub fn new(
-        meshes: &mut Assets<Mesh>,
-        materials: &mut Assets<M>,
-        window: &Window,
-        rel_position: Vec2,
-        rel_size: Vec2,
+        context: &Context,
+        rel_position: impl Into<Vec2>,
+        rel_size: impl Into<Vec2>,
+        material: SimMaterial,
     ) -> Self {
-        let window_size = Vec2::new(window.width(), window.height());
-
-        let widget = SimWidget {
-            rel_position,
-            rel_size,
-        };
-
-        let transform = widget.compute_transform(window_size);
-
+        let gm = Gm::new(
+            Rectangle::new(context, (0.0, 0.0), degrees(0.0), 0.0, 0.0),
+            material,
+        );
         Self {
-            widget,
-            content: MaterialMesh2dBundle {
-                mesh: meshes.add(Mesh::from(shape::Quad::default())).into(),
-                transform,
-                material: materials.add(M::new(rel_size, window_size)),
-                ..default()
-            },
+            rel_position: rel_position.into(),
+            rel_size: rel_size.into(),
+            gm,
         }
     }
-}
 
-pub trait WidgetMaterial: Material2d {
-    fn new(rel_size: Vec2, window_size: Vec2) -> Self;
-    fn update_window_size(&mut self, window_size: Vec2);
+    pub fn update(&mut self, viewport: Viewport, data: &[[f32; 3]], time: f32) {
+        let width = viewport.width as f32 * self.rel_size.x;
+        let height = viewport.height as f32 * self.rel_size.y;
+        let x = viewport.width as f32 * self.rel_position.x;
+        let y = viewport.height as f32 * self.rel_position.y;
+        self.gm.geometry.set_center((x, y));
+        self.gm.geometry.set_size(width, height);
+        self.gm.material.set_size(width, height);
+
+        // Update data
+        self.gm.material.update_data(data);
+
+        // Update time
+        self.gm.material.set_time(time);
+    }
+
+    pub fn obj(&self) -> &dyn Object {
+        &self.gm
+    }
 }

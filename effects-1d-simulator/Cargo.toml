@@ -9,18 +9,9 @@ edition = "2021"
 effects-1d-common = { path = "../effects-1d-common" }
 effects-1d-runtime = { path = "../effects-1d-runtime" }
 rand = { workspace = true, features = ["default"] }
-console_error_panic_hook = "0.1.7"
+tracing = { workspace = true }
+# console_error_panic_hook = "0.1.7"
+three-d = { version = "0.16.4", features = ["egui-gui"] }
 
-[dependencies.bevy]
-version = "0.12.1"
-default-features = false
-features = [
-    "bevy_asset",
-    "bevy_core_pipeline",
-    "bevy_render",
-    "bevy_sprite",
-    "bevy_text",
-    "bevy_ui",
-    "bevy_winit",
-    #"default_font",
-]
+[dev-dependencies]
+tracing-subscriber = { workspace = true }
