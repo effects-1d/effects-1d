@@ -78,10 +78,10 @@ where
 
         let result = format!(
             "Compute Time: {:.01?}\n{:#?}\n{:#?}\n\nState:\n{:#?}",
-            self.running_effect.as_mut().unwrap(),
             render_duration,
             beat,
-            effect_state
+            effect_state,
+            self.running_effect.as_mut().unwrap(),
         );
 
         if self

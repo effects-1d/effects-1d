@@ -39,42 +39,38 @@ pub fn run_simulation(mut backend: impl EffectBackend + 'static) {
     let mut beat = BeatInfo::zero();
 
     window.render_loop(move |mut frame_input| {
-        let viewport = gui.update(&mut frame_input, &mut settings, &mut backend);
+        use effects_1d_common::color::{self, palette::FromColor, Color};
 
-        {
-            use effects_1d_common::color::{self, palette::FromColor, Color};
+        let mut framebuffer = vec![color::RGB::zero(); settings.resolution];
 
-            let mut framebuffer = vec![color::RGB::zero(); settings.resolution];
+        beat.progress(f32::from(settings.bpm) * frame_input.elapsed_time as f32 / 60_000.);
 
-            beat.progress(f32::from(settings.bpm) * frame_input.elapsed_time as f32 / 60_000.);
+        let effect_state = backend.render_next_frame(
+            &mut framebuffer,
+            (frame_input.elapsed_time / 1000.0) as f32,
+            beat,
+        );
 
-            let effect_state = backend.render_next_frame(
-                &mut framebuffer,
-                (frame_input.elapsed_time / 1000.0) as f32,
-                beat,
-            );
+        let viewport = gui.update(&mut frame_input, &mut settings, &mut backend, &effect_state);
 
-            // Todo display effect state string
+        let rgb_colors: Vec<[f32; 3]> = framebuffer
+            .into_iter()
+            .map(|srgb_col| {
+                let linrgb_col = color::palette::LinSrgb::from_color(srgb_col.into_format());
+                [linrgb_col.red, linrgb_col.green, linrgb_col.blue]
+            })
+            .collect();
 
-            let rgb_colors: Vec<[f32; 3]> = framebuffer
-                .into_iter()
-                .map(|srgb_col| {
-                    let linrgb_col = color::palette::LinSrgb::from_color(srgb_col.into_format());
-                    [linrgb_col.red, linrgb_col.green, linrgb_col.blue]
-                })
-                .collect();
-
-            laser_sim_widget.update(
-                viewport,
-                &rgb_colors,
-                frame_input.accumulated_time as f32 * 1000.0,
-            );
-            led_strip_widget.update(
-                viewport,
-                &rgb_colors,
-                frame_input.accumulated_time as f32 * 1000.0,
-            );
-        }
+        laser_sim_widget.update(
+            viewport,
+            &rgb_colors,
+            frame_input.accumulated_time as f32 * 1000.0,
+        );
+        led_strip_widget.update(
+            viewport,
+            &rgb_colors,
+            frame_input.accumulated_time as f32 * 1000.0,
+        );
 
         frame_input
             .screen()

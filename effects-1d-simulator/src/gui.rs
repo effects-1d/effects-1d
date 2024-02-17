@@ -16,6 +16,7 @@ impl EffectGUI {
         frame_input: &mut three_d::FrameInput,
         settings: &mut SimulatorSettings,
         backend: &mut dyn EffectBackend,
+        effect_state: &str,
     ) -> three_d::Viewport {
         let mut panel_width = 0.0;
 
@@ -29,9 +30,18 @@ impl EffectGUI {
                 SidePanel::left("side_panel").show(gui_context, |ui| {
                     ui.heading("Simulator Settings");
                     settings.render_gui(ui);
+
                     ui.add_space(12.0);
+
                     ui.heading("Effect Settings");
                     backend.render_settings_gui(ui);
+
+                    ui.add_space(12.0);
+
+                    ui.heading("State");
+                    ui.collapsing("Detailed State", |ui| {
+                        ui.label(RichText::new(effect_state).monospace().small());
+                    });
                 });
                 panel_width = gui_context.used_rect().width();
             },
