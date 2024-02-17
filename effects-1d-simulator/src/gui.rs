@@ -1,4 +1,4 @@
-use crate::settings::SimulatorSettings;
+use crate::{settings::SimulatorSettings, EffectBackend};
 
 pub struct EffectGUI {
     gui: three_d::GUI,
@@ -15,6 +15,7 @@ impl EffectGUI {
         &mut self,
         frame_input: &mut three_d::FrameInput,
         settings: &mut SimulatorSettings,
+        backend: &mut dyn EffectBackend,
     ) -> three_d::Viewport {
         let mut panel_width = 0.0;
 
@@ -29,6 +30,8 @@ impl EffectGUI {
                     ui.heading("Simulator Settings");
                     settings.render_gui(ui);
                     ui.add_space(12.0);
+                    ui.heading("Effect Settings");
+                    backend.render_settings_gui(ui);
                 });
                 panel_width = gui_context.used_rect().width();
             },

@@ -152,4 +152,6 @@ pub trait EffectBackend {
         elapsed_time_seconds: f32,
         beat: BeatInfo,
     ) -> String;
+
+    fn render_settings_gui(&mut self, ui: &mut three_d::egui::Ui);
 }

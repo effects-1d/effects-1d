@@ -39,7 +39,7 @@ pub fn run_simulation(mut backend: impl EffectBackend + 'static) {
     let mut beat = BeatInfo::zero();
 
     window.render_loop(move |mut frame_input| {
-        let viewport = gui.update(&mut frame_input, &mut settings);
+        let viewport = gui.update(&mut frame_input, &mut settings, &mut backend);
 
         {
             use effects_1d_common::color::{self, palette::FromColor, Color};

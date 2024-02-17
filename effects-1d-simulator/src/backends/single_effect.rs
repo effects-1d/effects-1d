@@ -27,7 +27,7 @@ impl<T> Default for SingleEffectBackend<T> {
     fn default() -> Self {
         Self {
             running_effect: None,
-            switch_timer: SwitchTimer::new(0.0),
+            switch_timer: SwitchTimer::new(30.0),
             switch_requested: false,
         }
     }
@@ -94,6 +94,17 @@ where
         }
 
         result
+    }
+
+    fn render_settings_gui(&mut self, ui: &mut three_d::egui::Ui) {
+        use three_d::egui::*;
+
+        let mut effect_duration = self.switch_timer.get_effect_duration();
+        ui.add(
+            Slider::new(&mut effect_duration, 5.0..=600.0)
+                .text("Effect Duration (secs)")
+                .logarithmic(true),
+        );
     }
 }
 
