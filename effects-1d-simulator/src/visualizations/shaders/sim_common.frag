@@ -16,7 +16,7 @@ vec3 get_color(uint index) {
     );
 }
 
-
+// RNG /////
 uint pcg_hash(uint data)
 {
     uint state = data * 747796405u + 2891336453u;
@@ -44,10 +44,10 @@ float rand(inout uint rng_state)
     return float(raw_value) / float(RAND_PCG_MAX);
 }
 
-uint init_rand_state(vec2 uv) {
+uint init_rand_state() {
     uint rng_state = 0u;
     rng_state ^= pcg_hash_f(time);
-    rng_state ^= pcg_hash_f(uv.x);
-    rng_state ^= pcg_hash_f(uv.y);
+    rng_state ^= pcg_hash_f(uvs.x);
+    rng_state ^= pcg_hash_f(uvs.y);
     return rng_state;
 }

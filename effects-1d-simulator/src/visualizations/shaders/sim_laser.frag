@@ -3,7 +3,7 @@ const float GRIDLINE_SIZE = 0.15;
 
 void main()
 {
-    uint rng_state = init_rand_state(uvs);
+    uint rng_state = init_rand_state();
 
     float pixel_size = 1.0 / widget_size.x;
 
