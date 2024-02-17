@@ -1,7 +1,9 @@
+use effects_1d_common::effects::BeatInfo;
 use three_d::*;
 
 mod effect_renderer;
 mod gui;
+mod settings;
 mod single_effect_simulator;
 mod visualizations;
 
@@ -19,6 +21,7 @@ pub fn run_simulation(mut effect_renderer: EffectRenderer) {
     let context = window.gl();
 
     let mut gui = gui::EffectGUI::new(&context);
+    let mut settings = settings::SimulatorSettings::default();
 
     let mut laser_sim_widget = visualizations::SimWidget::new(
         &context,
@@ -33,15 +36,23 @@ pub fn run_simulation(mut effect_renderer: EffectRenderer) {
         visualizations::SimMaterial::ledstrip(&context),
     );
 
+    let mut beat = BeatInfo::zero();
+
     window.render_loop(move |mut frame_input| {
-        let viewport = gui.update(&mut frame_input);
+        let viewport = gui.update(&mut frame_input, &mut settings);
 
         {
             use effects_1d_common::color::{self, palette::FromColor, Color};
 
-            let mut framebuffer = vec![color::RGB::zero(); 1024];
-            let effect_state = effect_renderer
-                .render_next_frame(&mut framebuffer, (frame_input.elapsed_time / 1000.0) as f32);
+            let mut framebuffer = vec![color::RGB::zero(); settings.resolution];
+
+            beat.progress(f32::from(settings.bpm) * frame_input.elapsed_time as f32 / 60_000.);
+
+            let effect_state = effect_renderer.render_next_frame(
+                &mut framebuffer,
+                (frame_input.elapsed_time / 1000.0) as f32,
+                beat,
+            );
 
             // Todo display effect state string
 

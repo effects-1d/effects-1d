@@ -1,6 +1,6 @@
 use effects_1d_common::{
     color::{self, Color},
-    effects::{BeatBasedEffect, BeatInfo, FrameBufferRef},
+    effects::{BeatBasedEffect, FrameBufferRef},
     errors::RenderError,
     random::{EffectRng, Rng},
 };
@@ -17,8 +17,6 @@ pub trait SimulateEffect {
     fn simulate();
 }
 
-const BPM: f32 = 125.0;
-
 impl<T> SimulateEffect for T
 where
     T: BeatBasedEffect,
@@ -28,11 +26,10 @@ where
         EffectRng::seed(OsRng.gen());
 
         let mut running_effect = None;
-        let mut beat = BeatInfo::zero();
         let mut switch_timer = SwitchTimer::new(10.0);
         let mut switch_requested = false;
 
-        let effect_renderer = EffectRenderer::new(Box::new(move |data, delta_seconds| {
+        let effect_renderer = EffectRenderer::new(Box::new(move |data, delta_seconds, beat| {
             if switch_requested && beat.is_new_beat {
                 info!("Effect switched.");
                 running_effect = None;
@@ -78,8 +75,6 @@ where
                 info!("Request effect switching ...");
                 switch_requested = true;
             }
-
-            beat.progress(BPM * delta_seconds / 60.0);
 
             result
         }));

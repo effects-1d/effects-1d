@@ -1,6 +1,6 @@
 use effects_1d_common::{
     color::{self, BlendableColor, Color, RGB},
-    effects::{BlendMode, FrameBufferRef},
+    effects::{BeatInfo, BlendMode, FrameBufferRef},
 };
 
 pub struct SimulationFramebuffer<'a> {
@@ -147,13 +147,13 @@ impl FrameBufferRef<color::Binary> for SimulationFramebuffer<'_> {
 
 /// An object that can render an effect to a simulation framebuffer
 pub struct EffectRenderer {
-    render_callback: Box<dyn FnMut(&mut [color::RGB], f32) -> String + Send + Sync>,
+    render_callback: Box<dyn FnMut(&mut [color::RGB], f32, BeatInfo) -> String + Send + Sync>,
 }
 
 impl EffectRenderer {
     /// Create a new effect renderer
     pub fn new(
-        render_callback: Box<dyn FnMut(&mut [color::RGB], f32) -> String + Send + Sync>,
+        render_callback: Box<dyn FnMut(&mut [color::RGB], f32, BeatInfo) -> String + Send + Sync>,
     ) -> Self {
         Self { render_callback }
     }
@@ -162,7 +162,8 @@ impl EffectRenderer {
         &mut self,
         framebuffer: &mut [color::RGB],
         time: f32,
+        beat: BeatInfo,
     ) -> String {
-        (self.render_callback)(framebuffer, time)
+        (self.render_callback)(framebuffer, time, beat)
     }
 }
