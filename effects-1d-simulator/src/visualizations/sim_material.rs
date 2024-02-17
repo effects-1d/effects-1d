@@ -6,6 +6,8 @@ pub struct SimMaterial {
     data_size: u32,
     fragment_shader: &'static str,
     widget_size: Vec2,
+    time: f32,
+    material_id: u16,
 }
 
 fn create_1d_texture(context: &Context, len: u32) -> Texture2D {
@@ -22,18 +24,23 @@ fn create_1d_texture(context: &Context, len: u32) -> Texture2D {
 }
 
 impl SimMaterial {
-    fn new(context: &Context, fragment_shader: &'static str) -> Self {
+    fn new(context: &Context, fragment_shader: &'static str, material_id: u16) -> Self {
         Self {
             context: context.clone(),
             data: create_1d_texture(context, 1),
             data_size: 1,
             fragment_shader,
             widget_size: Vec2::new(1.0, 1.0),
+            time: 0.0,
+            material_id,
         }
     }
 
     pub fn ledstrip(context: &Context) -> Self {
-        Self::new(context, include_str!("shaders/sim_ledstrip.frag"))
+        Self::new(context, include_str!("shaders/sim_ledstrip.frag"), 0b101u16)
+    }
+    pub fn laser(context: &Context) -> Self {
+        Self::new(context, include_str!("shaders/sim_laser.frag"), 0b100u16)
     }
 
     pub fn update_data(&mut self, data: &[[f32; 3]]) {
@@ -47,6 +54,10 @@ impl SimMaterial {
     pub fn set_size(&mut self, width: f32, height: f32) {
         self.widget_size.x = width;
         self.widget_size.y = height;
+    }
+
+    pub fn set_time(&mut self, time: f32) {
+        self.time = time;
     }
 }
 
@@ -70,6 +81,7 @@ impl Material for SimMaterial {
         program.use_texture("effect_data", &self.data);
         program.use_uniform("effect_data_len", &self.data_size);
         program.use_uniform("widget_size", &self.widget_size);
+        program.use_uniform("time", &self.time);
     }
 
     fn render_states(&self) -> RenderStates {
@@ -87,6 +99,6 @@ impl Material for SimMaterial {
     }
 
     fn id(&self) -> u16 {
-        0b11u16
+        self.material_id
     }
 }

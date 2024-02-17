@@ -24,7 +24,7 @@ pub fn run_simulation(mut effect_renderer: EffectRenderer) {
         &context,
         (0.5, 0.45),
         (0.98, 0.88),
-        visualizations::SimMaterial::ledstrip(&context),
+        visualizations::SimMaterial::laser(&context),
     );
     let mut led_strip_widget = visualizations::SimWidget::new(
         &context,
@@ -53,8 +53,16 @@ pub fn run_simulation(mut effect_renderer: EffectRenderer) {
                 })
                 .collect();
 
-            laser_sim_widget.update(viewport, &rgb_colors);
-            led_strip_widget.update(viewport, &rgb_colors);
+            laser_sim_widget.update(
+                viewport,
+                &rgb_colors,
+                frame_input.accumulated_time as f32 * 1000.0,
+            );
+            led_strip_widget.update(
+                viewport,
+                &rgb_colors,
+                frame_input.accumulated_time as f32 * 1000.0,
+            );
         }
 
         frame_input
