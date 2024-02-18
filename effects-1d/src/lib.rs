@@ -14,25 +14,25 @@ macro_rules! export_effects {
             }
 
             #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-            pub enum [< $modname:camel Effects >] {
+            pub enum [< $modname:camel Effect >] {
                 $(
                     [<$name>],
                 )*
             }
 
             #[derive(Debug)]
-            pub enum [< $modname:camel Effect >] {
+            pub enum [< $modname:camel EffectInstance >] {
                 $(
                     [<$name>]($modname::[<$name>]),
                 )*
             }
 
-            impl [< $modname:camel Effects >] {
-                pub fn create(self, resolution_hint: Option<u32>, start_beat: i32) -> [< $modname:camel Effect >] {
+            impl [< $modname:camel Effect >] {
+                pub fn create(self, resolution_hint: Option<u32>, start_beat: i32) -> [< $modname:camel EffectInstance >] {
                     match self {
                         $(
                             Self::[<$name>] => {
-                                [< $modname:camel Effect >]::[<$name>](::effects_1d_common::effects::ConstructibleBeatBasedEffect::init(resolution_hint, start_beat))
+                                [< $modname:camel EffectInstance >]::[<$name>](::effects_1d_common::effects::ConstructibleBeatBasedEffect::init(resolution_hint, start_beat))
                             }
                         )*
                     }
@@ -47,13 +47,13 @@ macro_rules! export_effects {
                 }
             }
 
-            impl ::core::fmt::Display for [< $modname:camel Effects >] {
+            impl ::core::fmt::Display for [< $modname:camel Effect >] {
                 fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> Result<(), ::core::fmt::Error> {
                     ::core::fmt::Debug::fmt(self, f)
                 }
             }
 
-            impl [< $modname:camel Effect >] {
+            impl [< $modname:camel EffectInstance >] {
                 pub fn as_effect(&mut self) -> &mut dyn ::effects_1d_common::effects::BeatBasedEffect<Color = $color> {
                     match self {
                         $(
