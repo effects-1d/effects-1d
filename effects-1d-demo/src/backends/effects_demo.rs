@@ -1,8 +1,10 @@
 use core::fmt::Display;
 
 use effects_1d::{
-    BinaryEffect, BinaryEffectInstance, BinaryRgbEffect, BinaryRgbEffectInstance, MonochromeEffect,
-    MonochromeEffectInstance, RgbEffect, RgbEffectInstance,
+    BinaryEffect, BinaryEffectInstance, BinaryRgbEffect, BinaryRgbEffectInstance,
+    CalibrationMonochromeEffect, CalibrationMonochromeEffectInstance, CalibrationRgbEffect,
+    CalibrationRgbEffectInstance, MonochromeEffect, MonochromeEffectInstance, RgbEffect,
+    RgbEffectInstance,
 };
 use effects_1d_common::{
     color::{self, Color},
@@ -40,6 +42,8 @@ enum DemoEffect {
     Monochrome(MonochromeEffect),
     BinaryRgb(BinaryRgbEffect),
     Rgb(RgbEffect),
+    CalibrationMono(CalibrationMonochromeEffect),
+    CalibrationRgb(CalibrationRgbEffect),
 }
 
 #[derive(Debug)]
@@ -48,6 +52,8 @@ enum DemoEffectInstance {
     Monochrome(MonochromeEffectInstance),
     BinaryRgb(BinaryRgbEffectInstance),
     Rgb(RgbEffectInstance),
+    CalibrationMono(CalibrationMonochromeEffectInstance),
+    CalibrationRgb(CalibrationRgbEffectInstance),
 }
 
 impl Display for DemoEffect {
@@ -57,6 +63,8 @@ impl Display for DemoEffect {
             DemoEffect::BinaryRgb(effect) => write!(f, "8-Color - {}", effect),
             DemoEffect::Monochrome(effect) => write!(f, "Mono - {}", effect),
             DemoEffect::Rgb(effect) => write!(f, "RGB - {}", effect),
+            DemoEffect::CalibrationMono(effect) => write!(f, "Calibration - {}", effect),
+            DemoEffect::CalibrationRgb(effect) => write!(f, "Calibration - {}", effect),
         }
     }
 }
@@ -75,6 +83,12 @@ impl DemoEffect {
             }
             DemoEffect::Rgb(effect) => {
                 DemoEffectInstance::Rgb(effect.create(resolution_hint, start_beat))
+            }
+            DemoEffect::CalibrationMono(effect) => {
+                DemoEffectInstance::CalibrationMono(effect.create(resolution_hint, start_beat))
+            }
+            DemoEffect::CalibrationRgb(effect) => {
+                DemoEffectInstance::CalibrationRgb(effect.create(resolution_hint, start_beat))
             }
         }
     }
@@ -98,6 +112,12 @@ impl DemoEffectInstance {
                 effect.as_effect().render_frame(framebuffer, d_t, beat)
             }
             DemoEffectInstance::Rgb(effect) => {
+                effect.as_effect().render_frame(framebuffer, d_t, beat)
+            }
+            DemoEffectInstance::CalibrationMono(effect) => {
+                effect.as_effect().render_frame(framebuffer, d_t, beat)
+            }
+            DemoEffectInstance::CalibrationRgb(effect) => {
                 effect.as_effect().render_frame(framebuffer, d_t, beat)
             }
         }
@@ -211,6 +231,24 @@ impl EffectBackend for EffectsDemoBackend {
                     ui.selectable_value(
                         &mut self.desired_effect,
                         DemoEffect::Rgb(effect),
+                        format!("{}", effect),
+                    );
+                }
+
+                ui.add_space(12.0);
+
+                ui.label("Calibration");
+                for &effect in CalibrationMonochromeEffect::available() {
+                    ui.selectable_value(
+                        &mut self.desired_effect,
+                        DemoEffect::CalibrationMono(effect),
+                        format!("{}", effect),
+                    );
+                }
+                for &effect in CalibrationRgbEffect::available() {
+                    ui.selectable_value(
+                        &mut self.desired_effect,
+                        DemoEffect::CalibrationRgb(effect),
                         format!("{}", effect),
                     );
                 }
