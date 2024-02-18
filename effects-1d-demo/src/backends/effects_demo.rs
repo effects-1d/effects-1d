@@ -8,15 +8,10 @@ use effects_1d::{
 };
 use effects_1d_common::{
     color::{self, Color},
-    effects::{
-        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
-    },
+    effects::{BeatInfo, EffectState},
     errors::RenderError,
-    random::{EffectRng, Rng},
 };
 use effects_1d_simulator::{EffectBackend, SimulationFramebuffer};
-
-use tracing::{error, info};
 
 pub struct EffectsDemoBackend {
     switch_requested: bool,
@@ -132,13 +127,13 @@ impl EffectBackend for EffectsDemoBackend {
         beat: effects_1d_common::effects::BeatInfo,
     ) -> String {
         if self.switch_in_progress && beat.is_new_beat {
-            info!("Effect switched.");
+            tracing::info!("Effect switched.");
             self.running_effect = None;
             self.switch_in_progress = false;
             self.switch_requested = false;
         }
         if self.switch_requested && beat.is_new_beat {
-            info!("Switching effect ...");
+            tracing::info!("Switching effect ...");
             self.switch_in_progress = true;
             self.switch_requested = false;
         }
@@ -162,11 +157,11 @@ impl EffectBackend for EffectsDemoBackend {
                     break effect_state;
                 }
                 Err(RenderError::EffectOver) => {
-                    info!("Effect is over. Restarting ...");
+                    tracing::info!("Effect is over. Restarting ...");
                     self.running_effect = None;
                     continue;
                 }
-                Err(e) => error!("Effect failed: {:?}", e),
+                Err(e) => tracing::error!("Effect failed: {:?}", e),
             };
         };
         let render_duration = t0.elapsed();
