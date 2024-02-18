@@ -1026,6 +1026,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "effects-1d-demo"
+version = "0.1.0"
+dependencies = [
+ "effects-1d",
+ "effects-1d-common",
+ "effects-1d-simulator",
+ "three-d",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "effects-1d-runtime"
 version = "0.1.0"
 dependencies = [
