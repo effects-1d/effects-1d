@@ -3,7 +3,9 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color::{self, gradients::HsvRainbowGradient},
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
 };
 
@@ -13,15 +15,17 @@ pub struct RotatingRainbow {
     rainbow_scale: f32,
 }
 
-impl BeatBasedEffect for RotatingRainbow {
-    type Color = color::RGB;
-
+impl ConstructibleBeatBasedEffect for RotatingRainbow {
     fn init(_resolution_hint: Option<u32>, _start_beat: i32) -> Self {
         Self {
             cycle_len: 12,
             rainbow_scale: 0.5,
         }
     }
+}
+
+impl BeatBasedEffect for RotatingRainbow {
+    type Color = color::RGB;
 
     fn render_frame(
         &mut self,

@@ -4,64 +4,109 @@
 
 // Adds effect submodules and exports the effect types
 macro_rules! export_effects {
-    ($($name: ident),* $(,)?) => {
-        $(
-            ::paste::paste!{
-                mod [<$name:snake>];
-                pub use [<$name:snake>]::$name;
+    ($modname: ident, $color: ty, {$($name: ident),* $(,)?}) => {
+        ::paste::paste!{
+            pub mod $modname {
+                $(
+                    mod [<$name:snake>];
+                    pub use [<$name:snake>]::$name;
+                )*
             }
-        )*
+
+            #[derive(Debug, Clone, Copy, Eq, PartialEq)]
+            pub enum [< $modname:camel Effects >] {
+                $(
+                    [<$name>],
+                )*
+            }
+
+            #[derive(Debug)]
+            pub enum [< $modname:camel Effect >] {
+                $(
+                    [<$name>]($modname::[<$name>]),
+                )*
+            }
+
+            impl [< $modname:camel Effects >] {
+                pub fn create(self, resolution_hint: Option<u32>, start_beat: i32) -> [< $modname:camel Effect >] {
+                    match self {
+                        $(
+                            Self::[<$name>] => {
+                                [< $modname:camel Effect >]::[<$name>](::effects_1d_common::effects::ConstructibleBeatBasedEffect::init(resolution_hint, start_beat))
+                            }
+                        )*
+                    }
+                }
+
+                pub fn available() -> &'static [Self] {
+                    &[
+                        $(
+                            Self::[<$name>],
+                        )*
+                    ]
+                }
+            }
+
+            impl ::core::fmt::Display for [< $modname:camel Effects >] {
+                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> Result<(), ::core::fmt::Error> {
+                    ::core::fmt::Debug::fmt(self, f)
+                }
+            }
+
+            impl [< $modname:camel Effect >] {
+                pub fn as_effect(&mut self) -> &mut dyn ::effects_1d_common::effects::BeatBasedEffect<Color = $color> {
+                    match self {
+                        $(
+                            Self::[<$name>](effect) => effect,
+                        )*
+                    }
+                }
+            }
+        }
     }
 }
 
-pub mod binary {
-    export_effects! {
-        BlinkingStripes,
-        Lighthouse,
-        StrobingRotatingLines,
-        Wiping,
-        JumpingLine,
-    }
-}
+export_effects!(binary, ::effects_1d_common::color::Binary, {
+    BlinkingStripes,
+    Lighthouse,
+    StrobingRotatingLines,
+    Wiping,
+    JumpingLine,
+});
 
-pub mod binary_rgb {
-    export_effects! {
-        JumpingStripes,
-    }
-}
+export_effects!(binary_rgb, ::effects_1d_common::color::BinaryRGB, {
+    JumpingStripes,
+});
 
-pub mod monochrome {
-    export_effects! {
-        SplittingLine,
-        RotatingLines,
-        RotatingLinesFilled,
-        OpeningClosingFan,
-        FanWave,
-        RandomBlinkingPixels,
-        MonoPsychedelic1,
-        AsyncWave,
-        BinaryExplosions,
-    }
-}
+export_effects!(monochrome, ::effects_1d_common::color::Monochrome, {
+    SplittingLine,
+    RotatingLines,
+    RotatingLinesFilled,
+    OpeningClosingFan,
+    FanWave,
+    RandomBlinkingPixels,
+    MonoPsychedelic1,
+    AsyncWave,
+    BinaryExplosions,
+});
 
-pub mod rgb {
-    export_effects! {
-        AppearingRainbowStripes,
-        RotatingRainbow,
-        TwoColorWaves,
-        RotatingFronts,
-        RotatingLinesWithBorders,
-        FadingColoredLighthouse,
-        RapidFireStripes,
-        SegmentedSnake,
-        Psychedelic1,
-    }
-}
+export_effects!(rgb, ::effects_1d_common::color::RGB, {
+    AppearingRainbowStripes,
+    RotatingRainbow,
+    TwoColorWaves,
+    RotatingFronts,
+    RotatingLinesWithBorders,
+    FadingColoredLighthouse,
+    RapidFireStripes,
+    SegmentedSnake,
+    Psychedelic1,
+});
 
-pub mod calibration {
-    export_effects! {
-        ColorTestMonochrome,
-        ColorTestRgbGradients,
-        ColorTestRgbHslGradient,
-    }
-}
+export_effects!(calibration_monochrome, ::effects_1d_common::color::Monochrome, {
+    ColorTestMonochrome,
+});
+
+export_effects!(calibration_rgb, ::effects_1d_common::color::RGB, {
+    ColorTestRgbGradients,
+    ColorTestRgbHslGradient,
+});

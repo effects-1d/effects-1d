@@ -6,7 +6,10 @@ use effects_1d_common::{
         self,
         gradients::{ColorGradient, OklabGradient},
     },
-    effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, BlendMode, ConstructibleBeatBasedEffect, EffectState,
+        FrameBufferRef,
+    },
     errors::RenderError,
     rhythm::MultiBeatCycle,
 };
@@ -21,9 +24,7 @@ pub struct SegmentedSnake {
     color: OklabGradient,
 }
 
-impl BeatBasedEffect for SegmentedSnake {
-    type Color = color::RGB;
-
+impl ConstructibleBeatBasedEffect for SegmentedSnake {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let mut line_size = 0.01;
         if let Some(resolution) = resolution_hint {
@@ -40,6 +41,10 @@ impl BeatBasedEffect for SegmentedSnake {
             color: OklabGradient::new(color::rgb8(0, 0, 255), color::rgb8(255, 0, 0)),
         }
     }
+}
+
+impl BeatBasedEffect for SegmentedSnake {
+    type Color = color::RGB;
 
     fn render_frame(
         &mut self,

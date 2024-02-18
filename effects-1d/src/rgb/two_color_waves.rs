@@ -7,7 +7,9 @@ use effects_1d_common::{
         gradients::{ColorGradient, HslGradient, ReversedGradient},
         RGB,
     },
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
     rhythm::MultiBeatCycle,
 };
@@ -20,9 +22,7 @@ pub struct TwoColorWaves {
     cycle: MultiBeatCycle,
 }
 
-impl BeatBasedEffect for TwoColorWaves {
-    type Color = color::RGB;
-
+impl ConstructibleBeatBasedEffect for TwoColorWaves {
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         Self {
             color_1: RGB::new(0, 0, u16::MAX),
@@ -31,6 +31,10 @@ impl BeatBasedEffect for TwoColorWaves {
             cycle: MultiBeatCycle::new(4, start_beat),
         }
     }
+}
+
+impl BeatBasedEffect for TwoColorWaves {
+    type Color = color::RGB;
 
     fn render_frame(
         &mut self,

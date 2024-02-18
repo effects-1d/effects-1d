@@ -4,11 +4,8 @@ use crate::{color::Color, errors::RenderError};
 
 use super::{framebuffer::FrameBufferRef, EffectState, MeasureInfo};
 
-/// An effect whos animation is based on time, beat and measure.
-pub trait MeasureBasedEffect: Send + Sync + 'static + Debug {
-    /// The color space the effect will render to.
-    type Color: Color;
-
+/// An effect who can be constructed.
+pub trait ConstructibleMeasureBasedEffect: MeasureBasedEffect {
     /// Creates a new instance of the effect.
     ///
     /// # Arguments
@@ -25,6 +22,12 @@ pub trait MeasureBasedEffect: Send + Sync + 'static + Debug {
     /// in the general area of the hint. The resolution might even change in every frame, for example
     /// at POV displays (where the frame size might depend on the varying rotation speed).
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self;
+}
+
+/// An effect whos animation is based on time, beat and measure.
+pub trait MeasureBasedEffect: Send + Sync + 'static + Debug {
+    /// The color space the effect will render to.
+    type Color: Color;
 
     /// Renders the current frame.
     ///

@@ -1,6 +1,6 @@
 use effects_1d_common::{
     color::{self, Color},
-    effects::{EffectState, FrameBufferRef, TimeBasedEffect},
+    effects::{ConstructibleTimeBasedEffect, EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
 use effects_1d_simulator::SimulateEffect;
@@ -22,9 +22,7 @@ fn random_color() -> color::RGB {
 
 const SPEED: f32 = 0.05;
 
-impl TimeBasedEffect for DebugEffect {
-    type Color = color::RGB;
-
+impl ConstructibleTimeBasedEffect for DebugEffect {
     fn init(_resolution_hint: Option<u32>) -> Self {
         Self {
             old_color: color::RGB::zero(),
@@ -33,6 +31,10 @@ impl TimeBasedEffect for DebugEffect {
             time_total: 0.0,
         }
     }
+}
+
+impl TimeBasedEffect for DebugEffect {
+    type Color = color::RGB;
 
     fn render_frame(
         &mut self,

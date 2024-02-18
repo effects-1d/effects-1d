@@ -3,7 +3,9 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
     random::{EffectRng, Rng},
     rhythm::BeatMultiplier,
@@ -23,9 +25,7 @@ impl JumpingLine {
     }
 }
 
-impl BeatBasedEffect for JumpingLine {
-    type Color = color::Binary;
-
+impl ConstructibleBeatBasedEffect for JumpingLine {
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let mut this = Self {
             line_width: 0.1,
@@ -36,6 +36,10 @@ impl BeatBasedEffect for JumpingLine {
         this.refresh();
         this
     }
+}
+
+impl BeatBasedEffect for JumpingLine {
+    type Color = color::Binary;
 
     fn render_frame(
         &mut self,

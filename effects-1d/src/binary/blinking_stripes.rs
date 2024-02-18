@@ -3,7 +3,9 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
 };
 
@@ -13,9 +15,7 @@ pub struct BlinkingStripes {
     fix_stripe_size: Option<u32>,
 }
 
-impl BeatBasedEffect for BlinkingStripes {
-    type Color = color::Binary;
-
+impl ConstructibleBeatBasedEffect for BlinkingStripes {
     fn init(resolution_hint: Option<u32>, _start_beat: i32) -> Self {
         let num_stripes = 35;
         let fix_stripe_size = resolution_hint.and_then(|resolution| {
@@ -32,6 +32,10 @@ impl BeatBasedEffect for BlinkingStripes {
             fix_stripe_size,
         }
     }
+}
+
+impl BeatBasedEffect for BlinkingStripes {
+    type Color = color::Binary;
 
     fn render_frame(
         &mut self,

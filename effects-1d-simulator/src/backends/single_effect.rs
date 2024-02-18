@@ -1,6 +1,6 @@
 use effects_1d_common::{
     color::{self, Color},
-    effects::{BeatBasedEffect, FrameBufferRef},
+    effects::{BeatBasedEffect, ConstructibleBeatBasedEffect, FrameBufferRef},
     errors::RenderError,
     random::{EffectRng, Rng},
 };
@@ -33,7 +33,7 @@ impl<T> Default for SingleEffectBackend<T> {
     }
 }
 
-impl<T: BeatBasedEffect> EffectBackend for SingleEffectBackend<T>
+impl<T: ConstructibleBeatBasedEffect> EffectBackend for SingleEffectBackend<T>
 where
     for<'a> SimulationFramebuffer<'a>: FrameBufferRef<<T as BeatBasedEffect>::Color>,
 {
@@ -112,7 +112,7 @@ where
 
 impl<T> SimulateEffect for T
 where
-    T: BeatBasedEffect,
+    T: ConstructibleBeatBasedEffect,
     for<'a> SimulationFramebuffer<'a>: FrameBufferRef<<T as BeatBasedEffect>::Color>,
 {
     fn simulate() {

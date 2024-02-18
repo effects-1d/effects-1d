@@ -3,7 +3,9 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
 };
 
@@ -16,9 +18,7 @@ pub struct Lighthouse {
     start_beat: i32,
 }
 
-impl BeatBasedEffect for Lighthouse {
-    type Color = color::Binary;
-
+impl ConstructibleBeatBasedEffect for Lighthouse {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let mut this = Self {
             stripe_width: 0.03,
@@ -35,6 +35,10 @@ impl BeatBasedEffect for Lighthouse {
 
         this
     }
+}
+
+impl BeatBasedEffect for Lighthouse {
+    type Color = color::Binary;
 
     fn render_frame(
         &mut self,

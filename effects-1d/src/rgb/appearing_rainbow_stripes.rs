@@ -6,7 +6,10 @@ use effects_1d_common::{
         self,
         gradients::{ColorGradient, HsvRainbowGradient},
     },
-    effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, BlendMode, ConstructibleBeatBasedEffect, EffectState,
+        FrameBufferRef,
+    },
     errors::RenderError,
 };
 
@@ -18,9 +21,7 @@ pub struct AppearingRainbowStripes {
     start_beat: i32,
 }
 
-impl BeatBasedEffect for AppearingRainbowStripes {
-    type Color = color::RGB;
-
+impl ConstructibleBeatBasedEffect for AppearingRainbowStripes {
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         Self {
             num_stripes_per_side: 12,
@@ -29,6 +30,10 @@ impl BeatBasedEffect for AppearingRainbowStripes {
             start_beat,
         }
     }
+}
+
+impl BeatBasedEffect for AppearingRainbowStripes {
+    type Color = color::RGB;
 
     fn render_frame(
         &mut self,

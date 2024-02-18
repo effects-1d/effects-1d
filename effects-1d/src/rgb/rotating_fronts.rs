@@ -3,7 +3,9 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color::{self, gradients::HslGradient, RGB},
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
 };
 
@@ -15,9 +17,7 @@ pub struct RotatingFronts {
     cycle_length: u16,
 }
 
-impl BeatBasedEffect for RotatingFronts {
-    type Color = color::RGB;
-
+impl ConstructibleBeatBasedEffect for RotatingFronts {
     fn init(_resolution_hint: Option<u32>, _start_beat: i32) -> Self {
         Self {
             color_1: RGB::new(0, 0, u16::MAX),
@@ -26,6 +26,10 @@ impl BeatBasedEffect for RotatingFronts {
             cycle_length: 2,
         }
     }
+}
+
+impl BeatBasedEffect for RotatingFronts {
+    type Color = color::RGB;
 
     fn render_frame(
         &mut self,

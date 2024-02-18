@@ -3,7 +3,9 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
     random::{rand::seq::SliceRandom, EffectRng},
     rhythm::MultiBeatCycle,
@@ -19,9 +21,7 @@ pub struct RandomBlinkingPixels {
     cycle: MultiBeatCycle,
 }
 
-impl BeatBasedEffect for RandomBlinkingPixels {
-    type Color = color::Monochrome;
-
+impl ConstructibleBeatBasedEffect for RandomBlinkingPixels {
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let mut rng = EffectRng::new();
         let mut offsets = core::array::from_fn(|pos| (pos as f32) / (NUM_LINES as f32));
@@ -31,6 +31,10 @@ impl BeatBasedEffect for RandomBlinkingPixels {
             cycle: MultiBeatCycle::new(CYCLE_LENGTH, start_beat),
         }
     }
+}
+
+impl BeatBasedEffect for RandomBlinkingPixels {
+    type Color = color::Monochrome;
 
     fn render_frame(
         &mut self,

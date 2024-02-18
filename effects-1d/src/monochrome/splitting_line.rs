@@ -3,7 +3,10 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, BlendMode, ConstructibleBeatBasedEffect, EffectState,
+        FrameBufferRef,
+    },
     errors::RenderError,
 };
 
@@ -15,9 +18,7 @@ pub struct SplittingLine {
     start_beat: i32,
 }
 
-impl BeatBasedEffect for SplittingLine {
-    type Color = color::Monochrome;
-
+impl ConstructibleBeatBasedEffect for SplittingLine {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let mut line_width: f32 = 0.003;
         let mut line_speed: f32 = 0.01;
@@ -44,6 +45,10 @@ impl BeatBasedEffect for SplittingLine {
             start_beat,
         }
     }
+}
+
+impl BeatBasedEffect for SplittingLine {
+    type Color = color::Monochrome;
 
     fn render_frame(
         &mut self,
