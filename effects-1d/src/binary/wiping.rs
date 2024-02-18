@@ -3,7 +3,9 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
     rhythm::MultiBeatCycle,
 };
@@ -13,14 +15,16 @@ pub struct Wiping {
     cycle: MultiBeatCycle,
 }
 
-impl BeatBasedEffect for Wiping {
-    type Color = color::Binary;
-
+impl ConstructibleBeatBasedEffect for Wiping {
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         Self {
             cycle: MultiBeatCycle::new(3, start_beat),
         }
     }
+}
+
+impl BeatBasedEffect for Wiping {
+    type Color = color::Binary;
 
     // GOAL: fill left to right, empty left to right, fill right to left, empty right to left.
 

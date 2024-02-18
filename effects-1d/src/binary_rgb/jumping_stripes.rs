@@ -3,7 +3,9 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
     random::{EffectRng, Rng},
 };
@@ -46,9 +48,7 @@ impl JumpingStripes {
     }
 }
 
-impl BeatBasedEffect for JumpingStripes {
-    type Color = color::BinaryRGB;
-
+impl ConstructibleBeatBasedEffect for JumpingStripes {
     fn init(_resolution_hint: Option<u32>, _start_beat: i32) -> Self {
         let mut this = Self {
             stripe_size: 0.05,
@@ -58,6 +58,10 @@ impl BeatBasedEffect for JumpingStripes {
         this.regenerate_stripes();
         this
     }
+}
+
+impl BeatBasedEffect for JumpingStripes {
+    type Color = color::BinaryRGB;
 
     fn render_frame(
         &mut self,

@@ -1,9 +1,9 @@
 mod time_based_effect;
-pub use time_based_effect::TimeBasedEffect;
+pub use time_based_effect::{ConstructibleTimeBasedEffect, TimeBasedEffect};
 mod beat_based_effect;
-pub use beat_based_effect::BeatBasedEffect;
+pub use beat_based_effect::{BeatBasedEffect, ConstructibleBeatBasedEffect};
 mod measure_based_effect;
-pub use measure_based_effect::MeasureBasedEffect;
+pub use measure_based_effect::{ConstructibleMeasureBasedEffect, MeasureBasedEffect};
 
 mod framebuffer;
 pub use framebuffer::FrameBufferRef;

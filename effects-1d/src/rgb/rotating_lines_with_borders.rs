@@ -4,7 +4,10 @@ use effects_1d_common::prelude::*;
 use effects_1d_common::{
     color,
     drawing::lines::Lines,
-    effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, BlendMode, ConstructibleBeatBasedEffect, EffectState,
+        FrameBufferRef,
+    },
     errors::RenderError,
     rhythm::MultiBeatCycle,
 };
@@ -17,9 +20,7 @@ pub struct RotatingLinesWithBorders {
     lines: Lines,
 }
 
-impl BeatBasedEffect for RotatingLinesWithBorders {
-    type Color = color::RGB;
-
+impl ConstructibleBeatBasedEffect for RotatingLinesWithBorders {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
         Self {
             border_color: color::rgb8(0, 0, 255),
@@ -28,6 +29,10 @@ impl BeatBasedEffect for RotatingLinesWithBorders {
             lines: Lines::new_with_resolution_hint(0.005, 0.035, 0.0, resolution_hint),
         }
     }
+}
+
+impl BeatBasedEffect for RotatingLinesWithBorders {
+    type Color = color::RGB;
 
     fn render_frame(
         &mut self,

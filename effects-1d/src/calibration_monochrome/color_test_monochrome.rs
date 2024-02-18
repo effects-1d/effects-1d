@@ -3,19 +3,21 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color::{self, BlendableColor, Color},
-    effects::{EffectState, FrameBufferRef, TimeBasedEffect},
+    effects::{ConstructibleTimeBasedEffect, EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
 
 #[derive(Debug)]
 pub struct ColorTestMonochrome;
 
-impl TimeBasedEffect for ColorTestMonochrome {
-    type Color = color::Monochrome;
-
+impl ConstructibleTimeBasedEffect for ColorTestMonochrome {
     fn init(_resolution_hint: Option<u32>) -> Self {
         Self
     }
+}
+
+impl TimeBasedEffect for ColorTestMonochrome {
+    type Color = color::Monochrome;
 
     fn render_frame(
         &mut self,

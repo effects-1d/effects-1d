@@ -8,7 +8,9 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
     rhythm::MultiBeatCycle,
 };
@@ -34,14 +36,16 @@ fn palette(t: f32) -> Vec3 {
     return A + B * j;
 }
 
-impl BeatBasedEffect for MonoPsychedelic1 {
-    type Color = color::Monochrome;
-
+impl ConstructibleBeatBasedEffect for MonoPsychedelic1 {
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         Self {
             cycle: MultiBeatCycle::new(4, start_beat),
         }
     }
+}
+
+impl BeatBasedEffect for MonoPsychedelic1 {
+    type Color = color::Monochrome;
 
     fn render_frame(
         &mut self,

@@ -3,7 +3,10 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color::{self, BlendableColor, Color},
-    effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, BlendMode, ConstructibleBeatBasedEffect, EffectState,
+        FrameBufferRef,
+    },
     errors::RenderError,
     random::{EffectRng, Rng},
     rhythm::MultiBeatCycle,
@@ -71,9 +74,7 @@ pub struct FadingColoredLighthouse {
     stripes: [Stripe; 3],
 }
 
-impl BeatBasedEffect for FadingColoredLighthouse {
-    type Color = color::RGB;
-
+impl ConstructibleBeatBasedEffect for FadingColoredLighthouse {
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let line_width = 0.1;
         let cycle_length = 6;
@@ -93,6 +94,10 @@ impl BeatBasedEffect for FadingColoredLighthouse {
 
         this
     }
+}
+
+impl BeatBasedEffect for FadingColoredLighthouse {
+    type Color = color::RGB;
 
     fn render_frame(
         &mut self,

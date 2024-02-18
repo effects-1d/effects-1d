@@ -3,7 +3,10 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color::{self, BlendableColor, Color},
-    effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, BlendMode, ConstructibleBeatBasedEffect, EffectState,
+        FrameBufferRef,
+    },
     errors::RenderError,
     random::{EffectRng, Rng},
     rhythm::{BeatMultiplier, MultiBeatCycle},
@@ -68,9 +71,7 @@ pub struct RapidFireStripes {
     beat_multiplier: BeatMultiplier,
 }
 
-impl BeatBasedEffect for RapidFireStripes {
-    type Color = color::RGB;
-
+impl ConstructibleBeatBasedEffect for RapidFireStripes {
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let line_width = 0.1;
 
@@ -90,6 +91,10 @@ impl BeatBasedEffect for RapidFireStripes {
 
         this
     }
+}
+
+impl BeatBasedEffect for RapidFireStripes {
+    type Color = color::RGB;
 
     fn render_frame(
         &mut self,

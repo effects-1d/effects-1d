@@ -3,7 +3,10 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color::{self, Monochrome},
-    effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, BlendMode, ConstructibleBeatBasedEffect, EffectState,
+        FrameBufferRef,
+    },
     errors::RenderError,
     lerp::Lerp,
     random::{EffectRng, Rng},
@@ -87,9 +90,7 @@ impl Explosion {
     }
 }
 
-impl BeatBasedEffect for BinaryExplosions {
-    type Color = color::Monochrome;
-
+impl ConstructibleBeatBasedEffect for BinaryExplosions {
     fn init(_resolution_hint: Option<u32>, start_beat: i32) -> Self {
         Self {
             explosions: Default::default(),
@@ -97,6 +98,10 @@ impl BeatBasedEffect for BinaryExplosions {
             multiplier: BeatMultiplier::new(2, start_beat),
         }
     }
+}
+
+impl BeatBasedEffect for BinaryExplosions {
+    type Color = color::Monochrome;
 
     fn render_frame(
         &mut self,

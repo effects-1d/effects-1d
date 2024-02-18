@@ -3,7 +3,9 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
+    },
     errors::RenderError,
     rhythm::Sequencer,
 };
@@ -19,9 +21,7 @@ pub struct StrobingRotatingLines {
     sequencer: Sequencer,
 }
 
-impl BeatBasedEffect for StrobingRotatingLines {
-    type Color = color::Binary;
-
+impl ConstructibleBeatBasedEffect for StrobingRotatingLines {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let mut this = Self {
             num_lines: 28,
@@ -42,6 +42,10 @@ impl BeatBasedEffect for StrobingRotatingLines {
 
         this
     }
+}
+
+impl BeatBasedEffect for StrobingRotatingLines {
+    type Color = color::Binary;
 
     fn render_frame(
         &mut self,

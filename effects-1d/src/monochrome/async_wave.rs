@@ -5,7 +5,10 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color,
-    effects::{BeatBasedEffect, BeatInfo, BlendMode, EffectState, FrameBufferRef},
+    effects::{
+        BeatBasedEffect, BeatInfo, BlendMode, ConstructibleBeatBasedEffect, EffectState,
+        FrameBufferRef,
+    },
     errors::RenderError,
     rhythm::MultiBeatCycle,
 };
@@ -17,9 +20,7 @@ pub struct AsyncWave {
     cycle: MultiBeatCycle,
 }
 
-impl BeatBasedEffect for AsyncWave {
-    type Color = color::Monochrome;
-
+impl ConstructibleBeatBasedEffect for AsyncWave {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
         let blink_period = 4;
         let mut num_buckets = 50;
@@ -41,6 +42,10 @@ impl BeatBasedEffect for AsyncWave {
             ),
         }
     }
+}
+
+impl BeatBasedEffect for AsyncWave {
+    type Color = color::Monochrome;
 
     fn render_frame(
         &mut self,

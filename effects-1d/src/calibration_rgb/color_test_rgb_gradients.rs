@@ -3,7 +3,7 @@ use effects_1d_common::prelude::*;
 
 use effects_1d_common::{
     color::{self, gradients::HslGradient, RGB},
-    effects::{EffectState, FrameBufferRef, TimeBasedEffect},
+    effects::{ConstructibleTimeBasedEffect, EffectState, FrameBufferRef, TimeBasedEffect},
     errors::RenderError,
 };
 
@@ -12,12 +12,14 @@ pub struct ColorTestRgbGradients;
 
 type Gradient = HslGradient;
 
-impl TimeBasedEffect for ColorTestRgbGradients {
-    type Color = color::RGB;
-
+impl ConstructibleTimeBasedEffect for ColorTestRgbGradients {
     fn init(_resolution_hint: Option<u32>) -> Self {
         Self
     }
+}
+
+impl TimeBasedEffect for ColorTestRgbGradients {
+    type Color = color::RGB;
 
     fn render_frame(
         &mut self,

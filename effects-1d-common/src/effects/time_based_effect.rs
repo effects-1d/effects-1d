@@ -2,13 +2,13 @@ use core::fmt::Debug;
 
 use crate::{color::Color, errors::RenderError};
 
-use super::{framebuffer::FrameBufferRef, BeatBasedEffect, BeatInfo, EffectState};
+use super::{
+    framebuffer::FrameBufferRef, BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect,
+    EffectState,
+};
 
-/// An effect whos animation is purely time-based.
-pub trait TimeBasedEffect: Send + Sync + 'static + Debug {
-    /// The color space the effect will render to
-    type Color: Color;
-
+/// An effect who can be constructed.
+pub trait ConstructibleTimeBasedEffect: TimeBasedEffect {
     /// Creates a new instance of the effect.
     ///
     /// # Arguments
@@ -22,6 +22,12 @@ pub trait TimeBasedEffect: Send + Sync + 'static + Debug {
     /// in the general area of the hint. The resolution might even change in every frame, for example
     /// at POV displays (where the frame size might depend on the varying rotation speed).
     fn init(resolution_hint: Option<u32>) -> Self;
+}
+
+/// An effect whos animation is purely time-based.
+pub trait TimeBasedEffect: Send + Sync + 'static + Debug {
+    /// The color space the effect will render to
+    type Color: Color;
 
     /// Renders the current frame.
     ///
@@ -39,15 +45,20 @@ pub trait TimeBasedEffect: Send + Sync + 'static + Debug {
     ) -> Result<EffectState, RenderError>;
 }
 
+impl<T> ConstructibleBeatBasedEffect for T
+where
+    T: ConstructibleTimeBasedEffect,
+{
+    fn init(resolution_hint: Option<u32>, _start_beat: i32) -> Self {
+        ConstructibleTimeBasedEffect::init(resolution_hint)
+    }
+}
+
 impl<T> BeatBasedEffect for T
 where
     T: TimeBasedEffect,
 {
     type Color = <Self as TimeBasedEffect>::Color;
-
-    fn init(resolution_hint: Option<u32>, _start_beat: i32) -> Self {
-        TimeBasedEffect::init(resolution_hint)
-    }
 
     fn render_frame(
         &mut self,
