@@ -1,16 +1,14 @@
 [package]
-name = "effects-1d-simulator"
+name = "effects-1d-demo"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+effects-1d = { path = "../effects-1d" }
 effects-1d-common = { path = "../effects-1d-common" }
-effects-1d-runtime = { path = "../effects-1d-runtime" }
-rand = { workspace = true, features = ["default"] }
+effects-1d-simulator = { path = "../effects-1d-simulator" }
 tracing = { workspace = true }
-three-d = { workspace = true }
-
-[dev-dependencies]
 tracing-subscriber = { workspace = true }
+three-d = { workspace = true }

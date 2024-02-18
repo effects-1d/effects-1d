@@ -59,5 +59,5 @@ void main()
     vec3 tonemapped_color = color_result + total_overshoot * 0.1;
 
     // Add alpha and do gamma correction
-    color = vec4(pow(tonemapped_color, vec3(1.0 / 2.2)), 1.0);
+    color = vec4(linear_to_srgb(tonemapped_color), 1.0);
 }

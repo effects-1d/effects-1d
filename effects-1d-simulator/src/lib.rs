@@ -8,7 +8,7 @@ mod settings;
 mod visualizations;
 
 pub use backends::single_effect::SimulateEffect;
-pub use effect_backend::EffectBackend;
+pub use effect_backend::{EffectBackend, SimulationFramebuffer};
 
 /// Runs a simulation for the given effect/engine
 pub fn run_simulation(mut backend: impl EffectBackend + 'static) {

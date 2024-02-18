@@ -64,5 +64,5 @@ void main()
     }
 
     // Add alpha and do gamma correction
-    color = vec4(pow(output_color, vec3(1.0 / 2.2)), alpha);
+    color = vec4(linear_to_srgb(output_color), alpha);
 }

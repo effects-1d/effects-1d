@@ -5,6 +5,7 @@ resolver = "2"
 members = [
     "effects-1d",
     "effects-1d-common",
+    "effects-1d-demo",
     "effects-1d-simulator",
     "effects-1d-runtime",
     "utilities",
@@ -29,3 +30,4 @@ eframe = "0.26.1"
 egui_plot = "0.26.1"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
+three-d = { version = "0.16.4", features = ["egui-gui"] }

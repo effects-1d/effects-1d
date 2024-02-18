@@ -77,7 +77,7 @@ where
         let render_duration = t0.elapsed();
 
         let result = format!(
-            "Compute Time: {:.01?}\n{:#?}\n{:#?}\n\nState:\n{:#?}",
+            "Compute Time: {:.01?}\n{:#?}\n{:#?}\n\n{:#?}",
             render_duration,
             beat,
             effect_state,
