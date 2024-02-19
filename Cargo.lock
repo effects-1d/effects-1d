@@ -1070,6 +1070,7 @@ dependencies = [
  "three-d",
  "tracing",
  "tracing-subscriber",
+ "web-time 1.0.0",
 ]
 
 [[package]]
