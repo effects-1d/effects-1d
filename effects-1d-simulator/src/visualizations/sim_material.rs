@@ -79,9 +79,9 @@ impl Material for SimMaterial {
 
     fn use_uniforms(&self, program: &Program, _camera: &Camera, _lights: &[&dyn Light]) {
         program.use_texture("effect_data", &self.data);
-        program.use_uniform("effect_data_len", &self.data_size);
-        program.use_uniform("widget_size", &self.widget_size);
-        program.use_uniform("time", &self.time);
+        program.use_uniform_if_required("effect_data_len", &self.data_size);
+        program.use_uniform_if_required("widget_size", &self.widget_size);
+        program.use_uniform_if_required("time", &self.time);
     }
 
     fn render_states(&self) -> RenderStates {

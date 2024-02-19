@@ -3,8 +3,6 @@ const float GRIDLINE_SIZE = 0.15;
 
 void main()
 {
-    uint rng_state = init_rand_state();
-
     float pixel_size = 1.0 / widget_size.x;
 
     uint effect_data_max_index = effect_data_len - 1u;
