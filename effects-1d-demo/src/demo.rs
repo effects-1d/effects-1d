@@ -1,5 +1,6 @@
 mod backends;
 use backends::EffectsDemoBackend;
+mod effect_collection;
 
 use effects_1d_common::random::{rand::rngs::OsRng, EffectRng, Rng};
 use effects_1d_simulator::run_simulation;
