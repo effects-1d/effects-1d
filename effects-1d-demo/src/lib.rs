@@ -1,10 +1,7 @@
-#![allow(special_module_name)]
+//! This lib is meant for WASM. It is not used by `main.rs`.
 
 #[cfg(target_arch = "wasm32")]
-mod main;
-
-#[cfg(target_arch = "wasm32")]
-mod backends;
+mod demo;
 
 // Entry point for wasm
 #[cfg(target_arch = "wasm32")]
@@ -27,6 +24,6 @@ pub fn start() -> Result<(), JsValue> {
 
     tracing::info!("Logging works!");
 
-    main::main();
+    demo::run();
     Ok(())
 }
