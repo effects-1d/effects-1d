@@ -1045,6 +1045,7 @@ dependencies = [
  "effects-1d-simulator",
  "three-d",
  "tracing",
+ "tracing-log",
  "tracing-subscriber",
  "tracing-wasm",
  "wasm-bindgen",
