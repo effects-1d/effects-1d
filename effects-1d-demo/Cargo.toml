@@ -10,5 +10,17 @@ effects-1d = { path = "../effects-1d" }
 effects-1d-common = { path = "../effects-1d-common" }
 effects-1d-simulator = { path = "../effects-1d-simulator" }
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
 three-d = { workspace = true }
+
+
+[lib]
+crate-type = ["cdylib"]
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tracing-subscriber = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+console_error_panic_hook = "0.1"
+tracing-wasm = "0.2.1"
