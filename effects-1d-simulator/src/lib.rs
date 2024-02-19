@@ -6,6 +6,7 @@ mod effect_backend;
 mod gui;
 mod settings;
 mod visualizations;
+pub mod widgets;
 
 pub use backends::single_effect::SimulateEffect;
 pub use effect_backend::{EffectBackend, SimulationFramebuffer};
@@ -51,7 +52,13 @@ pub fn run_simulation(mut backend: impl EffectBackend + 'static) {
             beat,
         );
 
-        let viewport = gui.update(&mut frame_input, &mut settings, &mut backend, &effect_state);
+        let viewport = gui.update(
+            &mut frame_input,
+            &mut settings,
+            &mut backend,
+            &effect_state,
+            beat,
+        );
 
         let rgb_colors: Vec<[f32; 3]> = framebuffer
             .into_iter()

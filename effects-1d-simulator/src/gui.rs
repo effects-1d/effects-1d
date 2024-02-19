@@ -1,3 +1,5 @@
+use effects_1d_common::effects::BeatInfo;
+
 use crate::{settings::SimulatorSettings, EffectBackend};
 
 pub struct EffectGUI {
@@ -17,6 +19,7 @@ impl EffectGUI {
         settings: &mut SimulatorSettings,
         backend: &mut dyn EffectBackend,
         effect_state: &str,
+        beat: BeatInfo,
     ) -> three_d::Viewport {
         let mut panel_width = 0.0;
 
@@ -29,7 +32,7 @@ impl EffectGUI {
                 use three_d::egui::*;
                 SidePanel::left("side_panel").show(gui_context, |ui| {
                     ui.heading("Simulator Settings");
-                    settings.render_gui(ui);
+                    settings.render_gui(ui, beat);
 
                     ui.add_space(12.0);
 
