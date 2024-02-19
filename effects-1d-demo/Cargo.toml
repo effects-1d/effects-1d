@@ -12,6 +12,7 @@ effects-1d-common = { path = "../effects-1d-common" }
 effects-1d-simulator = { path = "../effects-1d-simulator" }
 tracing = { workspace = true }
 three-d = { workspace = true }
+web-time = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tracing-subscriber = { workspace = true }

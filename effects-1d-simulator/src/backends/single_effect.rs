@@ -8,6 +8,7 @@ use effects_1d_runtime::SwitchTimer;
 
 use rand::rngs::OsRng;
 use tracing::{error, info};
+use web_time::Instant;
 
 use crate::{effect_backend::SimulationFramebuffer, run_simulation, EffectBackend};
 
@@ -50,7 +51,7 @@ where
         }
 
         let data_len = data.len();
-        let t0 = std::time::Instant::now();
+        let t0 = Instant::now();
         let effect_state = loop {
             data.fill(color::RGB::zero());
             let mut framebuffer = SimulationFramebuffer::new(data);

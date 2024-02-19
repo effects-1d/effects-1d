@@ -31,3 +31,4 @@ egui_plot = "0.26.1"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
 three-d = { version = "0.16.4", features = ["egui-gui"] }
+web-time = "1.0.0"

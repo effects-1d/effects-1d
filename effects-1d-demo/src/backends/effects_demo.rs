@@ -1,5 +1,7 @@
 use core::fmt::Display;
 
+use web_time::Instant;
+
 use effects_1d::{
     BinaryEffect, BinaryEffectInstance, BinaryRgbEffect, BinaryRgbEffectInstance,
     CalibrationMonochromeEffect, CalibrationMonochromeEffectInstance, CalibrationRgbEffect,
@@ -139,7 +141,7 @@ impl EffectBackend for EffectsDemoBackend {
         }
 
         let data_len = data.len();
-        let t0 = std::time::Instant::now();
+        let t0 = Instant::now();
         let effect_state = loop {
             data.fill(color::RGB::zero());
             let mut framebuffer = SimulationFramebuffer::new(data);
