@@ -43,9 +43,11 @@ impl BeatBasedEffect for BlinkingStripes {
         _d_t: f32,
         beat: BeatInfo,
     ) -> Result<EffectState, RenderError> {
+        let blink = (beat.current / 2) % 2 == 0;
+
         if let Some(fix_stripe_size) = self.fix_stripe_size {
             for i in 0..framebuffer.len() {
-                if ((i % (2 * fix_stripe_size)) < fix_stripe_size) ^ (beat.current % 2 == 0) {
+                if ((i % (2 * fix_stripe_size)) < fix_stripe_size) ^ blink {
                     framebuffer.set_pixel(i, color::Binary::on());
                 }
             }
@@ -53,7 +55,7 @@ impl BeatBasedEffect for BlinkingStripes {
             let len = self.num_stripes as f32;
             for i in 0..self.num_stripes {
                 let i: i32 = i.into();
-                if (i + beat.current / 2) % 2 == 0 {
+                if (i % 2 == 0) ^ blink {
                     let i = i as f32;
                     let start = i / len;
                     let end = (i + 1.0) / len;
