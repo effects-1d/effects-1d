@@ -22,8 +22,6 @@ pub fn start() -> Result<(), JsValue> {
     );
     tracing_log::LogTracer::init().unwrap();
 
-    tracing::info!("Logging works!");
-
     demo::run();
     Ok(())
 }
