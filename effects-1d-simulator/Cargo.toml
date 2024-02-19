@@ -11,6 +11,7 @@ effects-1d-runtime = { path = "../effects-1d-runtime" }
 rand = { workspace = true, features = ["default"] }
 tracing = { workspace = true }
 three-d = { workspace = true }
+web-time = { workspace = true }
 
 [dev-dependencies]
 tracing-subscriber = { workspace = true }

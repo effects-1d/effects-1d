@@ -14,7 +14,7 @@ pub use effect_backend::{EffectBackend, SimulationFramebuffer};
 pub fn run_simulation(mut backend: impl EffectBackend + 'static) {
     let window = Window::new(WindowSettings {
         title: "1D Effects Simulator".to_string(),
-        max_size: Some((1280, 720)),
+        // max_size: Some((1280, 720)),
         ..Default::default()
     })
     .unwrap();

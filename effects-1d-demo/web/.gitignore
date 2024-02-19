@@ -1,0 +1,5 @@
+/dist/
+/node_modules/
+/pkg/
+/package-lock.json
+/hosting_repo/

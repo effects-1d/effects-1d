@@ -1,16 +1,14 @@
-mod backends;
+//! This is the standalone demo program. It does not use `lib.rs`; instead it
+//! also uses `demo` as a submodule directly.
+//!
+//! This allows the same demo to be compiled as WASM library and as standalone executable.
 
-use backends::EffectsDemoBackend;
-use effects_1d_common::random::{rand::rngs::OsRng, EffectRng, Rng};
-use effects_1d_simulator::run_simulation;
+mod demo;
 
-fn main() {
+pub fn main() {
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::DEBUG)
         .init();
 
-    EffectRng::seed(OsRng.gen());
-
-    let effect_renderer: EffectsDemoBackend = Default::default();
-    run_simulation(effect_renderer);
+    demo::run();
 }
