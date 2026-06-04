@@ -7,7 +7,7 @@ pub struct SimMaterial {
     fragment_shader: &'static str,
     widget_size: Vec2,
     time: f32,
-    material_id: EffectMaterialId,
+    material_id: u16,
 }
 
 fn create_1d_texture(context: &Context, len: u32) -> Texture2D {
@@ -24,11 +24,7 @@ fn create_1d_texture(context: &Context, len: u32) -> Texture2D {
 }
 
 impl SimMaterial {
-    fn new(
-        context: &Context,
-        fragment_shader: &'static str,
-        material_id: EffectMaterialId,
-    ) -> Self {
+    fn new(context: &Context, fragment_shader: &'static str, material_id: u16) -> Self {
         Self {
             context: context.clone(),
             data: create_1d_texture(context, 1),
@@ -41,18 +37,10 @@ impl SimMaterial {
     }
 
     pub fn ledstrip(context: &Context) -> Self {
-        Self::new(
-            context,
-            include_str!("shaders/sim_ledstrip.frag"),
-            EffectMaterialId(0b101),
-        )
+        Self::new(context, include_str!("shaders/sim_ledstrip.frag"), 0b101u16)
     }
     pub fn laser(context: &Context) -> Self {
-        Self::new(
-            context,
-            include_str!("shaders/sim_laser.frag"),
-            EffectMaterialId(0b100),
-        )
+        Self::new(context, include_str!("shaders/sim_laser.frag"), 0b100u16)
     }
 
     pub fn update_data(&mut self, data: &[[f32; 3]]) {
@@ -103,6 +91,6 @@ impl Material for SimMaterial {
     }
 
     fn id(&self) -> EffectMaterialId {
-        EffectMaterialId(self.material_id.0)
+        EffectMaterialId(self.material_id)
     }
 }
