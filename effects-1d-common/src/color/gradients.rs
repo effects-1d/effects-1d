@@ -35,7 +35,7 @@ pub trait ColorGradient: core::fmt::Debug {
 /// Implements an RGB two-color gradient based on a specific color space.
 macro_rules! two_color_gradient_impl {
     ($blendtype:ident) => {
-        ::paste::paste! {
+        ::pastey::paste! {
             #[doc = "An RGB gradient based on `" $blendtype "` blending."]
             #[derive(Debug)]
             pub struct [<$blendtype Gradient>] {

@@ -70,18 +70,11 @@ impl Material for SimMaterial {
         )
     }
 
-    fn fragment_attributes(&self) -> FragmentAttributes {
-        FragmentAttributes {
-            uv: true,
-            ..FragmentAttributes::NONE
-        }
-    }
-
-    fn use_uniforms(&self, program: &Program, _camera: &Camera, _lights: &[&dyn Light]) {
+    fn use_uniforms(&self, program: &Program, _camera: &dyn Viewer, _lights: &[&dyn Light]) {
         program.use_texture("effect_data", &self.data);
-        program.use_uniform_if_required("effect_data_len", &self.data_size);
-        program.use_uniform_if_required("widget_size", &self.widget_size);
-        program.use_uniform_if_required("time", &self.time);
+        program.use_uniform_if_required("effect_data_len", self.data_size);
+        program.use_uniform_if_required("widget_size", self.widget_size);
+        program.use_uniform_if_required("time", self.time);
     }
 
     fn render_states(&self) -> RenderStates {
@@ -90,7 +83,6 @@ impl Material for SimMaterial {
             write_mask: WriteMask::COLOR,
             cull: Cull::Back,
             blend: Blend::TRANSPARENCY,
-            ..Default::default()
         }
     }
 
@@ -98,7 +90,7 @@ impl Material for SimMaterial {
         MaterialType::Transparent
     }
 
-    fn id(&self) -> u16 {
-        self.material_id
+    fn id(&self) -> EffectMaterialId {
+        EffectMaterialId(self.material_id)
     }
 }

@@ -7,7 +7,7 @@ use effects_1d_common::{
         BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
     },
     errors::RenderError,
-    random::{EffectRng, Rng},
+    random::{EffectRng, RngExt},
     rhythm::BeatMultiplier,
 };
 
@@ -21,7 +21,7 @@ pub struct JumpingLine {
 
 impl JumpingLine {
     fn refresh(&mut self) {
-        self.line_position = (1.0 - self.line_width) * self.rng.gen::<f32>();
+        self.line_position = (1.0 - self.line_width) * self.rng.random::<f32>();
     }
 }
 

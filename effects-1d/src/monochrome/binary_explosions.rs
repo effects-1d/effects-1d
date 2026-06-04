@@ -9,7 +9,7 @@ use effects_1d_common::{
     },
     errors::RenderError,
     lerp::Lerp,
-    random::{EffectRng, Rng},
+    random::{EffectRng, RngExt},
     rhythm::BeatMultiplier,
 };
 
@@ -32,17 +32,17 @@ struct Explosion {
 
 impl Explosion {
     pub fn new(beat: BeatInfo, rng: &mut EffectRng) -> Self {
-        let diameter = rng.gen_range(0.01..0.3);
-        let duration = rng.gen_range(1.0..5.0) * 2.0;
+        let diameter = rng.random_range(0.01..0.3);
+        let duration = rng.random_range(1.0..5.0) * 2.0;
         let movespeed = diameter / duration;
 
         Self {
-            position: rng.gen_range(0.1..0.9),
+            position: rng.random_range(0.1..0.9),
             start_beat: beat.current,
             start_subbeat: beat.fractional,
             duration,
             movespeed,
-            fill: rng.gen_range(0.05..0.5),
+            fill: rng.random_range(0.05..0.5),
         }
     }
 

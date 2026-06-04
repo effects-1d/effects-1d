@@ -1,4 +1,5 @@
 use effects_1d_common::effects::BeatInfo;
+use emath::GuiRounding as _;
 use three_d::egui::*;
 
 /// A visual indicator of the current beat. Similar to a horizontal line.
@@ -90,7 +91,7 @@ impl Widget for BeatIndicator {
             let painter = ui.painter();
             painter.hline(
                 (rect.left() - grow)..=(rect.right() + grow),
-                painter.round_to_pixel(rect.center().y),
+                rect.center().y.round_to_pixels(painter.pixels_per_point()),
                 stroke,
             );
         }

@@ -1,3 +1,5 @@
+#![allow(clippy::eq_op)]
+
 #[allow(unused_imports)]
 use effects_1d_common::prelude::*;
 

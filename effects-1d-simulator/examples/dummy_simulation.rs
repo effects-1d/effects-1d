@@ -5,7 +5,7 @@ use effects_1d_common::{
 };
 use effects_1d_simulator::SimulateEffect;
 
-use rand::Rng;
+use rand::RngExt;
 
 #[derive(Debug)]
 struct DebugEffect {
@@ -16,8 +16,8 @@ struct DebugEffect {
 }
 
 fn random_color() -> color::RGB {
-    let mut rng = rand::thread_rng();
-    color::RGB::new(rng.gen(), rng.gen(), rng.gen())
+    let mut rng = rand::rng();
+    color::RGB::new(rng.random(), rng.random(), rng.random())
 }
 
 const SPEED: f32 = 0.05;

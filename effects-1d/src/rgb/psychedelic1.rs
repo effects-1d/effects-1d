@@ -30,10 +30,10 @@ fn palette(t: f32) -> Vec3 {
     const C: Vec3 = Vec3::new(0.332, 0.518, 0.545);
     const D: Vec3 = Vec3::new(2.440, 5.043, 0.732);
 
-    let i = 6.28318 * (C * t + D);
+    let i = core::f32::consts::TAU * (C * t + D);
     let j = Vec3::new(i.x.cos(), i.y.cos(), i.z.cos());
 
-    return A + B * j;
+    A + B * j
 }
 
 impl ConstructibleBeatBasedEffect for Psychedelic1 {
@@ -58,7 +58,7 @@ impl BeatBasedEffect for Psychedelic1 {
         let t = t * PI / 2.;
 
         let bufsize = framebuffer.len().saturating_sub(1);
-        framebuffer.set_pixels(&mut |pos| {
+        framebuffer.set_pixels(&|pos| {
             let col = render_pixel(pos, bufsize, t);
             Srgb::<f32>::new(col.x, col.y, col.z).into_format()
         });
