@@ -55,8 +55,6 @@ impl BeatBasedEffect for BinaryMarchingAnts {
             }
         });
 
-        Ok(EffectState {
-            idle: self.cycle.is_last_beat_of_cycle(),
-        })
+        Ok(EffectState { idle: true })
     }
 }

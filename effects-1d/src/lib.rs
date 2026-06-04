@@ -74,7 +74,6 @@ export_effects!(binary, ::effects_1d_common::color::Binary, {
     Wiping,
     JumpingLine,
     ScannerBounce,
-    GlitchBurst,
     BinaryMarchingAnts,
 });
 
@@ -111,11 +110,9 @@ export_effects!(rgb, ::effects_1d_common::color::RGB, {
     CometTrail,
     PulseCollision,
     BreathingGradient,
-    SparkRain,
     ScannerBounce,
     BeatEqualizer,
     ColorOrbit,
-    GlitchBurst,
     RippleField,
     MeasureChaser,
     AuroraRibbon,
