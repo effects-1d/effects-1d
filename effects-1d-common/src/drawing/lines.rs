@@ -13,7 +13,7 @@ pub struct Lines {
 impl Lines {
     /// Create a new lines utility object
     pub fn new(line_width: f32, line_stride: f32, cycle_offset: f32) -> Self {
-        assert!(cycle_offset >= 0.0 && cycle_offset <= 1.0);
+        assert!((0.0..=1.0).contains(&cycle_offset));
         let num_lines = (1.0 / line_stride) as u16 + 2;
         Self {
             line_width,
