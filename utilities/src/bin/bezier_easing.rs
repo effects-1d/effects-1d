@@ -19,7 +19,7 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "My egui App with a plot",
         options,
-        Box::new(|_cc| Box::<MyApp>::default()),
+        Box::new(|_cc| Ok(Box::<MyApp>::default())),
     )
 }
 
@@ -38,7 +38,7 @@ impl Default for MyApp {
 }
 
 impl eframe::App for MyApp {
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let bezier_easing = BezierEasing::new(self.p0.x, self.p0.y, self.p1.x, self.p1.y);
         let bezier_easing_steps: Vec<PlotPoint> = bezier_easing
             .steps()
@@ -46,7 +46,7 @@ impl eframe::App for MyApp {
             .map(|step| PlotPoint::new(step.x, step.y))
             .collect();
 
-        egui::CentralPanel::default().show(ctx, move |ui| {
+        egui::CentralPanel::default().show_inside(ui, move |ui| {
             ui.horizontal_centered(move |ui| {
                 ui.vertical(|ui| {
                     ui.heading("Bezier Parameters");
@@ -59,30 +59,36 @@ impl eframe::App for MyApp {
                     Plot::new("Bezier Plot")
                         .legend(Legend::default())
                         .show(ui, move |plot_ui| {
-                            plot_ui.line(Line::new(vec![
-                                [0.0, 0.0],
-                                [self.p0.x as f64, self.p0.y as f64],
-                            ]));
-                            plot_ui.line(Line::new(vec![
-                                [1.0, 1.0],
-                                [self.p1.x as f64, self.p1.y as f64],
-                            ]));
+                            plot_ui.line(Line::new(
+                                "",
+                                vec![[0.0, 0.0], [self.p0.x as f64, self.p0.y as f64]],
+                            ));
+                            plot_ui.line(Line::new(
+                                "",
+                                vec![[1.0, 1.0], [self.p1.x as f64, self.p1.y as f64]],
+                            ));
                             //plot_ui.line(Line::new(PlotPoints::Owned(bezier_easing_steps.clone())));
                             plot_ui.points(
-                                Points::new(vec![
-                                    [self.p0.x as f64, self.p0.y as f64],
-                                    [self.p1.x as f64, self.p1.y as f64],
-                                ])
+                                Points::new(
+                                    "",
+                                    vec![
+                                        [self.p0.x as f64, self.p0.y as f64],
+                                        [self.p1.x as f64, self.p1.y as f64],
+                                    ],
+                                )
                                 .radius(4.0),
                             );
                             plot_ui.points(
-                                Points::new(PlotPoints::Owned(bezier_easing_steps)).radius(3.0),
+                                Points::new("", PlotPoints::Owned(bezier_easing_steps)).radius(3.0),
                             );
-                            plot_ui.line(Line::new(PlotPoints::from_explicit_callback(
-                                move |x| bezier_easing.evaluate(x as f32) as f64,
-                                0.0..=1.0,
-                                512,
-                            )));
+                            plot_ui.line(Line::new(
+                                "",
+                                PlotPoints::from_explicit_callback(
+                                    move |x| bezier_easing.evaluate(x as f32) as f64,
+                                    0.0..=1.0,
+                                    512,
+                                ),
+                            ));
                         })
                 });
             });

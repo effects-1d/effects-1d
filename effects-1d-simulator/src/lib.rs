@@ -85,11 +85,13 @@ pub fn run_simulation(mut backend: impl EffectBackend + 'static) {
             .clear_partially(viewport.into(), ClearState::color(0.1, 0.1, 0.1, 1.0))
             .render_partially(
                 viewport.into(),
-                &Camera::new_2d(viewport),
+                Camera::new_2d(viewport),
                 [laser_sim_widget.obj(), led_strip_widget.obj()],
                 &[],
             )
-            .write(|| gui.render());
+            .write(|| gui.render())
+            .inspect_err(|e| tracing::error!("{e}"))
+            .ok();
 
         // Returns default frame output to end the frame
         FrameOutput::default()

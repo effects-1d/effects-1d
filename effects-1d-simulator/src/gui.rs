@@ -30,7 +30,7 @@ impl EffectGUI {
             frame_input.device_pixel_ratio,
             |gui_context| {
                 use three_d::egui::*;
-                SidePanel::left("side_panel").show(gui_context, |ui| {
+                Panel::left("side_panel").show_inside(gui_context, |ui| {
                     ui.heading("Simulator Settings");
                     settings.render_gui(ui, beat);
 
@@ -46,7 +46,7 @@ impl EffectGUI {
                         ui.label(RichText::new(effect_state).monospace().small());
                     });
                 });
-                panel_width = gui_context.used_rect().width();
+                panel_width = gui_context.globally_used_rect().width();
             },
         );
 
@@ -61,7 +61,7 @@ impl EffectGUI {
         }
     }
 
-    pub fn render(&self) {
-        self.gui.render();
+    pub fn render(&self) -> Result<(), three_d::CoreError> {
+        self.gui.render()
     }
 }

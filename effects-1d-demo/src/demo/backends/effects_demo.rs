@@ -93,11 +93,11 @@ impl EffectBackend for EffectsDemoBackend {
 
         let previous_desired_effect = self.desired_effect;
 
-        ComboBox::from_id_source("Effect")
+        ComboBox::from_id_salt("Effect")
             .selected_text(format!("{}", self.desired_effect))
             .width(250.0)
             .show_ui(ui, |ui| {
-                ui.style_mut().wrap = Some(false);
+                ui.style_mut().wrap_mode = Some(TextWrapMode::Truncate);
 
                 ui.label("2-Color");
                 for &effect in BinaryEffect::available() {

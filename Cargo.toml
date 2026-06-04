@@ -26,9 +26,9 @@ palette = { version = "0.7.6", default-features = false, features = ["libm"] }
 pastey = "0.2.3"
 
 # Simulator dependencies
-eframe = "0.26.1"
-egui_plot = "0.26.1"
+eframe = "0.34.3"
+egui_plot = "0.35.0"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
-three-d = { version = "0.16.4", features = ["egui-gui"] }
+three-d = { version = "0.19.0", features = ["egui-gui"] }
 web-time = "1.1.0"

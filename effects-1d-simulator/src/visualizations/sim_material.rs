@@ -7,7 +7,7 @@ pub struct SimMaterial {
     fragment_shader: &'static str,
     widget_size: Vec2,
     time: f32,
-    material_id: u16,
+    material_id: EffectMaterialId,
 }
 
 fn create_1d_texture(context: &Context, len: u32) -> Texture2D {
@@ -24,7 +24,11 @@ fn create_1d_texture(context: &Context, len: u32) -> Texture2D {
 }
 
 impl SimMaterial {
-    fn new(context: &Context, fragment_shader: &'static str, material_id: u16) -> Self {
+    fn new(
+        context: &Context,
+        fragment_shader: &'static str,
+        material_id: EffectMaterialId,
+    ) -> Self {
         Self {
             context: context.clone(),
             data: create_1d_texture(context, 1),
@@ -37,10 +41,18 @@ impl SimMaterial {
     }
 
     pub fn ledstrip(context: &Context) -> Self {
-        Self::new(context, include_str!("shaders/sim_ledstrip.frag"), 0b101u16)
+        Self::new(
+            context,
+            include_str!("shaders/sim_ledstrip.frag"),
+            EffectMaterialId(0b101),
+        )
     }
     pub fn laser(context: &Context) -> Self {
-        Self::new(context, include_str!("shaders/sim_laser.frag"), 0b100u16)
+        Self::new(
+            context,
+            include_str!("shaders/sim_laser.frag"),
+            EffectMaterialId(0b100),
+        )
     }
 
     pub fn update_data(&mut self, data: &[[f32; 3]]) {
@@ -70,18 +82,11 @@ impl Material for SimMaterial {
         )
     }
 
-    fn fragment_attributes(&self) -> FragmentAttributes {
-        FragmentAttributes {
-            uv: true,
-            ..FragmentAttributes::NONE
-        }
-    }
-
-    fn use_uniforms(&self, program: &Program, _camera: &Camera, _lights: &[&dyn Light]) {
+    fn use_uniforms(&self, program: &Program, _camera: &dyn Viewer, _lights: &[&dyn Light]) {
         program.use_texture("effect_data", &self.data);
-        program.use_uniform_if_required("effect_data_len", &self.data_size);
-        program.use_uniform_if_required("widget_size", &self.widget_size);
-        program.use_uniform_if_required("time", &self.time);
+        program.use_uniform_if_required("effect_data_len", self.data_size);
+        program.use_uniform_if_required("widget_size", self.widget_size);
+        program.use_uniform_if_required("time", self.time);
     }
 
     fn render_states(&self) -> RenderStates {
@@ -90,7 +95,6 @@ impl Material for SimMaterial {
             write_mask: WriteMask::COLOR,
             cull: Cull::Back,
             blend: Blend::TRANSPARENCY,
-            ..Default::default()
         }
     }
 
@@ -98,7 +102,7 @@ impl Material for SimMaterial {
         MaterialType::Transparent
     }
 
-    fn id(&self) -> u16 {
-        self.material_id
+    fn id(&self) -> EffectMaterialId {
+        EffectMaterialId(self.material_id.0)
     }
 }
