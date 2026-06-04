@@ -1,6 +1,7 @@
 #![doc = include_str!("../README.md")]
 #![deny(unsafe_code)]
 #![no_std]
+#![allow(clippy::collapsible_if)]
 
 // Adds effect submodules and exports the effect types
 macro_rules! export_effects {
