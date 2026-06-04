@@ -2,11 +2,11 @@ use effects_1d_common::{
     color::{self, Color},
     effects::{BeatBasedEffect, ConstructibleBeatBasedEffect, FrameBufferRef},
     errors::RenderError,
-    random::{EffectRng, Rng},
+    random::{EffectRng, RngExt},
 };
 use effects_1d_runtime::SwitchTimer;
 
-use rand::rngs::OsRng;
+use rand::rngs::StdRng;
 use tracing::{error, info};
 use web_time::Instant;
 
@@ -117,7 +117,7 @@ where
     for<'a> SimulationFramebuffer<'a>: FrameBufferRef<<T as BeatBasedEffect>::Color>,
 {
     fn simulate() {
-        EffectRng::seed(OsRng.gen());
+        EffectRng::seed(rand::make_rng::<StdRng>().random());
 
         let effect_renderer: SingleEffectBackend<T> = Default::default();
         run_simulation(effect_renderer);

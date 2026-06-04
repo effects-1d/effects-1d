@@ -4,7 +4,7 @@ use core::f32::consts::E;
 use effects_1d_common::prelude::*;
 use effects_1d_common::{
     effects::BeatInfo,
-    random::{EffectRng, Rng},
+    random::{EffectRng, RngExt},
 };
 
 /// A timer that determines whether or not an effect
@@ -71,7 +71,7 @@ impl SwitchTimer {
         let should_finish = if draw_probability >= 1.0 {
             true
         } else {
-            self.rng.gen_bool(f64::from(draw_probability))
+            self.rng.random_bool(f64::from(draw_probability))
         };
 
         // {

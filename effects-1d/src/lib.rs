@@ -5,7 +5,7 @@
 // Adds effect submodules and exports the effect types
 macro_rules! export_effects {
     ($modname: ident, $color: ty, {$($name: ident),* $(,)?}) => {
-        ::paste::paste!{
+        ::pastey::paste!{
             pub mod $modname {
                 $(
                     mod [<$name:snake>];

@@ -7,7 +7,7 @@ use effects_1d_common::{
         BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
     },
     errors::RenderError,
-    random::{EffectRng, Rng},
+    random::{EffectRng, RngExt},
 };
 
 #[derive(Default, Debug)]
@@ -25,18 +25,17 @@ pub struct JumpingStripes {
 
 impl JumpingStripes {
     fn regenerate_stripes(&mut self) {
-        const POSSIBLE_COLORS: &'static [color::BinaryRGB; 6] =
-            color::BinaryRGB::all_possible_colors();
+        const POSSIBLE_COLORS: &[color::BinaryRGB; 6] = color::BinaryRGB::all_possible_colors();
         const NUM_COLORS: usize = POSSIBLE_COLORS.len();
 
-        let colorid_0 = self.rng.gen_range(0..NUM_COLORS);
-        let mut colorid_1 = self.rng.gen_range(0..(NUM_COLORS - 1));
+        let colorid_0 = self.rng.random_range(0..NUM_COLORS);
+        let mut colorid_1 = self.rng.random_range(0..(NUM_COLORS - 1));
         if colorid_1 >= colorid_0 {
             colorid_1 += 1;
         }
 
-        let position_0 = self.rng.gen_range(0.0..(1.0 - self.stripe_size));
-        let mut position_1 = self.rng.gen_range(0.0..(1.0 - 3.0 * self.stripe_size));
+        let position_0 = self.rng.random_range(0.0..(1.0 - self.stripe_size));
+        let mut position_1 = self.rng.random_range(0.0..(1.0 - 3.0 * self.stripe_size));
         if position_1 > position_0 - self.stripe_size {
             position_1 += 2.0 * self.stripe_size;
         }

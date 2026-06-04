@@ -87,7 +87,7 @@ macro_rules! easing_function {
         </svg>"#)
     };
     (@inner $name:ident, ($x0:literal, $y0:literal, $x1:literal, $y1:literal), $doc:expr) => {
-        ::paste::paste! {
+        ::pastey::paste! {
             #[doc = $doc]
             pub fn [<$name:snake>]() -> BezierEasing {
                 BezierEasing::new($x0, $y0, $x1, $y1)
@@ -107,7 +107,7 @@ macro_rules! easing_function {
             "taken from [easings.net](https://easings.net/#", stringify!($name), ")"
         ));
 
-        ::paste::paste! {
+        ::pastey::paste! {
             #[cfg(test)]
             #[test]
             fn [< test_ $name:snake >](){

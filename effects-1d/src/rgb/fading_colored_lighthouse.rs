@@ -8,7 +8,7 @@ use effects_1d_common::{
         FrameBufferRef,
     },
     errors::RenderError,
-    random::{EffectRng, Rng},
+    random::{EffectRng, RngExt},
     rhythm::MultiBeatCycle,
 };
 
@@ -34,10 +34,10 @@ impl Stripe {
     fn regenerate(&mut self, rng: &mut EffectRng) {
         let range = 1.0 - self.line_width;
 
-        self.pos_start = range * rng.gen::<f32>();
-        self.pos_end = range * rng.gen::<f32>();
+        self.pos_start = range * rng.random::<f32>();
+        self.pos_end = range * rng.random::<f32>();
 
-        self.color = color::hsv8(rng.gen::<f32>() * 360.0, 1.0, 1.0);
+        self.color = color::hsv8(rng.random::<f32>() * 360.0, 1.0, 1.0);
     }
 
     pub fn update(&mut self, beat: BeatInfo, rng: &mut EffectRng) {
