@@ -72,6 +72,9 @@ export_effects!(binary, ::effects_1d_common::color::Binary, {
     StrobingRotatingLines,
     Wiping,
     JumpingLine,
+    ScannerBounce,
+    GlitchBurst,
+    BinaryMarchingAnts,
 });
 
 export_effects!(binary_rgb, ::effects_1d_common::color::BinaryRGB, {
@@ -88,6 +91,10 @@ export_effects!(monochrome, ::effects_1d_common::color::Monochrome, {
     MonoPsychedelic1,
     AsyncWave,
     BinaryExplosions,
+    CometTrail,
+    PulseCollision,
+    BeatEqualizer,
+    RippleField,
 });
 
 export_effects!(rgb, ::effects_1d_common::color::RGB, {
@@ -100,6 +107,17 @@ export_effects!(rgb, ::effects_1d_common::color::RGB, {
     RapidFireStripes,
     SegmentedSnake,
     Psychedelic1,
+    CometTrail,
+    PulseCollision,
+    BreathingGradient,
+    SparkRain,
+    ScannerBounce,
+    BeatEqualizer,
+    ColorOrbit,
+    GlitchBurst,
+    RippleField,
+    MeasureChaser,
+    AuroraRibbon,
 });
 
 export_effects!(calibration_monochrome, ::effects_1d_common::color::Monochrome, {
