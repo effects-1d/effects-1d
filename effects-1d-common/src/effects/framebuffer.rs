@@ -1,8 +1,9 @@
-use crate::color::{gradients::ColorGradient, BlendableColor, Color};
+use crate::color::{BlendableColor, Color, gradients::ColorGradient};
 
 use super::BlendMode;
 
 /// A reference to a framebuffer an effect can render into.
+#[allow(clippy::len_without_is_empty)]
 pub trait FrameBufferRef<C: Color> {
     /// Get the resolution of the framebuffer.
     fn len(&self) -> u32;
@@ -14,8 +15,8 @@ pub trait FrameBufferRef<C: Color> {
     /// # Arguments
     ///
     /// * `pos` - The position of the pixel that should get modified.
-    ///           Should be in the range of `0` to `len() - 1`.
-    ///           Can be outside of this range, but then nothing will happen.
+    ///   Should be in the range of `0` to `len() - 1`.
+    ///   Can be outside of this range, but then nothing will happen.
     /// * `color` - The color the pixel shall be set to.
     fn set_pixel(&mut self, pos: u32, color: C);
 
@@ -31,11 +32,11 @@ pub trait FrameBufferRef<C: Color> {
     /// # Arguments
     ///
     /// * `pos` - The position of the pixel that should get modified.
-    ///           Should be in the range of `0` to `len() - 1`.
-    ///           Can be outside of this range, but then nothing will happen.
+    ///   Should be in the range of `0` to `len() - 1`.
+    ///   Can be outside of this range, but then nothing will happen.
     /// * `color` - The color the pixel shall be updated with.
     /// * `blend_mode` - The mechanism that should be used to combine the existing
-    ///                  and the new pixel color
+    ///   and the new pixel color
     fn update_pixel(&mut self, pos: u32, color: C, blend_mode: BlendMode)
     where
         C: BlendableColor;
@@ -50,7 +51,7 @@ pub trait FrameBufferRef<C: Color> {
     /// # Arguments
     ///
     /// * `start`, `end` - The range that should be filled.
-    ///                    The left end of the framebuffer is `0.0`, the right end is `1.0`.
+    ///   The left end of the framebuffer is `0.0`, the right end is `1.0`.
     /// * `color` - The color the range shall be set to.
     fn draw_sharp(&mut self, start: f32, end: f32, color: C) {
         let len = self.len() as f32;
@@ -128,7 +129,7 @@ pub trait FrameBufferRef<C: Color> {
     /// # Arguments
     ///
     /// * `start`, `end` - The range that should be filled.
-    ///                    The left end of the framebuffer is `0.0`, the right end is `1.0`.
+    ///   The left end of the framebuffer is `0.0`, the right end is `1.0`.
     /// * `color` - The color the range shall be set to.
     fn draw_smooth(&mut self, start: f32, end: f32, color: C, blend_mode: BlendMode)
     where
@@ -255,7 +256,7 @@ mod tests {
         data: &'a mut [C],
     }
 
-    impl<'a, C: Color> FrameBufferRef<C> for TestFrameBuffer<'_, C> {
+    impl<C: Color> FrameBufferRef<C> for TestFrameBuffer<'_, C> {
         fn len(&self) -> u32 {
             self.data.len() as u32
         }

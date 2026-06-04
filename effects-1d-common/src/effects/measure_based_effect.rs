@@ -2,7 +2,7 @@ use core::fmt::Debug;
 
 use crate::{color::Color, errors::RenderError};
 
-use super::{framebuffer::FrameBufferRef, EffectState, MeasureInfo};
+use super::{EffectState, MeasureInfo, framebuffer::FrameBufferRef};
 
 /// An effect who can be constructed.
 pub trait ConstructibleMeasureBasedEffect: MeasureBasedEffect {
@@ -12,8 +12,8 @@ pub trait ConstructibleMeasureBasedEffect: MeasureBasedEffect {
     ///
     /// * `resolution_hint` - A hint about what the resolution later might be.
     /// * `start_beat` - The beat number where the effect should start displaying.
-    ///                  It can be assumed that the first time the effect will be rendered
-    ///                  is a very short time after the `start_beat` started.
+    ///   It can be assumed that the first time the effect will be rendered
+    ///   is a very short time after the `start_beat` started.
     ///
     /// **IMPORTANT**: The `resolution_hint` is an approximate value and is intended to configure
     /// the effect parameters so that it looks good at the given resolution.
