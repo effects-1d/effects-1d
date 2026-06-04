@@ -63,14 +63,17 @@ impl BeatBasedEffect for PulseCollision {
                 right,
                 BlendMode::Add,
             );
-        } else if p < 0.58 {
-            let flash = 1.0 - ((p - 0.45) / 0.13).clamp(0.0, 1.0);
-            let flash_color =
-                color::RGB::zero().elementwise_lerp(color::rgb8(255, 255, 255), flash);
-            framebuffer.draw_smooth(0.0, 1.0, flash_color, BlendMode::Add);
-            framebuffer.draw_smooth(0.43, 0.57, color::rgb8(255, 255, 255), BlendMode::Add);
         } else {
-            let burst = smoothstep((p - 0.58) / 0.42);
+            if p < 0.58 {
+                let flash = 1.0 - ((p - 0.45) / 0.13).clamp(0.0, 1.0);
+                let flash_color =
+                    color::RGB::zero().elementwise_lerp(color::rgb8(255, 255, 255), flash);
+                framebuffer.draw_smooth(0.0, 1.0, flash_color, BlendMode::Add);
+            }
+            if p < 0.52 {
+                framebuffer.draw_smooth(0.43, 0.57, color::rgb8(255, 255, 255), BlendMode::Add);
+            }
+            let burst = smoothstep((p - 0.45) / 0.55);
             for fragment in 0..5u16 {
                 let rel = f32::from(fragment) / 5.0;
                 let offset = burst * (0.07 + rel * 0.42);
