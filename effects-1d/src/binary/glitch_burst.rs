@@ -7,7 +7,7 @@ use effects_1d_common::{
         BeatBasedEffect, BeatInfo, ConstructibleBeatBasedEffect, EffectState, FrameBufferRef,
     },
     errors::RenderError,
-    random::{EffectRng, Rng},
+    random::{EffectRng, RngExt},
     rhythm::{BeatMultiplier, MultiBeatCycle},
 };
 
@@ -29,9 +29,9 @@ pub struct GlitchBurst {
 impl GlitchBurst {
     fn regenerate(&mut self) {
         for slice in &mut self.slices {
-            slice.start = self.rng.gen_range(0.0..0.98);
-            slice.width = self.rng.gen_range(0.01..0.12);
-            slice.enabled = self.rng.gen::<u8>() % 3 != 0;
+            slice.start = self.rng.random_range(0.0..0.98);
+            slice.width = self.rng.random_range(0.01..0.12);
+            slice.enabled = self.rng.random::<u8>() % 3 != 0;
         }
     }
 }

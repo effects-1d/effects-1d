@@ -28,7 +28,7 @@ fn smoothstep(x: f32) -> f32 {
 
 impl ConstructibleBeatBasedEffect for PulseCollision {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
-        let mut width = 0.025;
+        let mut width: f32 = 0.025;
         if let Some(resolution) = resolution_hint {
             width = width.max(2.0 / resolution as f32);
         }
@@ -76,8 +76,18 @@ impl BeatBasedEffect for PulseCollision {
                 let offset = burst * (0.08 + f32::from(fragment) * 0.095);
                 let w = self.width * (1.0 - f32::from(fragment) * 0.08);
                 let c = brightness(strength * (1.0 - burst * 0.6));
-                framebuffer.draw_smooth(0.5 - offset - w / 2.0, 0.5 - offset + w / 2.0, c, BlendMode::Add);
-                framebuffer.draw_smooth(0.5 + offset - w / 2.0, 0.5 + offset + w / 2.0, c, BlendMode::Add);
+                framebuffer.draw_smooth(
+                    0.5 - offset - w / 2.0,
+                    0.5 - offset + w / 2.0,
+                    c,
+                    BlendMode::Add,
+                );
+                framebuffer.draw_smooth(
+                    0.5 + offset - w / 2.0,
+                    0.5 + offset + w / 2.0,
+                    c,
+                    BlendMode::Add,
+                );
             }
         }
 

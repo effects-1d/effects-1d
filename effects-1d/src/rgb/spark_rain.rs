@@ -8,7 +8,7 @@ use effects_1d_common::{
         FrameBufferRef,
     },
     errors::RenderError,
-    random::{EffectRng, Rng},
+    random::{EffectRng, RngExt},
     rhythm::BeatMultiplier,
 };
 
@@ -45,17 +45,21 @@ fn draw_wrapped(
 impl Spark {
     fn new(beat: BeatInfo, rng: &mut EffectRng) -> Self {
         Self {
-            start_pos: rng.gen_range(-0.08..0.12),
-            velocity: rng.gen_range(0.10..0.28),
+            start_pos: rng.random_range(-0.08..0.12),
+            velocity: rng.random_range(0.10..0.28),
             start_beat: beat.current,
             start_fractional: beat.fractional,
-            lifetime: rng.gen_range(3.0..8.0),
-            width: rng.gen_range(0.008..0.03),
-            color: color::hsv8(rng.gen::<f32>() * 360.0, 0.75, 1.0),
+            lifetime: rng.random_range(3.0..8.0),
+            width: rng.random_range(0.008..0.03),
+            color: color::hsv8(rng.random::<f32>() * 360.0, 0.75, 1.0),
         }
     }
 
-    fn render(self, beat: BeatInfo, framebuffer: &mut dyn FrameBufferRef<color::RGB>) -> Option<Self> {
+    fn render(
+        self,
+        beat: BeatInfo,
+        framebuffer: &mut dyn FrameBufferRef<color::RGB>,
+    ) -> Option<Self> {
         let age = (beat.current - self.start_beat) as f32 + beat.fractional - self.start_fractional;
         let progress = age / self.lifetime;
         if !(0.0..=1.0).contains(&progress) {
@@ -105,9 +109,11 @@ impl BeatBasedEffect for SparkRain {
     ) -> Result<EffectState, RenderError> {
         let beat = self.multiplier.generate_beat(beat);
         for spark in &mut self.sparks {
-            *spark = spark.take().and_then(|spark| spark.render(beat, framebuffer));
+            *spark = spark
+                .take()
+                .and_then(|spark| spark.render(beat, framebuffer));
         }
-        if beat.is_new_beat && self.rng.gen::<u8>() % 3 != 0 {
+        if beat.is_new_beat && self.rng.random::<u8>() % 3 != 0 {
             for spark in &mut self.sparks {
                 if spark.is_none() {
                     *spark = Some(Spark::new(beat, &mut self.rng));

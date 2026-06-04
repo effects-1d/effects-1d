@@ -24,7 +24,7 @@ fn smoothstep(x: f32) -> f32 {
 
 impl ConstructibleBeatBasedEffect for PulseCollision {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
-        let mut width = 0.025;
+        let mut width: f32 = 0.025;
         if let Some(resolution) = resolution_hint {
             width = width.max(2.0 / resolution as f32);
         }
@@ -65,7 +65,8 @@ impl BeatBasedEffect for PulseCollision {
             );
         } else if p < 0.58 {
             let flash = 1.0 - ((p - 0.45) / 0.13).clamp(0.0, 1.0);
-            let flash_color = color::RGB::zero().elementwise_lerp(color::rgb8(255, 255, 255), flash);
+            let flash_color =
+                color::RGB::zero().elementwise_lerp(color::rgb8(255, 255, 255), flash);
             framebuffer.draw_smooth(0.0, 1.0, flash_color, BlendMode::Add);
             framebuffer.draw_smooth(0.43, 0.57, color::rgb8(255, 255, 255), BlendMode::Add);
         } else {
@@ -78,8 +79,18 @@ impl BeatBasedEffect for PulseCollision {
                     color::hsv8(360.0 * rel + 180.0 * p, 1.0, 1.0),
                     (1.0 - burst * 0.65) * (1.0 - rel * 0.25),
                 );
-                framebuffer.draw_smooth(0.5 - offset - w / 2.0, 0.5 - offset + w / 2.0, c, BlendMode::Add);
-                framebuffer.draw_smooth(0.5 + offset - w / 2.0, 0.5 + offset + w / 2.0, c, BlendMode::Add);
+                framebuffer.draw_smooth(
+                    0.5 - offset - w / 2.0,
+                    0.5 - offset + w / 2.0,
+                    c,
+                    BlendMode::Add,
+                );
+                framebuffer.draw_smooth(
+                    0.5 + offset - w / 2.0,
+                    0.5 + offset + w / 2.0,
+                    c,
+                    BlendMode::Add,
+                );
             }
         }
 

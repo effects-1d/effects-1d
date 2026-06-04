@@ -24,7 +24,7 @@ pub struct ColorOrbit {
 
 impl ConstructibleBeatBasedEffect for ColorOrbit {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
-        let mut width = 0.018;
+        let mut width: f32 = 0.018;
         if let Some(resolution) = resolution_hint {
             width = width.max(1.5 / resolution as f32);
         }

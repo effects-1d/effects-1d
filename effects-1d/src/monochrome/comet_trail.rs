@@ -43,7 +43,7 @@ fn draw_wrapped(
 
 impl ConstructibleBeatBasedEffect for CometTrail {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
-        let mut width = 0.025;
+        let mut width: f32 = 0.025;
         if let Some(resolution) = resolution_hint {
             width = width.max(1.5 / resolution as f32);
         }

@@ -39,7 +39,7 @@ fn draw_wrapped(
 
 impl ConstructibleBeatBasedEffect for CometTrail {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
-        let mut width = 0.022;
+        let mut width: f32 = 0.022;
         if let Some(resolution) = resolution_hint {
             width = width.max(1.5 / resolution as f32);
         }
@@ -68,10 +68,8 @@ impl BeatBasedEffect for CometTrail {
             let rel = f32::from(segment) / f32::from(TRAIL_SEGMENTS);
             let pos = (head - rel * self.tail_length).rem_euclid(1.0);
             let intensity = (1.0 - rel).powf(2.0);
-            let c = color::RGB::zero().elementwise_lerp(
-                color::hsv8(base_hue + rel * 65.0, 1.0, 1.0),
-                intensity,
-            );
+            let c = color::RGB::zero()
+                .elementwise_lerp(color::hsv8(base_hue + rel * 65.0, 1.0, 1.0), intensity);
             draw_wrapped(framebuffer, pos, self.width, c);
         }
         Ok(EffectState {

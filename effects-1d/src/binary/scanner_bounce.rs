@@ -18,7 +18,7 @@ pub struct ScannerBounce {
 
 impl ConstructibleBeatBasedEffect for ScannerBounce {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
-        let mut width = 0.035;
+        let mut width: f32 = 0.035;
         if let Some(resolution) = resolution_hint {
             width = width.max(2.0 / resolution as f32);
         }

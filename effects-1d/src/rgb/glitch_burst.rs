@@ -8,7 +8,7 @@ use effects_1d_common::{
         FrameBufferRef,
     },
     errors::RenderError,
-    random::{EffectRng, Rng},
+    random::{EffectRng, RngExt},
     rhythm::{BeatMultiplier, MultiBeatCycle},
 };
 
@@ -30,9 +30,13 @@ pub struct GlitchBurst {
 impl GlitchBurst {
     fn regenerate(&mut self) {
         for slice in &mut self.slices {
-            slice.start = self.rng.gen_range(0.0..0.98);
-            slice.width = self.rng.gen_range(0.008..0.12);
-            slice.color = color::hsv8(self.rng.gen::<f32>() * 360.0, 1.0, self.rng.gen_range(0.45..1.0));
+            slice.start = self.rng.random_range(0.0..0.98);
+            slice.width = self.rng.random_range(0.008..0.12);
+            slice.color = color::hsv8(
+                self.rng.random::<f32>() * 360.0,
+                1.0,
+                self.rng.random_range(0.45..1.0),
+            );
         }
     }
 }
@@ -76,7 +80,12 @@ impl BeatBasedEffect for GlitchBurst {
         framebuffer.draw_smooth(0.0, 1.0, background, BlendMode::None);
 
         for slice in &self.slices {
-            framebuffer.draw_smooth(slice.start, slice.start + slice.width, slice.color, BlendMode::Add);
+            framebuffer.draw_smooth(
+                slice.start,
+                slice.start + slice.width,
+                slice.color,
+                BlendMode::Add,
+            );
         }
 
         Ok(EffectState {

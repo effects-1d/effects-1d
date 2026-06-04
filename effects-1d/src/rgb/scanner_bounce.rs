@@ -19,7 +19,7 @@ pub struct ScannerBounce {
 
 impl ConstructibleBeatBasedEffect for ScannerBounce {
     fn init(resolution_hint: Option<u32>, start_beat: i32) -> Self {
-        let mut width = 0.025;
+        let mut width: f32 = 0.025;
         if let Some(resolution) = resolution_hint {
             width = width.max(1.5 / resolution as f32);
         }
@@ -50,7 +50,12 @@ impl BeatBasedEffect for ScannerBounce {
             let offset = rel * 0.14 * if p < 0.5 { -1.0 } else { 1.0 };
             let center = pos + offset;
             let c = color::RGB::zero().elementwise_lerp(head_color, (1.0 - rel).powf(2.0));
-            framebuffer.draw_smooth(center - self.width / 2.0, center + self.width / 2.0, c, BlendMode::Add);
+            framebuffer.draw_smooth(
+                center - self.width / 2.0,
+                center + self.width / 2.0,
+                c,
+                BlendMode::Add,
+            );
         }
 
         Ok(EffectState {
