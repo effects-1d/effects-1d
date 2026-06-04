@@ -86,7 +86,7 @@ pub fn run_simulation(mut backend: impl EffectBackend + 'static) {
             .render_partially(
                 viewport.into(),
                 &Camera::new_2d(viewport),
-                &[laser_sim_widget.obj(), led_strip_widget.obj()],
+                [laser_sim_widget.obj(), led_strip_widget.obj()],
                 &[],
             )
             .write(|| gui.render());

@@ -30,7 +30,7 @@ impl ConstructibleBeatBasedEffect for StrobingRotatingLines {
             rotation_position: 0.0,
             line_id_offset: 0,
             rotation_delay_beats: 8,
-            sequencer: Sequencer::new(1, 4, &[0b0011, 0b1100], 0b1000, 8, start_beat).into(),
+            sequencer: Sequencer::new(1, 4, &[0b0011, 0b1100], 0b1000, 8, start_beat),
         };
 
         if let Some(resolution) = resolution_hint {

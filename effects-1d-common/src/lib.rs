@@ -2,6 +2,7 @@
 #![deny(missing_docs)]
 #![deny(unsafe_code)]
 #![no_std]
+#![allow(clippy::new_without_default)]
 
 /// Pixel colors
 pub mod color;

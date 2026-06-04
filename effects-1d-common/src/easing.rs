@@ -24,7 +24,9 @@ impl BezierEasing {
     ///
     /// The `x` coordinates of the control points must lie in the interval of `[0.0, 1.0]`. Values outside of that range will get clipped to it.
     pub fn new(x0: f32, y0: f32, x1: f32, y1: f32) -> Self {
-        assert!(BEZIER_EASING_STEPS >= 2);
+        const {
+            assert!(BEZIER_EASING_STEPS >= 2);
+        }
 
         let x0 = x0.clamp(0.0, 1.0);
         let x1 = x1.clamp(0.0, 1.0);

@@ -9,7 +9,7 @@ pub struct EffectGUI {
 impl EffectGUI {
     pub fn new(context: &three_d::Context) -> Self {
         Self {
-            gui: three_d::GUI::new(&context),
+            gui: three_d::GUI::new(context),
         }
     }
 
